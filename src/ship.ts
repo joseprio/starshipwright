@@ -1,0 +1,249 @@
+import { Randomizer } from "./randomizer";
+import { Faction } from "./faction";
+import { CANVAS_SHIP_EDGE, COMPONENT_GRID_SIZE } from "./constants";
+import { components } from "./components";
+import { outlines } from "./outlines";
+
+type Cell = {
+  gx: number;
+  gy: number;
+  x: number;
+  y: number;
+  state: number;
+};
+
+export class Ship {
+  f: Faction;
+  baseSeed: string;
+  seed: string;
+  r: Randomizer;
+  size: number;
+  w: number;
+  hw: number;
+  gw: number;
+  gwextra: number;
+  h: number;
+  hh: number;
+  gh: number;
+  ghextra: number;
+  cs: HTMLCanvasElement;
+  csx: CanvasRenderingContext2D;
+  cf: HTMLCanvasElement;
+  cfx: CanvasRenderingContext2D;
+  passes: number;
+  extra: number;
+  extradone: number = 0;
+  nextpass: number = 0;
+  nextcell: number = 0;
+  totalcomponents: number;
+  totaldone: number = 0;
+  cgrid: Array<Array<Cell>>;
+  goodcells: Array<Cell>;
+  csd: ImageData;
+
+  constructor(p_faction: Faction, p_seed: string) {
+    this.f = p_faction;
+    this.baseSeed = p_seed; //Base seed for this ship, without appending the faction seed.
+    this.seed = this.f.seed + this.baseSeed;
+    this.r = new Randomizer(this.seed);
+    //this.c = []; //Data cache.
+    this.size = Math.pow(
+      this.r.sd(
+        this.f.randomizer.hd(2.5, 3.5, "size min"),
+        this.f.randomizer.hd(5, 7, "size max")
+      ),
+      3
+    ); //The initial overall size of this ship, in pixels.
+    const wratio = this.r.sd(
+      this.f.randomizer.hd(0.5, 1, "wratio min"),
+      this.f.randomizer.hd(1, 1.3, "wratio max")
+    );
+    const hratio = this.r.sd(
+      this.f.randomizer.hd(0.7, 1, "hratio min"),
+      this.f.randomizer.hd(1.1, 1.7, "hratio max")
+    );
+    this.w = Math.floor(this.size * wratio) + 2 * CANVAS_SHIP_EDGE; //Maximum width of this ship, in pixels.
+    this.hw = Math.floor(this.w / 2);
+    this.gw = Math.floor((this.w - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
+    this.gwextra = (this.w - this.gw * COMPONENT_GRID_SIZE) * 0.5;
+    this.h = Math.floor(this.size * hratio) + 2 * CANVAS_SHIP_EDGE; //Maximum height of this ship, in pixels.
+    this.hh = Math.floor(this.h / 2);
+    this.gh = Math.floor((this.h - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
+    this.ghextra = (this.h - this.gh * COMPONENT_GRID_SIZE) * 0.5;
+    this.cs = document.createElement("canvas"); //Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0.
+    this.cs.setAttribute("width", String(this.w));
+    this.cs.setAttribute("height", String(this.h));
+    this.csx = this.cs.getContext("2d");
+    this.cf = document.createElement("canvas"); //Canvas on which the actual ship components are drawn. Ships face upwards, with front towards Y=0.
+    this.cf.setAttribute("width", String(this.w));
+    this.cf.setAttribute("height", String(this.h));
+    this.cfx = this.cf.getContext("2d");
+    outlines[this.f.randomizer.hchoose([1, 1, 1], "outline type")](this);
+    this.csd = this.csx.getImageData(0, 0, this.w, this.h);
+    this.cgrid = [];
+    for (var gx = 0; gx < this.gw; gx++) {
+      this.cgrid[gx] = [];
+      for (var gy = 0; gy < this.gh; gy++) {
+        this.cgrid[gx][gy] = {
+          gx: gx,
+          gy: gy,
+          x: Math.floor(this.gwextra + (gx + 0.5) * COMPONENT_GRID_SIZE),
+          y: Math.floor(this.ghextra + (gy + 0.5) * COMPONENT_GRID_SIZE),
+          state: 0,
+        }; //state is 0 for unchecked, 1 for checked and good, and -1 for checked and bad.
+      }
+    }
+    this.goodcells = [
+      this.cgrid[Math.floor(this.gw / 2)][Math.floor(this.gh / 2)],
+    ];
+    var nextcheck = 0;
+    while (nextcheck < this.goodcells.length) {
+      var lcell = this.goodcells[nextcheck];
+      if (lcell.gx > 0) {
+        var ncell = this.cgrid[lcell.gx - 1][lcell.gy];
+        if (ncell.state == 0) {
+          if (this.getspa(ncell.x, ncell.y) > 0) {
+            ncell.state = 1;
+            this.goodcells.push(ncell);
+          } else {
+            ncell.state = -1;
+          }
+        }
+      }
+      if (lcell.gx < this.gw - 1) {
+        var ncell = this.cgrid[lcell.gx + 1][lcell.gy];
+        if (ncell.state == 0) {
+          if (this.getspa(ncell.x, ncell.y) > 0) {
+            ncell.state = 1;
+            this.goodcells.push(ncell);
+          } else {
+            ncell.state = -1;
+          }
+        }
+      }
+      if (lcell.gy > 0) {
+        var ncell = this.cgrid[lcell.gx][lcell.gy - 1];
+        if (ncell.state == 0) {
+          if (this.getspa(ncell.x, ncell.y) > 0) {
+            ncell.state = 1;
+            this.goodcells.push(ncell);
+          } else {
+            ncell.state = -1;
+          }
+        }
+      }
+      if (lcell.gy < this.gh - 1) {
+        var ncell = this.cgrid[lcell.gx][lcell.gy + 1];
+        if (ncell.state == 0) {
+          if (this.getspa(ncell.x, ncell.y) > 0) {
+            ncell.state = 1;
+            this.goodcells.push(ncell);
+          } else {
+            ncell.state = -1;
+          }
+        }
+      }
+      nextcheck++;
+    }
+    for (var i = 0; i < this.goodcells.length; i++) {
+      var lcell = this.goodcells[i];
+      var ocell = this.cgrid[this.gw - 1 - lcell.gx][lcell.gy];
+      if (ocell.state != 1) {
+        ocell.state = 1;
+        this.goodcells.push(ocell);
+      }
+    }
+    this.passes = this.f.randomizer.hi(1, 2, "base component passes");
+    this.extra = Math.max(
+      1,
+      Math.floor(
+        this.goodcells.length *
+          this.f.randomizer.hd(0, 1 / this.passes, "extra component amount")
+      )
+    );
+    this.totalcomponents = this.passes * this.goodcells.length + this.extra;
+  }
+
+  // Returns the cell containing (X,Y), if there is one, or null otherwise
+  getcell(x: number, y: number) {
+    var gx = Math.floor((x - this.gwextra) / COMPONENT_GRID_SIZE);
+    var gy = Math.floor((y - this.ghextra) / COMPONENT_GRID_SIZE);
+    if (gx < 0 || gx >= this.gw || gy < 0 || gy >= this.gh) {
+      return null;
+    }
+    return this.cgrid[gx][gy];
+  }
+
+  getcellstate(
+    x,
+    y //Returns the state of the cell containing (X,Y), or 0 if there is no such cell.
+  ) {
+    var lcell = this.getcell(x, y);
+    if (lcell == null) {
+      return 0;
+    }
+    return lcell.state;
+  }
+
+  //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or -1 if (X,Y) is out of bounds.
+  getspa(x: number, y: number): number {
+    x = Math.floor(x);
+    y = Math.floor(y);
+    if (x < 0 || x > this.w || y < 0 || y > this.h) {
+      return -1;
+    }
+    return this.csd.data[(y * this.w + x) * 4 + 3];
+  }
+
+  getpcdone() {
+    return this.totaldone / this.totalcomponents;
+  }
+
+  addcomponent() {
+    //Generates the next component of this ship. Returns true if the ship is finished, false if there are still more components to add.
+    var ncell;
+    if (this.nextpass < this.passes) {
+      if (this.nextcell < this.goodcells.length) {
+        ncell = this.goodcells[this.nextcell];
+        this.nextcell++;
+      } else {
+        this.nextpass++;
+        ncell = this.goodcells[0];
+        this.nextcell = 1;
+      }
+    } else if (this.extradone < this.extra) {
+      ncell = this.goodcells[this.r.si(0, this.goodcells.length - 1)];
+      this.extradone++;
+    } else {
+      return true;
+    }
+    var lv = [ncell.x, ncell.y];
+    for (var t = 0; t < 10; t++) {
+      var nv = [
+        ncell.x + this.r.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
+        ncell.y + this.r.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
+      ];
+      if (
+        nv[0] < CANVAS_SHIP_EDGE ||
+        nv[0] > this.w - CANVAS_SHIP_EDGE ||
+        nv[1] < CANVAS_SHIP_EDGE ||
+        nv[1] > this.h - CANVAS_SHIP_EDGE
+      ) {
+        continue;
+      }
+      if (this.getspa(nv[0], nv[1]) <= 0) {
+        continue;
+      }
+      lv = nv;
+      break;
+    }
+    if (Math.abs(lv[0] - this.hw) < COMPONENT_GRID_SIZE) {
+      if (this.r.sb(this.f.randomizer.hd(0, 1, "com middleness"))) {
+        lv[0] = Math.floor(this.hw);
+      }
+    }
+    components[this.r.schoose(this.f.componentChances)](this, lv);
+    this.totaldone++;
+    return false;
+  }
+}
