@@ -11,13 +11,7 @@ outlines[0] = function (lp: Ship) {
   var csarealimit = csarea * 0.05;
   var initialwidth = Math.ceil(
     (lp.w - 2 * CANVAS_SHIP_EDGE) *
-      (lp.f.cache["outline0 iw"] == null
-        ? (lp.f.cache["outline0 iw"] = lp.f.randomizer.hd(
-            0.1,
-            1,
-            "outline0 iw"
-          ))
-        : lp.f.cache["outline0 iw"]) *
+      lp.f.randomizer.hd(0.1, 1, "outline0 iw") *
       0.2
   );
   var blocks = [
@@ -26,13 +20,12 @@ outlines[0] = function (lp: Ship) {
       [lp.hw + initialwidth, lp.h - CANVAS_SHIP_EDGE],
     ],
   ];
-  if (lp.f.cache["outline0 bc"] == null) {
-    lp.f.cache["outline0 bc"] = lp.f.randomizer.hd(2, 8, "outline0 bc");
-  }
   var blockcount =
     2 +
     Math.floor(
-      lp.r.sd(0.5, 1) * lp.f.cache["outline0 bc"] * Math.sqrt(lp.size)
+      lp.r.sd(0.5, 1) *
+        lp.f.randomizer.hd(2, 8, "outline0 bc") *
+        Math.sqrt(lp.size)
     );
   for (var i = 1; i < blockcount; i++) {
     var base = blocks[lp.r.si(0, blocks.length - 1)];
@@ -42,15 +35,7 @@ outlines[0] = function (lp: Ship) {
     ];
     if (
       v0[1] < (base[0][1] + base[1][1]) * 0.5 &&
-      lp.r.sb(
-        lp.f.cache["outline0 frontbias"] == null
-          ? (lp.f.cache["outline0 frontbias"] = lp.f.randomizer.hd(
-              0.5,
-              1.5,
-              "outline0 frontbias"
-            ))
-          : lp.f.cache["outline0 frontbias"]
-      )
+      lp.r.sb(lp.f.randomizer.hd(0.5, 1.5, "outline0 frontbias"))
     ) {
       v0[1] = base[1][1] - (v0[1] - base[0][1]);
     }
@@ -104,13 +89,7 @@ outlines[1] = function (lp: Ship) {
   var csrlimit = Math.max(2, Math.sqrt(csarealimit / Math.PI));
   var initialwidth = Math.ceil(
     (lp.w - 2 * CANVAS_SHIP_EDGE) *
-      (lp.f.cache["outline1 iw"] == null
-        ? (lp.f.cache["outline1 iw"] = lp.f.randomizer.hd(
-            0.1,
-            1,
-            "outline1 iw"
-          ))
-        : lp.f.cache["outline1 iw"]) *
+      lp.f.randomizer.hd(0.1, 1, "outline1 iw") *
       0.2
   );
   var circles = [];
@@ -121,13 +100,12 @@ outlines[1] = function (lp: Ship) {
     let lv = [lp.hw, lp.h - (CANVAS_SHIP_EDGE + initialwidth * (i * 2 + 1))];
     circles.push({ v: lv, r: initialwidth });
   }
-  if (lp.f.cache["outline1 cc"] == null) {
-    lp.f.cache["outline1 cc"] = lp.f.randomizer.hd(10, 50, "outline1 cc");
-  }
   var circlecount =
     initialcount +
     Math.floor(
-      lp.r.sd(0.5, 1) * lp.f.cache["outline1 cc"] * Math.sqrt(lp.size)
+      lp.r.sd(0.5, 1) *
+        lp.f.randomizer.hd(10, 50, "outline1 cc") *
+        Math.sqrt(lp.size)
     );
   for (var i = initialcount; i < circlecount; i++) {
     var base =
@@ -139,15 +117,7 @@ outlines[1] = function (lp: Ship) {
     var pa = lp.r.sd(0, 2 * Math.PI);
     if (
       pa > Math.PI &&
-      lp.r.sb(
-        lp.f.cache["outline1 frontbias"] == null
-          ? (lp.f.cache["outline1 frontbias"] = lp.f.randomizer.hd(
-              0.5,
-              1.5,
-              "outline1 frontbias"
-            ))
-          : lp.f.cache["outline1 frontbias"]
-      )
+      lp.r.sb(lp.f.randomizer.hd(0.5, 1.5, "outline1 frontbias"))
     ) {
       var pa = lp.r.sd(0, Math.PI);
     }
@@ -179,13 +149,7 @@ outlines[2] = function (lp: Ship) {
   ];
   var basefatness =
     COMPONENT_GRID_SIZE / lp.size +
-    (lp.f.cache["outline2 basefatness"] == null
-      ? (lp.f.cache["outline2 basefatness"] = lp.f.randomizer.hd(
-          0.03,
-          0.1,
-          "outline2 basefatness"
-        ))
-      : lp.f.cache["outline2 basefatness"]);
+    lp.f.randomizer.hd(0.03, 0.1, "outline2 basefatness");
   var basemessiness = 1 / basefatness;
   var pointcount = Math.max(
     3,
@@ -193,13 +157,7 @@ outlines[2] = function (lp: Ship) {
   );
   // @ts-ignore - We're doing it properly
   lp.csx.lineCap = ["round", "square"][
-    lp.f.cache["outline2 linecap"] == null
-      ? (lp.f.cache["outline2 linecap"] = lp.f.randomizer.hi(
-          0,
-          1,
-          "outline2 linecap"
-        ))
-      : lp.f.cache["outline2 linecap"]
+    lp.f.randomizer.hi(0, 1, "outline2 linecap")
   ];
   lp.csx.strokeStyle = "#FFFFFF";
   for (var npi = 1; npi < pointcount; npi++) {
@@ -209,31 +167,14 @@ outlines[2] = function (lp: Ship) {
         lp.r.sd(0, 1) * innersize[0] + CANVAS_SHIP_EDGE,
         Math.pow(
           lp.r.sd(0, 1),
-          lp.f.cache["outline2 frontbias"] == null
-            ? (lp.f.cache["outline2 frontbias"] = lp.f.randomizer.hd(
-                0.1,
-                1,
-                "outline2 frontbias"
-              ))
-            : lp.f.cache["outline2 frontbias"]
+          lp.f.randomizer.hd(0.1, 1, "outline2 frontbias")
         ) *
           innersize[1] +
           CANVAS_SHIP_EDGE,
       ];
       points.push(np);
     }
-    var cons =
-      1 +
-      lp.r.sseq(
-        lp.f.cache["outline2 conadjust"] == null
-          ? (lp.f.cache["outline2 conadjust"] = lp.f.randomizer.hd(
-              0,
-              1,
-              "outline2 conadjust"
-            ))
-          : lp.f.cache["outline2 conadjust"],
-        3
-      );
+    var cons = 1 + lp.r.sseq(lp.f.randomizer.hd(0, 1, "outline2 conadjust"), 3);
     for (var nci = 0; nci < cons; nci++) {
       var pre = points[lp.r.si(0, points.length - 2)];
       lp.csx.lineWidth = lp.r.sd(0.7, 1) * basefatness * lp.size;

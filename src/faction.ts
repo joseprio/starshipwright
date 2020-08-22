@@ -1,5 +1,6 @@
 import { Randomizer } from "./randomizer";
 import { clamp, hsvToRgb } from "./utils";
+import { Ship } from "./ship";
 
 export class Faction {
   seed: string;
@@ -65,39 +66,10 @@ export class Faction {
         );
       }
     }
-    if (this.cache["window colors"] == null) {
-      var dp = 5; //Default maximum power.
-      this.cache["window color count"] =
-        1 + (this.randomizer.hb(0.3, "window color +1") ? 1 : 0);
-      this.cache["window colors"] = new Array(this.cache["window color count"]);
-      this.cache["window color chances"] = new Array(
-        this.cache["window color count"]
-      );
-      for (var i = 0; i < this.cache["window color count"]; i++) {
-        var ls = "window color" + i;
-        this.cache["window colors"][i] = hsvToRgb([
-          this.randomizer.hb(0.6, "window color blues only")
-            ? this.randomizer.hd(1 / 3, 3 / 4, "window color blue hue")
-            : this.randomizer.hd(0, 1, "window color hue"),
-          Math.pow(
-            clamp(this.randomizer.hd(-0.2, 1.2, "window color hue"), 0, 1),
-            0.5
-          ),
-          Math.pow(
-            clamp(this.randomizer.hd(0.4, 1.3, "window color value"), 0, 1),
-            0.5
-          ),
-        ]);
-        this.cache["window color chances"][i] = Math.pow(
-          2,
-          this.randomizer.hd(0, dp, ls + "chances")
-        );
-      }
-    }
   }
 
   //Where lp is the ship to get the color for.
-  getBaseColor(lp) {
+  getBaseColor(lp: Ship) {
     if (this.cache["base colors"] == null) {
       this.setupColors();
     }
@@ -159,14 +131,42 @@ export class Faction {
     return rv;
   }
 
-  //Where lp is the ship to get the color for.
+  //Where lp is the ship to get the color for
+  /*
   getwindowcolor(lp) {
     if (this.cache["window colors"] == null) {
-      this.setupColors();
+      var dp = 5; //Default maximum power.
+      this.cache["window color count"] =
+        1 + (this.randomizer.hb(0.3, "window color +1") ? 1 : 0);
+      this.cache["window colors"] = new Array(this.cache["window color count"]);
+      this.cache["window color chances"] = new Array(
+        this.cache["window color count"]
+      );
+      for (var i = 0; i < this.cache["window color count"]; i++) {
+        var ls = "window color" + i;
+        this.cache["window colors"][i] = hsvToRgb([
+          this.randomizer.hb(0.6, "window color blues only")
+            ? this.randomizer.hd(1 / 3, 3 / 4, "window color blue hue")
+            : this.randomizer.hd(0, 1, "window color hue"),
+          Math.pow(
+            clamp(this.randomizer.hd(-0.2, 1.2, "window color hue"), 0, 1),
+            0.5
+          ),
+          Math.pow(
+            clamp(this.randomizer.hd(0.4, 1.3, "window color value"), 0, 1),
+            0.5
+          ),
+        ]);
+        this.cache["window color chances"][i] = Math.pow(
+          2,
+          this.randomizer.hd(0, dp, ls + "chances")
+        );
+      }
     }
     var rv = this.cache["window colors"][
       lp.r.schoose(this.cache["window color chances"])
     ];
     return rv;
   }
+  */
 }

@@ -71,17 +71,7 @@ components[0] = function (
   let lcms = COMPONENT_MAXIMUM_SIZE;
   var bn = Math.pow(bigness(lp, v), 0.3);
   if (lp.r.sb(lp.f.randomizer.hd(0, 0.9, "com0 bigchance")) * bn) {
-    while (
-      lp.r.sb(
-        (lp.f.cache["com0 bigincchance"] == null
-          ? (lp.f.cache["com0 bigincchance"] = lp.f.randomizer.hd(
-              0,
-              0.5,
-              "com0 bigincchance"
-            ))
-          : lp.f.cache["com0 bigincchance"]) * bn
-      )
-    ) {
+    while (lp.r.sb(lp.f.randomizer.hd(0, 0.5, "com0 bigincchance") * bn)) {
       var lw = leeway(lp, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
@@ -157,28 +147,8 @@ components[1] = function (
 ) {
   var lcms = COMPONENT_MAXIMUM_SIZE;
   var bn = Math.pow(bigness(lp, v), 0.2);
-  if (
-    lp.r.sb(
-      (lp.f.cache["com1 bigchance"] == null
-        ? (lp.f.cache["com1 bigchance"] = lp.f.randomizer.hd(
-            0.3,
-            1,
-            "com1 bigchance"
-          ))
-        : lp.f.cache["com1 bigchance"]) * bn
-    )
-  ) {
-    while (
-      lp.r.sb(
-        (lp.f.cache["com1 bigincchance"] == null
-          ? (lp.f.cache["com1 bigincchance"] = lp.f.randomizer.hd(
-              0,
-              0.6,
-              "com1 bigincchance"
-            ))
-          : lp.f.cache["com1 bigincchance"]) * bn
-      )
-    ) {
+  if (lp.r.sb(lp.f.randomizer.hd(0.3, 1, "com1 bigchance") * bn)) {
+    while (lp.r.sb(lp.f.randomizer.hd(0, 0.6, "com1 bigincchance") * bn)) {
       var lw = leeway(lp, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
@@ -199,13 +169,7 @@ components[1] = function (
   var ccolor = colorToHex(scaleColorBy(basecolor, lp.r.sd(0.5, 1)));
   var darkness = lp.r.sd(0.3, 0.9);
   var orientation = lp.r.sb(
-    lp.f.cache["com1 hchance"] == null
-      ? (lp.f.cache["com1 hchance"] = clamp(
-          lp.f.randomizer.hd(-0.2, 1.2, "com1 hchance"),
-          0,
-          1
-        ))
-      : lp.f.cache["com1 hchance"]
+    clamp(lp.f.randomizer.hd(-0.2, 1.2, "com1 hchance"), 0, 1)
   ); //true = horizontal array, false = vertical array.
   if (orientation) {
     var bv = [v[0] - Math.floor(w / 2), v[1] - Math.floor(h / 2)];
@@ -246,28 +210,8 @@ components[2] = function (
 ) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
   var bn = Math.pow(bigness(lp, v), 0.05);
-  if (
-    lp.r.sb(
-      (lp.f.cache["com2 bigchance"] == null
-        ? (lp.f.cache["com2 bigchance"] = lp.f.randomizer.hd(
-            0,
-            1,
-            "com2 bigchance"
-          ))
-        : lp.f.cache["com2 bigchance"]) * bn
-    )
-  ) {
-    while (
-      lp.r.sb(
-        (lp.f.cache["com2 bigincchance"] == null
-          ? (lp.f.cache["com2 bigincchance"] = lp.f.randomizer.hd(
-              0,
-              0.9,
-              "com2 bigincchance"
-            ))
-          : lp.f.cache["com2 bigincchance"]) * bn
-      )
-    ) {
+  if (lp.r.sb(lp.f.randomizer.hd(0, 1, "com2 bigchance") * bn)) {
+    while (lp.r.sb(lp.f.randomizer.hd(0, 0.9, "com2 bigincchance") * bn)) {
       var lw = leeway(lp, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
@@ -290,14 +234,7 @@ components[2] = function (
     Math.floor(clamp(w * lp.r.sd(0.1, 0.3), 1, h)),
   ];
   var hpair = h2[0] + h2[1];
-  var odd = lp.r.sb(
-    lp.f.cache["com2 oddchance"] == null
-      ? (lp.f.cache["com2 oddchance"] = Math.pow(
-          lp.f.randomizer.hd(0, 1, "com2 oddchance"),
-          0.5
-        ))
-      : lp.f.cache["com2 oddchance"]
-  );
+  var odd = lp.r.sb(Math.pow(lp.f.randomizer.hd(0, 1, "com2 oddchance"), 0.5));
   var count = clamp(Math.floor(h / hpair), 1, h);
   var htotal = count * hpair + (odd ? h2[0] : 0);
   var basecolor = lp.f.getBaseColor(lp);
@@ -312,12 +249,7 @@ components[2] = function (
     scaleColorBy(color2[1], lightness),
   ];
   var orientation = lp.r.sb(
-    lp.f.cache["com2 verticalchance"] == null
-      ? (lp.f.cache["com2 verticalchance"] = Math.pow(
-          lp.f.randomizer.hd(0, 1, "com2 verticalchance"),
-          0.1
-        ))
-      : lp.f.cache["com2 verticalchance"]
+    Math.pow(lp.f.randomizer.hd(0, 1, "com2 verticalchance"), 0.1)
   );
   if (orientation) {
     var grad2 = [
@@ -385,28 +317,8 @@ components[3] = function (
   }
   let lcms = COMPONENT_MAXIMUM_SIZE;
   var bn = Math.pow(bigness(lp, v), 0.1);
-  if (
-    lp.r.sb(
-      (lp.f.cache["com3 bigchance"] == null
-        ? (lp.f.cache["com3 bigchance"] = lp.f.randomizer.hd(
-            0.6,
-            1,
-            "com3 bigchance"
-          ))
-        : lp.f.cache["com3 bigchance"]) * bn
-    )
-  ) {
-    while (
-      lp.r.sb(
-        (lp.f.cache["com3 bigincchance"] == null
-          ? (lp.f.cache["com3 bigincchance"] = lp.f.randomizer.hd(
-              0.3,
-              0.8,
-              "com3 bigincchance"
-            ))
-          : lp.f.cache["com3 bigincchance"]) * bn
-      )
-    ) {
+  if (lp.r.sb(lp.f.randomizer.hd(0.6, 1, "com3 bigchance") * bn)) {
+    while (lp.r.sb(lp.f.randomizer.hd(0.3, 0.8, "com3 bigincchance") * bn)) {
       var lw = leeway(lp, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
@@ -434,38 +346,15 @@ components[3] = function (
   lp.f.setupColors();
   var basecolor =
     lp.f.cache["base colors"][
-      lp.f.cache["com3 basecolor"] == null
-        ? (lp.f.cache["com3 basecolor"] = lp.f.randomizer.hchoose(
-            lp.f.cache["base color chances"],
-            "com3 basecolor"
-          ))
-        : lp.f.cache["com3 basecolor"]
+      lp.f.randomizer.hchoose(
+        lp.f.cache["base color chances"],
+        "com3 basecolor"
+      )
     ];
-  var lightness0_mid =
-    lp.f.cache["com3 lightness0 mid"] == null
-      ? (lp.f.cache["com3 lightness0 mid"] = lp.f.randomizer.hd(
-          0.5,
-          0.8,
-          "com3 lightness0 mid"
-        ))
-      : lp.f.cache["com3 lightness0 mid"];
+  var lightness0_mid = lp.f.randomizer.hd(0.5, 0.8, "com3 lightness0 mid");
   var lightness0_edge =
-    lightness0_mid -
-    (lp.f.cache["com3 lightness0 edge"] == null
-      ? (lp.f.cache["com3 lightness0 edge"] = lp.f.randomizer.hd(
-          0.2,
-          0.4,
-          "com3 lightness0 edge"
-        ))
-      : lp.f.cache["com3 lightness0 edge"]);
-  var lightness1_edge =
-    lp.f.cache["com3 lightness1 edge"] == null
-      ? (lp.f.cache["com3 lightness1 edge"] = lp.f.randomizer.hd(
-          0,
-          0.2,
-          "com3 lightness1 edge"
-        ))
-      : lp.f.cache["com3 lightness1 edge"];
+    lightness0_mid - lp.f.randomizer.hd(0.2, 0.4, "com3 lightness0 edge");
+  var lightness1_edge = lp.f.randomizer.hd(0, 0.2, "com3 lightness1 edge");
   var grad2 = [
     lp.cfx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
     lp.cfx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
@@ -539,13 +428,7 @@ components[4] = function (
     Math.ceil(
       lp.size *
         Math.pow(lp.r.sd(0.4, 1), 2) *
-        (lp.f.cache["com4 maxwidth"] == null
-          ? (lp.f.cache["com4 maxwidth"] = lp.f.randomizer.hd(
-              0.02,
-              0.1,
-              "com4 maxwidth"
-            ))
-          : lp.f.cache["com4 maxwidth"])
+        lp.f.randomizer.hd(0.02, 0.1, "com4 maxwidth")
     )
   );
   var hwi = Math.floor(w / 2);
@@ -567,16 +450,7 @@ components[4] = function (
       Math.floor(
         0.7 *
           lp.size *
-          Math.pow(
-            lp.r.sd(0, 1),
-            lp.f.cache["com4 hpower0"] == null
-              ? (lp.f.cache["com4 hpower0"] = lp.f.randomizer.hd(
-                  2,
-                  6,
-                  "com4 hpower0"
-                ))
-              : lp.f.cache["com4 hpower0"]
-          )
+          Math.pow(lp.r.sd(0, 1), lp.f.randomizer.hd(2, 6, "com4 hpower0"))
       )
     );
     var bb = [
@@ -606,16 +480,7 @@ components[4] = function (
       Math.floor(
         0.6 *
           lp.size *
-          Math.pow(
-            lp.r.sd(0, 1),
-            lp.f.cache["com4 hpower1"] == null
-              ? (lp.f.cache["com4 hpower1"] = lp.f.randomizer.hd(
-                  2,
-                  7,
-                  "com4 hpower1"
-                ))
-              : lp.f.cache["com4 hpower1"]
-          )
+          Math.pow(lp.r.sd(0, 1), lp.f.randomizer.hd(2, 7, "com4 hpower1"))
       )
     );
     var bb = [
@@ -676,28 +541,8 @@ components[5] = function (
 ) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
   var bn = Math.pow(bigness(lp, v), 0.1);
-  if (
-    lp.r.sb(
-      (lp.f.cache["com5 bigchance"] == null
-        ? (lp.f.cache["com5 bigchance"] = lp.f.randomizer.hd(
-            0,
-            0.9,
-            "com5 bigchance"
-          ))
-        : lp.f.cache["com5 bigchance"]) * bn
-    )
-  ) {
-    while (
-      lp.r.sb(
-        (lp.f.cache["com5 bigincchance"] == null
-          ? (lp.f.cache["com5 bigincchance"] = lp.f.randomizer.hd(
-              0,
-              0.8,
-              "com5 bigincchance"
-            ))
-          : lp.f.cache["com5 bigincchance"]) * bn
-      )
-    ) {
+  if (lp.r.sb(lp.f.randomizer.hd(0, 0.9, "com5 bigchance") * bn)) {
+    while (lp.r.sb(lp.f.randomizer.hd(0, 0.8, "com5 bigincchance") * bn)) {
       var lw = leeway(lp, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
@@ -717,17 +562,13 @@ components[5] = function (
   var countx =
     1 +
     lp.r.sseq(
-      lp.f.cache["com5 multxc"] == null
-        ? (lp.f.cache["com5 multxc"] = lp.f.randomizer.hd(0, 1, "com5 multxc"))
-        : lp.f.cache["com5 multxc"],
+      lp.f.randomizer.hd(0, 1, "com5 multxc"),
       Math.floor(1.2 * Math.pow(lcms / COMPONENT_MAXIMUM_SIZE, 0.6))
     );
   var county =
     1 +
     lp.r.sseq(
-      lp.f.cache["com5 multyc"] == null
-        ? (lp.f.cache["com5 multyc"] = lp.f.randomizer.hd(0, 1, "com5 multyc"))
-        : lp.f.cache["com5 multyc"],
+      lp.f.randomizer.hd(0, 1, "com5 multyc"),
       Math.floor(1.2 * Math.pow(lcms / COMPONENT_MAXIMUM_SIZE, 0.6))
     );
   var smallr = (lp.r.sd(0.5, 1) * lcms) / Math.max(countx, county);
@@ -772,28 +613,8 @@ components[6] = function (
   }
   let lcms = COMPONENT_MAXIMUM_SIZE;
   var bn = Math.pow(bigness(lp, v), 0.05);
-  if (
-    lp.r.sb(
-      (lp.f.cache["com6 bigchance"] == null
-        ? (lp.f.cache["com6 bigchance"] = lp.f.randomizer.hd(
-            0,
-            0.9,
-            "com6 bigchance"
-          ))
-        : lp.f.cache["com6 bigchance"]) * bn
-    )
-  ) {
-    while (
-      lp.r.sb(
-        (lp.f.cache["com6 bigincchance"] == null
-          ? (lp.f.cache["com6 bigincchance"] = lp.f.randomizer.hd(
-              0,
-              0.8,
-              "com6 bigincchance"
-            ))
-          : lp.f.cache["com6 bigincchance"]) * bn
-      )
-    ) {
+  if (lp.r.sb(lp.f.randomizer.hd(0, 0.9, "com6 bigchance") * bn)) {
+    while (lp.r.sb(lp.f.randomizer.hd(0, 0.8, "com6 bigincchance") * bn)) {
       var lw = leeway(lp, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
@@ -811,22 +632,8 @@ components[6] = function (
   var h1 =
     h0 *
     Math.pow(
-      lp.r.sd(
-        lp.f.cache["com6 h1min"] == null
-          ? (lp.f.cache["com6 h1min"] = Math.pow(
-              lp.f.randomizer.hd(0, 0.8, "com6 h1min"),
-              0.5
-            ))
-          : lp.f.cache["com6 h1min"],
-        0.9
-      ),
-      lp.f.cache["com6 h1power"] == null
-        ? (lp.f.cache["com6 h1power"] = lp.f.randomizer.hd(
-            0.5,
-            1.5,
-            "com6 h1power"
-          ))
-        : lp.f.cache["com6 h1power"]
+      lp.r.sd(Math.pow(lp.f.randomizer.hd(0, 0.8, "com6 h1min"), 0.5), 0.9),
+      lp.f.randomizer.hd(0.5, 1.5, "com6 h1power")
     ); //Outer height, shorter.
   var hh1i = Math.floor(h1 / 2);
   var hh1e = h0 % 2;
@@ -846,12 +653,7 @@ components[6] = function (
   var w = Math.ceil(
     lcms *
       lp.r.sd(0.7, 1) *
-      (lp.f.cache["com6 width"] == null
-        ? (lp.f.cache["com6 width"] = Math.pow(
-            lp.f.randomizer.hd(0.1, 3.5, "com6 width"),
-            0.5
-          ))
-        : lp.f.cache["com6 width"])
+      Math.pow(lp.f.randomizer.hd(0.1, 3.5, "com6 width"), 0.5)
   );
   var hwi = Math.floor(w / 2);
   var hwe = w % 2;

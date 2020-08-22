@@ -408,24 +408,6 @@ class faction_Faction {
                 this.cache["base color chances"][i] = Math.pow(2, this.randomizer.hd(0, dp, ls + "chances"));
             }
         }
-        if (this.cache["window colors"] == null) {
-            var dp = 5; //Default maximum power.
-            this.cache["window color count"] =
-                1 + (this.randomizer.hb(0.3, "window color +1") ? 1 : 0);
-            this.cache["window colors"] = new Array(this.cache["window color count"]);
-            this.cache["window color chances"] = new Array(this.cache["window color count"]);
-            for (var i = 0; i < this.cache["window color count"]; i++) {
-                var ls = "window color" + i;
-                this.cache["window colors"][i] = hsvToRgb([
-                    this.randomizer.hb(0.6, "window color blues only")
-                        ? this.randomizer.hd(1 / 3, 3 / 4, "window color blue hue")
-                        : this.randomizer.hd(0, 1, "window color hue"),
-                    Math.pow(clamp(this.randomizer.hd(-0.2, 1.2, "window color hue"), 0, 1), 0.5),
-                    Math.pow(clamp(this.randomizer.hd(0.4, 1.3, "window color value"), 0, 1), 0.5),
-                ]);
-                this.cache["window color chances"][i] = Math.pow(2, this.randomizer.hd(0, dp, ls + "chances"));
-            }
-        }
     }
     //Where lp is the ship to get the color for.
     getBaseColor(lp) {
@@ -457,14 +439,6 @@ class faction_Faction {
                     clamp(lp.r.sd(-1, 1.2), 0, 1) *
                     clamp(lp.r.ss(0.7) + lp.r.ss(0.7), -1, 1), 0, 1);
         }
-        return rv;
-    }
-    //Where lp is the ship to get the color for.
-    getwindowcolor(lp) {
-        if (this.cache["window colors"] == null) {
-            this.setupColors();
-        }
-        var rv = this.cache["window colors"][lp.r.schoose(this.cache["window color chances"])];
         return rv;
     }
 }
@@ -528,9 +502,7 @@ components[0] = function (lp, v //Bordered block.
     let lcms = COMPONENT_MAXIMUM_SIZE;
     var bn = Math.pow(bigness(lp, v), 0.3);
     if (lp.r.sb(lp.f.randomizer.hd(0, 0.9, "com0 bigchance")) * bn) {
-        while (lp.r.sb((lp.f.cache["com0 bigincchance"] == null
-            ? (lp.f.cache["com0 bigincchance"] = lp.f.randomizer.hd(0, 0.5, "com0 bigincchance"))
-            : lp.f.cache["com0 bigincchance"]) * bn)) {
+        while (lp.r.sb(lp.f.randomizer.hd(0, 0.5, "com0 bigincchance") * bn)) {
             var lw = leeway(lp, [
                 [v[0] - lcms, v[1] - lcms],
                 [v[0] + lcms, v[1] + lcms],
@@ -580,12 +552,8 @@ components[1] = function (lp, v //Cylinder array
 ) {
     var lcms = COMPONENT_MAXIMUM_SIZE;
     var bn = Math.pow(bigness(lp, v), 0.2);
-    if (lp.r.sb((lp.f.cache["com1 bigchance"] == null
-        ? (lp.f.cache["com1 bigchance"] = lp.f.randomizer.hd(0.3, 1, "com1 bigchance"))
-        : lp.f.cache["com1 bigchance"]) * bn)) {
-        while (lp.r.sb((lp.f.cache["com1 bigincchance"] == null
-            ? (lp.f.cache["com1 bigincchance"] = lp.f.randomizer.hd(0, 0.6, "com1 bigincchance"))
-            : lp.f.cache["com1 bigincchance"]) * bn)) {
+    if (lp.r.sb(lp.f.randomizer.hd(0.3, 1, "com1 bigchance") * bn)) {
+        while (lp.r.sb(lp.f.randomizer.hd(0, 0.6, "com1 bigincchance") * bn)) {
             var lw = leeway(lp, [
                 [v[0] - lcms, v[1] - lcms],
                 [v[0] + lcms, v[1] + lcms],
@@ -606,9 +574,7 @@ components[1] = function (lp, v //Cylinder array
     var basecolor = lp.f.getBaseColor(lp);
     var ccolor = colorToHex(scaleColorBy(basecolor, lp.r.sd(0.5, 1)));
     var darkness = lp.r.sd(0.3, 0.9);
-    var orientation = lp.r.sb(lp.f.cache["com1 hchance"] == null
-        ? (lp.f.cache["com1 hchance"] = clamp(lp.f.randomizer.hd(-0.2, 1.2, "com1 hchance"), 0, 1))
-        : lp.f.cache["com1 hchance"]); //true = horizontal array, false = vertical array.
+    var orientation = lp.r.sb(clamp(lp.f.randomizer.hd(-0.2, 1.2, "com1 hchance"), 0, 1)); //true = horizontal array, false = vertical array.
     if (orientation) {
         var bv = [v[0] - Math.floor(w / 2), v[1] - Math.floor(h / 2)];
         lp.cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
@@ -636,12 +602,8 @@ components[2] = function (lp, v //Banded cylinder
 ) {
     let lcms = COMPONENT_MAXIMUM_SIZE;
     var bn = Math.pow(bigness(lp, v), 0.05);
-    if (lp.r.sb((lp.f.cache["com2 bigchance"] == null
-        ? (lp.f.cache["com2 bigchance"] = lp.f.randomizer.hd(0, 1, "com2 bigchance"))
-        : lp.f.cache["com2 bigchance"]) * bn)) {
-        while (lp.r.sb((lp.f.cache["com2 bigincchance"] == null
-            ? (lp.f.cache["com2 bigincchance"] = lp.f.randomizer.hd(0, 0.9, "com2 bigincchance"))
-            : lp.f.cache["com2 bigincchance"]) * bn)) {
+    if (lp.r.sb(lp.f.randomizer.hd(0, 1, "com2 bigchance") * bn)) {
+        while (lp.r.sb(lp.f.randomizer.hd(0, 0.9, "com2 bigincchance") * bn)) {
             var lw = leeway(lp, [
                 [v[0] - lcms, v[1] - lcms],
                 [v[0] + lcms, v[1] + lcms],
@@ -665,9 +627,7 @@ components[2] = function (lp, v //Banded cylinder
         Math.floor(clamp(w * lp.r.sd(0.1, 0.3), 1, h)),
     ];
     var hpair = h2[0] + h2[1];
-    var odd = lp.r.sb(lp.f.cache["com2 oddchance"] == null
-        ? (lp.f.cache["com2 oddchance"] = Math.pow(lp.f.randomizer.hd(0, 1, "com2 oddchance"), 0.5))
-        : lp.f.cache["com2 oddchance"]);
+    var odd = lp.r.sb(Math.pow(lp.f.randomizer.hd(0, 1, "com2 oddchance"), 0.5));
     var count = clamp(Math.floor(h / hpair), 1, h);
     var htotal = count * hpair + (odd ? h2[0] : 0);
     var basecolor = lp.f.getBaseColor(lp);
@@ -681,9 +641,7 @@ components[2] = function (lp, v //Banded cylinder
         scaleColorBy(color2[0], lightness),
         scaleColorBy(color2[1], lightness),
     ];
-    var orientation = lp.r.sb(lp.f.cache["com2 verticalchance"] == null
-        ? (lp.f.cache["com2 verticalchance"] = Math.pow(lp.f.randomizer.hd(0, 1, "com2 verticalchance"), 0.1))
-        : lp.f.cache["com2 verticalchance"]);
+    var orientation = lp.r.sb(Math.pow(lp.f.randomizer.hd(0, 1, "com2 verticalchance"), 0.1));
     if (orientation) {
         var grad2 = [
             lp.cfx.createLinearGradient(v[0] - wh2[0], v[1], v[0] + wh2[0], v[1]),
@@ -746,12 +704,8 @@ components[3] = function (lp, v //Rocket engine (or tries to call another random
     }
     let lcms = COMPONENT_MAXIMUM_SIZE;
     var bn = Math.pow(bigness(lp, v), 0.1);
-    if (lp.r.sb((lp.f.cache["com3 bigchance"] == null
-        ? (lp.f.cache["com3 bigchance"] = lp.f.randomizer.hd(0.6, 1, "com3 bigchance"))
-        : lp.f.cache["com3 bigchance"]) * bn)) {
-        while (lp.r.sb((lp.f.cache["com3 bigincchance"] == null
-            ? (lp.f.cache["com3 bigincchance"] = lp.f.randomizer.hd(0.3, 0.8, "com3 bigincchance"))
-            : lp.f.cache["com3 bigincchance"]) * bn)) {
+    if (lp.r.sb(lp.f.randomizer.hd(0.6, 1, "com3 bigchance") * bn)) {
+        while (lp.r.sb(lp.f.randomizer.hd(0.3, 0.8, "com3 bigincchance") * bn)) {
             var lw = leeway(lp, [
                 [v[0] - lcms, v[1] - lcms],
                 [v[0] + lcms, v[1] + lcms],
@@ -778,19 +732,10 @@ components[3] = function (lp, v //Rocket engine (or tries to call another random
     var count = Math.ceil(h / hpair);
     h = count * hpair + h2[0];
     lp.f.setupColors();
-    var basecolor = lp.f.cache["base colors"][lp.f.cache["com3 basecolor"] == null
-        ? (lp.f.cache["com3 basecolor"] = lp.f.randomizer.hchoose(lp.f.cache["base color chances"], "com3 basecolor"))
-        : lp.f.cache["com3 basecolor"]];
-    var lightness0_mid = lp.f.cache["com3 lightness0 mid"] == null
-        ? (lp.f.cache["com3 lightness0 mid"] = lp.f.randomizer.hd(0.5, 0.8, "com3 lightness0 mid"))
-        : lp.f.cache["com3 lightness0 mid"];
-    var lightness0_edge = lightness0_mid -
-        (lp.f.cache["com3 lightness0 edge"] == null
-            ? (lp.f.cache["com3 lightness0 edge"] = lp.f.randomizer.hd(0.2, 0.4, "com3 lightness0 edge"))
-            : lp.f.cache["com3 lightness0 edge"]);
-    var lightness1_edge = lp.f.cache["com3 lightness1 edge"] == null
-        ? (lp.f.cache["com3 lightness1 edge"] = lp.f.randomizer.hd(0, 0.2, "com3 lightness1 edge"))
-        : lp.f.cache["com3 lightness1 edge"];
+    var basecolor = lp.f.cache["base colors"][lp.f.randomizer.hchoose(lp.f.cache["base color chances"], "com3 basecolor")];
+    var lightness0_mid = lp.f.randomizer.hd(0.5, 0.8, "com3 lightness0 mid");
+    var lightness0_edge = lightness0_mid - lp.f.randomizer.hd(0.2, 0.4, "com3 lightness0 edge");
+    var lightness1_edge = lp.f.randomizer.hd(0, 0.2, "com3 lightness1 edge");
     var grad2 = [
         lp.cfx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
         lp.cfx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
@@ -843,9 +788,7 @@ components[4] = function (lp, v //Elongated cylinder (calls component 0 - 2 on t
     }
     var w = Math.max(3, Math.ceil(lp.size *
         Math.pow(lp.r.sd(0.4, 1), 2) *
-        (lp.f.cache["com4 maxwidth"] == null
-            ? (lp.f.cache["com4 maxwidth"] = lp.f.randomizer.hd(0.02, 0.1, "com4 maxwidth"))
-            : lp.f.cache["com4 maxwidth"])));
+        lp.f.randomizer.hd(0.02, 0.1, "com4 maxwidth")));
     var hwi = Math.floor(w / 2);
     var hwe = w % 2;
     var direction = lp.r.schoose([
@@ -859,9 +802,7 @@ components[4] = function (lp, v //Elongated cylinder (calls component 0 - 2 on t
         var hlimit = v[1] - CANVAS_SHIP_EDGE;
         var h = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.7 *
             lp.size *
-            Math.pow(lp.r.sd(0, 1), lp.f.cache["com4 hpower0"] == null
-                ? (lp.f.cache["com4 hpower0"] = lp.f.randomizer.hd(2, 6, "com4 hpower0"))
-                : lp.f.cache["com4 hpower0"])));
+            Math.pow(lp.r.sd(0, 1), lp.f.randomizer.hd(2, 6, "com4 hpower0"))));
         var bb = [
             [v[0] - hwi, v[1] - h],
             [v[0] + hwi + hwe, v[1]],
@@ -879,9 +820,7 @@ components[4] = function (lp, v //Elongated cylinder (calls component 0 - 2 on t
         var hlimit = lp.h - (CANVAS_SHIP_EDGE + v[1]);
         var h = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.6 *
             lp.size *
-            Math.pow(lp.r.sd(0, 1), lp.f.cache["com4 hpower1"] == null
-                ? (lp.f.cache["com4 hpower1"] = lp.f.randomizer.hd(2, 7, "com4 hpower1"))
-                : lp.f.cache["com4 hpower1"])));
+            Math.pow(lp.r.sd(0, 1), lp.f.randomizer.hd(2, 7, "com4 hpower1"))));
         var bb = [
             [v[0] - hwi, v[1]],
             [v[0] + hwi + hwe, v[1] + h],
@@ -929,12 +868,8 @@ components[5] = function (lp, v //Ball
 ) {
     let lcms = COMPONENT_MAXIMUM_SIZE;
     var bn = Math.pow(bigness(lp, v), 0.1);
-    if (lp.r.sb((lp.f.cache["com5 bigchance"] == null
-        ? (lp.f.cache["com5 bigchance"] = lp.f.randomizer.hd(0, 0.9, "com5 bigchance"))
-        : lp.f.cache["com5 bigchance"]) * bn)) {
-        while (lp.r.sb((lp.f.cache["com5 bigincchance"] == null
-            ? (lp.f.cache["com5 bigincchance"] = lp.f.randomizer.hd(0, 0.8, "com5 bigincchance"))
-            : lp.f.cache["com5 bigincchance"]) * bn)) {
+    if (lp.r.sb(lp.f.randomizer.hd(0, 0.9, "com5 bigchance") * bn)) {
+        while (lp.r.sb(lp.f.randomizer.hd(0, 0.8, "com5 bigincchance") * bn)) {
             var lw = leeway(lp, [
                 [v[0] - lcms, v[1] - lcms],
                 [v[0] + lcms, v[1] + lcms],
@@ -953,13 +888,9 @@ components[5] = function (lp, v //Ball
     var colormid = colorToHex(scaleColorBy(basecolor, lightmid));
     var coloredge = colorToHex(scaleColorBy(basecolor, lightedge));
     var countx = 1 +
-        lp.r.sseq(lp.f.cache["com5 multxc"] == null
-            ? (lp.f.cache["com5 multxc"] = lp.f.randomizer.hd(0, 1, "com5 multxc"))
-            : lp.f.cache["com5 multxc"], Math.floor(1.2 * Math.pow(lcms / COMPONENT_MAXIMUM_SIZE, 0.6)));
+        lp.r.sseq(lp.f.randomizer.hd(0, 1, "com5 multxc"), Math.floor(1.2 * Math.pow(lcms / COMPONENT_MAXIMUM_SIZE, 0.6)));
     var county = 1 +
-        lp.r.sseq(lp.f.cache["com5 multyc"] == null
-            ? (lp.f.cache["com5 multyc"] = lp.f.randomizer.hd(0, 1, "com5 multyc"))
-            : lp.f.cache["com5 multyc"], Math.floor(1.2 * Math.pow(lcms / COMPONENT_MAXIMUM_SIZE, 0.6)));
+        lp.r.sseq(lp.f.randomizer.hd(0, 1, "com5 multyc"), Math.floor(1.2 * Math.pow(lcms / COMPONENT_MAXIMUM_SIZE, 0.6)));
     var smallr = (lp.r.sd(0.5, 1) * lcms) / Math.max(countx, county);
     var drawr = smallr + 0.5;
     var shadowr = smallr + 1;
@@ -999,12 +930,8 @@ components[6] = function (lp, v //Forward-facing trapezoidal fin
     }
     let lcms = COMPONENT_MAXIMUM_SIZE;
     var bn = Math.pow(bigness(lp, v), 0.05);
-    if (lp.r.sb((lp.f.cache["com6 bigchance"] == null
-        ? (lp.f.cache["com6 bigchance"] = lp.f.randomizer.hd(0, 0.9, "com6 bigchance"))
-        : lp.f.cache["com6 bigchance"]) * bn)) {
-        while (lp.r.sb((lp.f.cache["com6 bigincchance"] == null
-            ? (lp.f.cache["com6 bigincchance"] = lp.f.randomizer.hd(0, 0.8, "com6 bigincchance"))
-            : lp.f.cache["com6 bigincchance"]) * bn)) {
+    if (lp.r.sb(lp.f.randomizer.hd(0, 0.9, "com6 bigchance") * bn)) {
+        while (lp.r.sb(lp.f.randomizer.hd(0, 0.8, "com6 bigincchance") * bn)) {
             var lw = leeway(lp, [
                 [v[0] - lcms, v[1] - lcms],
                 [v[0] + lcms, v[1] + lcms],
@@ -1021,11 +948,7 @@ components[6] = function (lp, v //Forward-facing trapezoidal fin
     var hh0i = Math.floor(h0 / 2);
     var hh0e = h0 % 2;
     var h1 = h0 *
-        Math.pow(lp.r.sd(lp.f.cache["com6 h1min"] == null
-            ? (lp.f.cache["com6 h1min"] = Math.pow(lp.f.randomizer.hd(0, 0.8, "com6 h1min"), 0.5))
-            : lp.f.cache["com6 h1min"], 0.9), lp.f.cache["com6 h1power"] == null
-            ? (lp.f.cache["com6 h1power"] = lp.f.randomizer.hd(0.5, 1.5, "com6 h1power"))
-            : lp.f.cache["com6 h1power"]); //Outer height, shorter.
+        Math.pow(lp.r.sd(Math.pow(lp.f.randomizer.hd(0, 0.8, "com6 h1min"), 0.5), 0.9), lp.f.randomizer.hd(0.5, 1.5, "com6 h1power")); //Outer height, shorter.
     var hh1i = Math.floor(h1 / 2);
     var hh1e = h0 % 2;
     var backamount = Math.max(0 - (h0 - h1) / 2, h0 *
@@ -1037,9 +960,7 @@ components[6] = function (lp, v //Forward-facing trapezoidal fin
             : lp.f.cache["com6 backness"]));
     var w = Math.ceil(lcms *
         lp.r.sd(0.7, 1) *
-        (lp.f.cache["com6 width"] == null
-            ? (lp.f.cache["com6 width"] = Math.pow(lp.f.randomizer.hd(0.1, 3.5, "com6 width"), 0.5))
-            : lp.f.cache["com6 width"]));
+        Math.pow(lp.f.randomizer.hd(0.1, 3.5, "com6 width"), 0.5));
     var hwi = Math.floor(w / 2);
     var hwe = w % 2;
     var quad = [
@@ -1167,9 +1088,7 @@ outlines[0] = function (lp) {
     var csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
     var csarealimit = csarea * 0.05;
     var initialwidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) *
-        (lp.f.cache["outline0 iw"] == null
-            ? (lp.f.cache["outline0 iw"] = lp.f.randomizer.hd(0.1, 1, "outline0 iw"))
-            : lp.f.cache["outline0 iw"]) *
+        lp.f.randomizer.hd(0.1, 1, "outline0 iw") *
         0.2);
     var blocks = [
         [
@@ -1177,11 +1096,10 @@ outlines[0] = function (lp) {
             [lp.hw + initialwidth, lp.h - CANVAS_SHIP_EDGE],
         ],
     ];
-    if (lp.f.cache["outline0 bc"] == null) {
-        lp.f.cache["outline0 bc"] = lp.f.randomizer.hd(2, 8, "outline0 bc");
-    }
     var blockcount = 2 +
-        Math.floor(lp.r.sd(0.5, 1) * lp.f.cache["outline0 bc"] * Math.sqrt(lp.size));
+        Math.floor(lp.r.sd(0.5, 1) *
+            lp.f.randomizer.hd(2, 8, "outline0 bc") *
+            Math.sqrt(lp.size));
     for (var i = 1; i < blockcount; i++) {
         var base = blocks[lp.r.si(0, blocks.length - 1)];
         var v0 = [
@@ -1189,9 +1107,7 @@ outlines[0] = function (lp) {
             base[0][1] + lp.r.sd(0, 1) * (base[1][1] - base[0][1]),
         ];
         if (v0[1] < (base[0][1] + base[1][1]) * 0.5 &&
-            lp.r.sb(lp.f.cache["outline0 frontbias"] == null
-                ? (lp.f.cache["outline0 frontbias"] = lp.f.randomizer.hd(0.5, 1.5, "outline0 frontbias"))
-                : lp.f.cache["outline0 frontbias"])) {
+            lp.r.sb(lp.f.randomizer.hd(0.5, 1.5, "outline0 frontbias"))) {
             v0[1] = base[1][1] - (v0[1] - base[0][1]);
         }
         var v1 = [
@@ -1232,9 +1148,7 @@ outlines[1] = function (lp) {
     var csarealimit = csarea * 0.05;
     var csrlimit = Math.max(2, Math.sqrt(csarealimit / Math.PI));
     var initialwidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) *
-        (lp.f.cache["outline1 iw"] == null
-            ? (lp.f.cache["outline1 iw"] = lp.f.randomizer.hd(0.1, 1, "outline1 iw"))
-            : lp.f.cache["outline1 iw"]) *
+        lp.f.randomizer.hd(0.1, 1, "outline1 iw") *
         0.2);
     var circles = [];
     var initialcount = Math.floor((lp.h - 2 * CANVAS_SHIP_EDGE) / (initialwidth * 2));
@@ -1242,20 +1156,17 @@ outlines[1] = function (lp) {
         let lv = [lp.hw, lp.h - (CANVAS_SHIP_EDGE + initialwidth * (i * 2 + 1))];
         circles.push({ v: lv, r: initialwidth });
     }
-    if (lp.f.cache["outline1 cc"] == null) {
-        lp.f.cache["outline1 cc"] = lp.f.randomizer.hd(10, 50, "outline1 cc");
-    }
     var circlecount = initialcount +
-        Math.floor(lp.r.sd(0.5, 1) * lp.f.cache["outline1 cc"] * Math.sqrt(lp.size));
+        Math.floor(lp.r.sd(0.5, 1) *
+            lp.f.randomizer.hd(10, 50, "outline1 cc") *
+            Math.sqrt(lp.size));
     for (var i = initialcount; i < circlecount; i++) {
         var base = circles[Math.max(lp.r.si(0, circles.length - 1), lp.r.si(0, circles.length - 1))];
         var ncr = lp.r.sd(1, csrlimit);
         var pr = lp.r.sd(Math.max(0, base.r - ncr), base.r);
         var pa = lp.r.sd(0, 2 * Math.PI);
         if (pa > Math.PI &&
-            lp.r.sb(lp.f.cache["outline1 frontbias"] == null
-                ? (lp.f.cache["outline1 frontbias"] = lp.f.randomizer.hd(0.5, 1.5, "outline1 frontbias"))
-                : lp.f.cache["outline1 frontbias"])) {
+            lp.r.sb(lp.f.randomizer.hd(0.5, 1.5, "outline1 frontbias"))) {
             var pa = lp.r.sd(0, Math.PI);
         }
         let lv = [base.v[0] + Math.cos(pa) * pr, base.v[1] + Math.sin(pa) * pr];
@@ -1284,33 +1195,24 @@ outlines[2] = function (lp) {
         [lp.hw, lp.r.sd(0.95, 1) * innersize[1] + CANVAS_SHIP_EDGE],
     ];
     var basefatness = COMPONENT_GRID_SIZE / lp.size +
-        (lp.f.cache["outline2 basefatness"] == null
-            ? (lp.f.cache["outline2 basefatness"] = lp.f.randomizer.hd(0.03, 0.1, "outline2 basefatness"))
-            : lp.f.cache["outline2 basefatness"]);
+        lp.f.randomizer.hd(0.03, 0.1, "outline2 basefatness");
     var basemessiness = 1 / basefatness;
     var pointcount = Math.max(3, Math.ceil(basemessiness * lp.r.sd(0.05, 0.1) * Math.sqrt(lp.size)));
     // @ts-ignore - We're doing it properly
-    lp.csx.lineCap = ["round", "square"][lp.f.cache["outline2 linecap"] == null
-        ? (lp.f.cache["outline2 linecap"] = lp.f.randomizer.hi(0, 1, "outline2 linecap"))
-        : lp.f.cache["outline2 linecap"]];
+    lp.csx.lineCap = ["round", "square"][lp.f.randomizer.hi(0, 1, "outline2 linecap")];
     lp.csx.strokeStyle = "#FFFFFF";
     for (var npi = 1; npi < pointcount; npi++) {
         var np = points[npi];
         if (np == null) {
             np = [
                 lp.r.sd(0, 1) * innersize[0] + CANVAS_SHIP_EDGE,
-                Math.pow(lp.r.sd(0, 1), lp.f.cache["outline2 frontbias"] == null
-                    ? (lp.f.cache["outline2 frontbias"] = lp.f.randomizer.hd(0.1, 1, "outline2 frontbias"))
-                    : lp.f.cache["outline2 frontbias"]) *
+                Math.pow(lp.r.sd(0, 1), lp.f.randomizer.hd(0.1, 1, "outline2 frontbias")) *
                     innersize[1] +
                     CANVAS_SHIP_EDGE,
             ];
             points.push(np);
         }
-        var cons = 1 +
-            lp.r.sseq(lp.f.cache["outline2 conadjust"] == null
-                ? (lp.f.cache["outline2 conadjust"] = lp.f.randomizer.hd(0, 1, "outline2 conadjust"))
-                : lp.f.cache["outline2 conadjust"], 3);
+        var cons = 1 + lp.r.sseq(lp.f.randomizer.hd(0, 1, "outline2 conadjust"), 3);
         for (var nci = 0; nci < cons; nci++) {
             var pre = points[lp.r.si(0, points.length - 2)];
             lp.csx.lineWidth = lp.r.sd(0.7, 1) * basefatness * lp.size;
