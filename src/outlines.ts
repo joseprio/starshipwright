@@ -10,9 +10,7 @@ outlines[0] = function (lp: Ship) {
   var csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
   var csarealimit = csarea * 0.05;
   var initialwidth = Math.ceil(
-    (lp.w - 2 * CANVAS_SHIP_EDGE) *
-      lp.f.randomizer.hd(0.1, 1, "outline0 iw") *
-      0.2
+    (lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.r.hd(0.1, 1, "outline0 iw") * 0.2
   );
   var blocks = [
     [
@@ -23,9 +21,7 @@ outlines[0] = function (lp: Ship) {
   var blockcount =
     2 +
     Math.floor(
-      lp.r.sd(0.5, 1) *
-        lp.f.randomizer.hd(2, 8, "outline0 bc") *
-        Math.sqrt(lp.size)
+      lp.r.sd(0.5, 1) * lp.f.r.hd(2, 8, "outline0 bc") * Math.sqrt(lp.size)
     );
   for (var i = 1; i < blockcount; i++) {
     var base = blocks[lp.r.si(0, blocks.length - 1)];
@@ -35,7 +31,7 @@ outlines[0] = function (lp: Ship) {
     ];
     if (
       v0[1] < (base[0][1] + base[1][1]) * 0.5 &&
-      lp.r.sb(lp.f.randomizer.hd(0.5, 1.5, "outline0 frontbias"))
+      lp.r.sb(lp.f.r.hd(0.5, 1.5, "outline0 frontbias"))
     ) {
       v0[1] = base[1][1] - (v0[1] - base[0][1]);
     }
@@ -88,9 +84,7 @@ outlines[1] = function (lp: Ship) {
   var csarealimit = csarea * 0.05;
   var csrlimit = Math.max(2, Math.sqrt(csarealimit / Math.PI));
   var initialwidth = Math.ceil(
-    (lp.w - 2 * CANVAS_SHIP_EDGE) *
-      lp.f.randomizer.hd(0.1, 1, "outline1 iw") *
-      0.2
+    (lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.r.hd(0.1, 1, "outline1 iw") * 0.2
   );
   var circles = [];
   var initialcount = Math.floor(
@@ -103,9 +97,7 @@ outlines[1] = function (lp: Ship) {
   var circlecount =
     initialcount +
     Math.floor(
-      lp.r.sd(0.5, 1) *
-        lp.f.randomizer.hd(10, 50, "outline1 cc") *
-        Math.sqrt(lp.size)
+      lp.r.sd(0.5, 1) * lp.f.r.hd(10, 50, "outline1 cc") * Math.sqrt(lp.size)
     );
   for (var i = initialcount; i < circlecount; i++) {
     var base =
@@ -115,10 +107,7 @@ outlines[1] = function (lp: Ship) {
     var ncr = lp.r.sd(1, csrlimit);
     var pr = lp.r.sd(Math.max(0, base.r - ncr), base.r);
     var pa = lp.r.sd(0, 2 * Math.PI);
-    if (
-      pa > Math.PI &&
-      lp.r.sb(lp.f.randomizer.hd(0.5, 1.5, "outline1 frontbias"))
-    ) {
+    if (pa > Math.PI && lp.r.sb(lp.f.r.hd(0.5, 1.5, "outline1 frontbias"))) {
       var pa = lp.r.sd(0, Math.PI);
     }
     let lv = [base.v[0] + Math.cos(pa) * pr, base.v[1] + Math.sin(pa) * pr];
@@ -149,32 +138,27 @@ outlines[2] = function (lp: Ship) {
   ];
   var basefatness =
     COMPONENT_GRID_SIZE / lp.size +
-    lp.f.randomizer.hd(0.03, 0.1, "outline2 basefatness");
+    lp.f.r.hd(0.03, 0.1, "outline2 basefatness");
   var basemessiness = 1 / basefatness;
   var pointcount = Math.max(
     3,
     Math.ceil(basemessiness * lp.r.sd(0.05, 0.1) * Math.sqrt(lp.size))
   );
   // @ts-ignore - We're doing it properly
-  lp.csx.lineCap = ["round", "square"][
-    lp.f.randomizer.hi(0, 1, "outline2 linecap")
-  ];
+  lp.csx.lineCap = ["round", "square"][lp.f.r.hi(0, 1, "outline2 linecap")];
   lp.csx.strokeStyle = "#FFFFFF";
   for (var npi = 1; npi < pointcount; npi++) {
     var np = points[npi];
     if (np == null) {
       np = [
         lp.r.sd(0, 1) * innersize[0] + CANVAS_SHIP_EDGE,
-        Math.pow(
-          lp.r.sd(0, 1),
-          lp.f.randomizer.hd(0.1, 1, "outline2 frontbias")
-        ) *
+        Math.pow(lp.r.sd(0, 1), lp.f.r.hd(0.1, 1, "outline2 frontbias")) *
           innersize[1] +
           CANVAS_SHIP_EDGE,
       ];
       points.push(np);
     }
-    var cons = 1 + lp.r.sseq(lp.f.randomizer.hd(0, 1, "outline2 conadjust"), 3);
+    var cons = 1 + lp.r.sseq(lp.f.r.hd(0, 1, "outline2 conadjust"), 3);
     for (var nci = 0; nci < cons; nci++) {
       var pre = points[lp.r.si(0, points.length - 2)];
       lp.csx.lineWidth = lp.r.sd(0.7, 1) * basefatness * lp.size;

@@ -1,6 +1,4 @@
-// [ red, green, blue ]
-export type RGBColor = [number, number, number];
-export type HSVColor = [number, number, number];
+import type { HSVColor, RGBColor } from "./types";
 
 export function copyArray<T>(
   a: Array<T>,

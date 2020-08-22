@@ -4,41 +4,46 @@ import {
   CANVAS_SHIP_EDGE,
 } from "./constants";
 import { clamp, colorToHex, copyArray, scaleColorBy } from "./utils";
+import type { Ship } from "./ship";
+import type { Vec } from "./types";
 
-function backness(lp, v) {
+function backness(lp: Ship, v: Vec): number {
   return v[1] / lp.h;
 }
 
-function frontness(lp, v) {
+function frontness(lp: Ship, v: Vec): number {
   return 1 - v[1] / lp.h;
 }
 
-function centerness(lp, v, do_x, do_y) {
-  var rv = 1;
-  if (do_x) {
+function centerness(lp: Ship, v: Vec, doX: boolean, doY: boolean): number {
+  let rv = 1;
+  if (doX) {
     rv = Math.min(rv, 1 - Math.abs(v[0] - lp.hw) / lp.hw);
   }
-  if (do_y) {
+  if (doY) {
     rv = Math.min(rv, 1 - Math.abs(v[1] - lp.hh) / lp.hh);
   }
   return rv;
 }
 
-function bigness(lp, v) {
-  var effect_center = centerness(lp, v, true, true);
-  var effect_shipsize = 1 - 1 / ((lp.w + lp.h) / 1000 + 1);
-  var effect_faction = Math.pow(
-    lp.f.randomizer.hd(0, 1, "master bigness"),
-    0.5
-  );
-  var effect_stack = 1 - lp.getpcdone();
-  return effect_center * effect_shipsize * effect_faction * effect_stack;
+function bigness(lp: Ship, v: Vec): number {
+  const effectCenter = centerness(lp, v, true, true);
+  const effectShipsize = 1 - 1 / ((lp.w + lp.h) / 1000 + 1);
+  const effectFaction = Math.pow(lp.f.r.hd(0, 1, "master bigness"), 0.5);
+  const effectStack = 1 - lp.getpcdone();
+  return effectCenter * effectShipsize * effectFaction * effectStack;
 }
 
-function leeway(lp, bb) {
+function leeway(lp: Ship, boundingBox: [Vec, Vec]): Vec {
   return [
-    Math.min(bb[0][0] - CANVAS_SHIP_EDGE, lp.w - CANVAS_SHIP_EDGE - bb[1][0]),
-    Math.min(bb[0][1] - CANVAS_SHIP_EDGE, lp.h - CANVAS_SHIP_EDGE - bb[1][1]),
+    Math.min(
+      boundingBox[0][0] - CANVAS_SHIP_EDGE,
+      lp.w - CANVAS_SHIP_EDGE - boundingBox[1][0]
+    ),
+    Math.min(
+      boundingBox[0][1] - CANVAS_SHIP_EDGE,
+      lp.h - CANVAS_SHIP_EDGE - boundingBox[1][1]
+    ),
   ];
 }
 
@@ -47,31 +52,35 @@ function shadowcolor(amount: number): string {
   return "rgba(0,0,0," + clamp(amount, 0, 1) + ")";
 }
 
-function shadowgradient(lp, middlep, edgep, amount) {
-  //lp is the ship. amount is the amount of shadow at the edges, 0 - 1 (the middle is always 0). middlep and edgep should be vectors at the middle and edge of the gradient.
-  var grad = lp.cfx.createLinearGradient(
-    edgep[0],
-    edgep[1],
-    middlep[0] * 2 - edgep[0],
-    middlep[1] * 2 - edgep[1]
+//lp is the ship. amount is the amount of shadow at the edges, 0 - 1 (the middle is always 0). middlep and edgep should be vectors at the middle and edge of the gradient.
+function shadowGradient(
+  lp: Ship,
+  middlePoint: Vec,
+  edgePoint: Vec,
+  amount: number
+): CanvasGradient {
+  const grad = lp.cfx.createLinearGradient(
+    edgePoint[0],
+    edgePoint[1],
+    middlePoint[0] * 2 - edgePoint[0],
+    middlePoint[1] * 2 - edgePoint[1]
   );
-  var darkness = shadowcolor(amount);
+  const darkness = shadowcolor(amount);
   grad.addColorStop(0, darkness);
   grad.addColorStop(0.5, "rgba(0,0,0,0)");
   grad.addColorStop(1, darkness);
   return grad;
 }
 
-export const components = []; //Each component function takes an argument 'lp' (for the ship) and 'v' (an integral 2-vector denoting the center of the component).
+// Each component function takes an argument 'lp' (for the ship) and 'v' (an integral 2-vector denoting the center of the component)
+export const components = [];
 
-components[0] = function (
-  lp,
-  v //Bordered block.
-) {
+// Bordered block
+components[0] = function (lp: Ship, v: Vec) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
   var bn = Math.pow(bigness(lp, v), 0.3);
-  if (lp.r.sb(lp.f.randomizer.hd(0, 0.9, "com0 bigchance")) * bn) {
-    while (lp.r.sb(lp.f.randomizer.hd(0, 0.5, "com0 bigincchance") * bn)) {
+  if (lp.r.sb(lp.f.r.hd(0, 0.9, "com0 bigchance") * bn)) {
+    while (lp.r.sb(lp.f.r.hd(0, 0.5, "com0 bigincchance") * bn)) {
       var lw = leeway(lp, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
@@ -126,7 +135,7 @@ components[0] = function (
       clamp((pcdone * 0.6 + 0.3) * (lcms / COMPONENT_MAXIMUM_SIZE), 0, 0.98)
     )
   ) {
-    lp.cfx.fillStyle = shadowgradient(
+    lp.cfx.fillStyle = shadowGradient(
       lp,
       v,
       [v[0] + trv[0], v[1]],
@@ -141,14 +150,12 @@ components[0] = function (
   }
 };
 
-components[1] = function (
-  lp,
-  v //Cylinder array
-) {
+// Cylinder array
+components[1] = function (lp: Ship, v: Vec) {
   var lcms = COMPONENT_MAXIMUM_SIZE;
   var bn = Math.pow(bigness(lp, v), 0.2);
-  if (lp.r.sb(lp.f.randomizer.hd(0.3, 1, "com1 bigchance") * bn)) {
-    while (lp.r.sb(lp.f.randomizer.hd(0, 0.6, "com1 bigincchance") * bn)) {
+  if (lp.r.sb(lp.f.r.hd(0.3, 1, "com1 bigchance") * bn)) {
+    while (lp.r.sb(lp.f.r.hd(0, 0.6, "com1 bigincchance") * bn)) {
       var lw = leeway(lp, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
@@ -168,9 +175,7 @@ components[1] = function (
   var basecolor = lp.f.getBaseColor(lp);
   var ccolor = colorToHex(scaleColorBy(basecolor, lp.r.sd(0.5, 1)));
   var darkness = lp.r.sd(0.3, 0.9);
-  var orientation = lp.r.sb(
-    clamp(lp.f.randomizer.hd(-0.2, 1.2, "com1 hchance"), 0, 1)
-  ); //true = horizontal array, false = vertical array.
+  var orientation = lp.r.sb(clamp(lp.f.r.hd(-0.2, 1.2, "com1 hchance"), 0, 1)); //true = horizontal array, false = vertical array.
   if (orientation) {
     var bv = [v[0] - Math.floor(w / 2), v[1] - Math.floor(h / 2)];
     lp.cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
@@ -178,7 +183,7 @@ components[1] = function (
     lp.cfx.fillStyle = ccolor;
     lp.cfx.fillRect(bv[0], bv[1], w, h);
     for (var i = 0; i < count; i++) {
-      lp.cfx.fillStyle = shadowgradient(
+      lp.cfx.fillStyle = shadowGradient(
         lp,
         [bv[0] + (i + 0.5) * cw, v[1]],
         [bv[0] + i * cw, v[1]],
@@ -193,7 +198,7 @@ components[1] = function (
     lp.cfx.fillStyle = ccolor;
     lp.cfx.fillRect(bv[0], bv[1], h, w);
     for (var i = 0; i < count; i++) {
-      lp.cfx.fillStyle = shadowgradient(
+      lp.cfx.fillStyle = shadowGradient(
         lp,
         [v[0], bv[1] + (i + 0.5) * cw],
         [v[0], bv[1] + i * cw],
@@ -204,14 +209,12 @@ components[1] = function (
   }
 };
 
-components[2] = function (
-  lp,
-  v //Banded cylinder
-) {
+// Banded cylinder
+components[2] = function (lp: Ship, v: Vec) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
   var bn = Math.pow(bigness(lp, v), 0.05);
-  if (lp.r.sb(lp.f.randomizer.hd(0, 1, "com2 bigchance") * bn)) {
-    while (lp.r.sb(lp.f.randomizer.hd(0, 0.9, "com2 bigincchance") * bn)) {
+  if (lp.r.sb(lp.f.r.hd(0, 1, "com2 bigchance") * bn)) {
+    while (lp.r.sb(lp.f.r.hd(0, 0.9, "com2 bigincchance") * bn)) {
       var lw = leeway(lp, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
@@ -234,7 +237,7 @@ components[2] = function (
     Math.floor(clamp(w * lp.r.sd(0.1, 0.3), 1, h)),
   ];
   var hpair = h2[0] + h2[1];
-  var odd = lp.r.sb(Math.pow(lp.f.randomizer.hd(0, 1, "com2 oddchance"), 0.5));
+  var odd = lp.r.sb(Math.pow(lp.f.r.hd(0, 1, "com2 oddchance"), 0.5));
   var count = clamp(Math.floor(h / hpair), 1, h);
   var htotal = count * hpair + (odd ? h2[0] : 0);
   var basecolor = lp.f.getBaseColor(lp);
@@ -249,7 +252,7 @@ components[2] = function (
     scaleColorBy(color2[1], lightness),
   ];
   var orientation = lp.r.sb(
-    Math.pow(lp.f.randomizer.hd(0, 1, "com2 verticalchance"), 0.1)
+    Math.pow(lp.f.r.hd(0, 1, "com2 verticalchance"), 0.1)
   );
   if (orientation) {
     var grad2 = [
@@ -298,10 +301,8 @@ components[2] = function (
   }
 };
 
-components[3] = function (
-  lp,
-  v //Rocket engine (or tries to call another random component if too far forward)
-) {
+//Rocket engine (or tries to call another random component if too far forward)
+components[3] = function (lp: Ship, v: Vec) {
   if (
     lp.r.sb(frontness(lp, v) - 0.3) ||
     lp.getcellstate(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) > 0 ||
@@ -317,9 +318,9 @@ components[3] = function (
   }
   let lcms = COMPONENT_MAXIMUM_SIZE;
   var bn = Math.pow(bigness(lp, v), 0.1);
-  if (lp.r.sb(lp.f.randomizer.hd(0.6, 1, "com3 bigchance") * bn)) {
-    while (lp.r.sb(lp.f.randomizer.hd(0.3, 0.8, "com3 bigincchance") * bn)) {
-      var lw = leeway(lp, [
+  if (lp.r.sb(lp.f.r.hd(0.6, 1, "com3 bigchance") * bn)) {
+    while (lp.r.sb(lp.f.r.hd(0.3, 0.8, "com3 bigincchance") * bn)) {
+      const lw = leeway(lp, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
       ]);
@@ -345,11 +346,11 @@ components[3] = function (
   h = count * hpair + h2[0];
   lp.f.setupColors();
   var basecolor =
-    lp.f.colors[lp.f.randomizer.hchoose(lp.f.colorChances, "com3 basecolor")];
-  var lightness0_mid = lp.f.randomizer.hd(0.5, 0.8, "com3 lightness0 mid");
+    lp.f.colors[lp.f.r.hchoose(lp.f.colorChances, "com3 basecolor")];
+  var lightness0_mid = lp.f.r.hd(0.5, 0.8, "com3 lightness0 mid");
   var lightness0_edge =
-    lightness0_mid - lp.f.randomizer.hd(0.2, 0.4, "com3 lightness0 edge");
-  var lightness1_edge = lp.f.randomizer.hd(0, 0.2, "com3 lightness1 edge");
+    lightness0_mid - lp.f.r.hd(0.2, 0.4, "com3 lightness0 edge");
+  var lightness1_edge = lp.f.r.hd(0, 0.2, "com3 lightness1 edge");
   var grad2 = [
     lp.cfx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
     lp.cfx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
@@ -375,7 +376,7 @@ components[3] = function (
     1,
     colorToHex(scaleColorBy(basecolor, lightness1_edge))
   );
-  var by = Math.ceil(v[1] - h / 2);
+  const by = Math.ceil(v[1] - h / 2);
   lp.cfx.fillStyle = grad2[0];
   lp.cfx.beginPath();
   lp.cfx.moveTo(v[0] - nw / 2, by);
@@ -385,10 +386,10 @@ components[3] = function (
   lp.cfx.fill();
   lp.cfx.fillStyle = grad2[1];
   var byh = [by + h2[0], by + hpair];
-  for (var i = 0; i < count; i++) {
-    var lyr = [i * hpair + h2[0], (i + 1) * hpair];
-    var ly = [byh[0] + i * hpair, byh[1] + i * hpair];
-    var lw = [
+  for (let i = 0; i < count; i++) {
+    const lyr = [i * hpair + h2[0], (i + 1) * hpair];
+    const ly = [byh[0] + i * hpair, byh[1] + i * hpair];
+    const lw = [
       (nw + (w - nw) * (lyr[0] / h)) / 2,
       (nw + (w - nw) * (lyr[1] / h)) / 2,
     ];
@@ -401,10 +402,8 @@ components[3] = function (
   }
 };
 
-components[4] = function (
-  lp,
-  v //Elongated cylinder (calls component 0 - 2 on top of its starting point)
-) {
+//Elongated cylinder (calls component 0 - 2 on top of its starting point)
+components[4] = function (lp: Ship, v: Vec) {
   var cn = centerness(lp, v, true, false);
   var lightmid = lp.r.sd(0.7, 1);
   var lightedge = lp.r.sd(0, 0.2);
@@ -413,9 +412,9 @@ components[4] = function (
   var coloredge = colorToHex(scaleColorBy(basecolor, lightedge));
   if (lp.f.cache["com4 directionc"] == null) {
     lp.f.cache["com4 directionc"] = [
-      1 * Math.pow(lp.f.randomizer.hd(0, 1, "com4 directionc0"), 4), //forwards
-      0.1 * Math.pow(lp.f.randomizer.hd(0, 1, "com4 directionc1"), 4), //backwards
-      0.2 * Math.pow(lp.f.randomizer.hd(0, 1, "com4 directionc2"), 4), //to center
+      1 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc0"), 4), //forwards
+      0.1 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc1"), 4), //backwards
+      0.2 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc2"), 4), //to center
     ];
   }
   var w = Math.max(
@@ -423,7 +422,7 @@ components[4] = function (
     Math.ceil(
       lp.size *
         Math.pow(lp.r.sd(0.4, 1), 2) *
-        lp.f.randomizer.hd(0.02, 0.1, "com4 maxwidth")
+        lp.f.r.hd(0.02, 0.1, "com4 maxwidth")
     )
   );
   var hwi = Math.floor(w / 2);
@@ -443,9 +442,7 @@ components[4] = function (
         hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)
       ),
       Math.floor(
-        0.7 *
-          lp.size *
-          Math.pow(lp.r.sd(0, 1), lp.f.randomizer.hd(2, 6, "com4 hpower0"))
+        0.7 * lp.size * Math.pow(lp.r.sd(0, 1), lp.f.r.hd(2, 6, "com4 hpower0"))
       )
     );
     var bb = [
@@ -473,9 +470,7 @@ components[4] = function (
         hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)
       ),
       Math.floor(
-        0.6 *
-          lp.size *
-          Math.pow(lp.r.sd(0, 1), lp.f.randomizer.hd(2, 7, "com4 hpower1"))
+        0.6 * lp.size * Math.pow(lp.r.sd(0, 1), lp.f.r.hd(2, 7, "com4 hpower1"))
       )
     );
     var bb = [
@@ -511,9 +506,9 @@ components[4] = function (
   }
   if (lp.f.cache["com4 covercomc"] == null) {
     lp.f.cache["com4 covercomc"] = [
-      0.6 * Math.pow(lp.f.randomizer.hd(0, 1, "com4 covercomc0"), 2),
-      0.2 * Math.pow(lp.f.randomizer.hd(0, 1, "com4 covercomc1"), 2),
-      1 * Math.pow(lp.f.randomizer.hd(0, 1, "com4 covercomc2"), 2),
+      0.6 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc0"), 2),
+      0.2 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc1"), 2),
+      1 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc2"), 2),
     ];
   }
   components[lp.r.schoose(lp.f.cache["com4 covercomc"])](lp, v);
@@ -530,14 +525,12 @@ components[4] = function (
   }
 };
 
-components[5] = function (
-  lp,
-  v //Ball
-) {
+//Ball
+components[5] = function (lp: Ship, v: Vec) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
   var bn = Math.pow(bigness(lp, v), 0.1);
-  if (lp.r.sb(lp.f.randomizer.hd(0, 0.9, "com5 bigchance") * bn)) {
-    while (lp.r.sb(lp.f.randomizer.hd(0, 0.8, "com5 bigincchance") * bn)) {
+  if (lp.r.sb(lp.f.r.hd(0, 0.9, "com5 bigchance") * bn)) {
+    while (lp.r.sb(lp.f.r.hd(0, 0.8, "com5 bigincchance") * bn)) {
       var lw = leeway(lp, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
@@ -557,13 +550,13 @@ components[5] = function (
   var countx =
     1 +
     lp.r.sseq(
-      lp.f.randomizer.hd(0, 1, "com5 multxc"),
+      lp.f.r.hd(0, 1, "com5 multxc"),
       Math.floor(1.2 * Math.pow(lcms / COMPONENT_MAXIMUM_SIZE, 0.6))
     );
   var county =
     1 +
     lp.r.sseq(
-      lp.f.randomizer.hd(0, 1, "com5 multyc"),
+      lp.f.r.hd(0, 1, "com5 multyc"),
       Math.floor(1.2 * Math.pow(lcms / COMPONENT_MAXIMUM_SIZE, 0.6))
     );
   var smallr = (lp.r.sd(0.5, 1) * lcms) / Math.max(countx, county);
@@ -598,18 +591,16 @@ components[5] = function (
   }
 };
 
-components[6] = function (
-  lp,
-  v //Forward-facing trapezoidal fin
-) {
+//Forward-facing trapezoidal fin
+components[6] = function (lp: Ship, v: Vec) {
   if (lp.nextpass <= 0 || lp.r.sb(frontness(lp, v))) {
     components[lp.r.schoose(copyArray(lp.f.componentChances, 0, 5))](lp, v);
     return;
   }
   let lcms = COMPONENT_MAXIMUM_SIZE;
   var bn = Math.pow(bigness(lp, v), 0.05);
-  if (lp.r.sb(lp.f.randomizer.hd(0, 0.9, "com6 bigchance") * bn)) {
-    while (lp.r.sb(lp.f.randomizer.hd(0, 0.8, "com6 bigincchance") * bn)) {
+  if (lp.r.sb(lp.f.r.hd(0, 0.9, "com6 bigchance") * bn)) {
+    while (lp.r.sb(lp.f.r.hd(0, 0.8, "com6 bigincchance") * bn)) {
       var lw = leeway(lp, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
@@ -627,8 +618,8 @@ components[6] = function (
   var h1 =
     h0 *
     Math.pow(
-      lp.r.sd(Math.pow(lp.f.randomizer.hd(0, 0.8, "com6 h1min"), 0.5), 0.9),
-      lp.f.randomizer.hd(0.5, 1.5, "com6 h1power")
+      lp.r.sd(Math.pow(lp.f.r.hd(0, 0.8, "com6 h1min"), 0.5), 0.9),
+      lp.f.r.hd(0.5, 1.5, "com6 h1power")
     ); //Outer height, shorter.
   var hh1i = Math.floor(h1 / 2);
   var hh1e = h0 % 2;
@@ -637,18 +628,13 @@ components[6] = function (
     h0 *
       (lp.r.sd(0, 0.45) + lp.r.sd(0, 0.45)) *
       (lp.f.cache["com6 backness"] == null
-        ? (lp.f.cache["com6 backness"] = lp.f.randomizer.hb(
-            0.8,
-            "com6 backnesstype"
-          )
-            ? lp.f.randomizer.hd(0.2, 0.9, "com6 backness#pos")
-            : lp.f.randomizer.hd(-0.2, -0.05, "com6 backness#neg"))
+        ? (lp.f.cache["com6 backness"] = lp.f.r.hb(0.8, "com6 backnesstype")
+            ? lp.f.r.hd(0.2, 0.9, "com6 backness#pos")
+            : lp.f.r.hd(-0.2, -0.05, "com6 backness#neg"))
         : lp.f.cache["com6 backness"])
   );
   var w = Math.ceil(
-    lcms *
-      lp.r.sd(0.7, 1) *
-      Math.pow(lp.f.randomizer.hd(0.1, 3.5, "com6 width"), 0.5)
+    lcms * lp.r.sd(0.7, 1) * Math.pow(lp.f.r.hd(0.1, 3.5, "com6 width"), 0.5)
   );
   var hwi = Math.floor(w / 2);
   var hwe = w % 2;
@@ -689,14 +675,14 @@ components["cabin !UNUSED"] = function (
   if (
     lp.r.sb(
       (lp.f.cache["com7 bigchance"] == null
-        ? (lp.f.cache["com7 bigchance"] = lp.f.randomizer.hd(0, 0.9, "com7 bigchance"))
+        ? (lp.f.cache["com7 bigchance"] = lp.f.r.hd(0, 0.9, "com7 bigchance"))
         : lp.f.cache["com7 bigchance"]) * bn
     )
   ) {
     while (
       lp.r.sb(
         (lp.f.cache["com7 bigincchance"] == null
-          ? (lp.f.cache["com7 bigincchance"] = lp.f.randomizer.hd(
+          ? (lp.f.cache["com7 bigincchance"] = lp.f.r.hd(
               0,
               0.9,
               "com7 bigincchance"
@@ -719,14 +705,14 @@ components["cabin !UNUSED"] = function (
     lcms *
     lp.r.sd(1, 2) *
     (lp.f.cache["com7 height"] == null
-      ? (lp.f.cache["com7 height"] = lp.f.randomizer.hd(0.5, 1, "com7 height"))
+      ? (lp.f.cache["com7 height"] = lp.f.r.hd(0.5, 1, "com7 height"))
       : lp.f.cache["com7 height"]);
   var hh = h / 2;
   var w =
     1 +
     h *
       (lp.f.cache["com7 width"] == null
-        ? (lp.f.cache["com7 width"] = lp.f.randomizer.hd(0.3, 0.8, "com7 width"))
+        ? (lp.f.cache["com7 width"] = lp.f.r.hd(0.3, 0.8, "com7 width"))
         : lp.f.cache["com7 width"]);
   var hw = w / 2;
   var windowcolor = lp.f.getwindowcolor(lp);
@@ -736,7 +722,7 @@ components["cabin !UNUSED"] = function (
   var color1 = scaleColorBy(windowcolor, lightness1);
   var transparency =
     lp.f.cache["com7 transparency"] == null
-      ? (lp.f.cache["com7 transparency"] = lp.f.randomizer.hd(0.3, 0.5, "com7 transparency"))
+      ? (lp.f.cache["com7 transparency"] = lp.f.r.hd(0.3, 0.5, "com7 transparency"))
       : lp.f.cache["com7 transparency"];
   var grad = lp.cfx.createRadialGradient(0, 0, w / 20, 0, 0, w / 2);
   grad.addColorStop(0, "rgba(255,255,255,1)");
