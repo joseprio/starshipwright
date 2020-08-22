@@ -345,12 +345,7 @@ components[3] = function (
   h = count * hpair + h2[0];
   lp.f.setupColors();
   var basecolor =
-    lp.f.cache["base colors"][
-      lp.f.randomizer.hchoose(
-        lp.f.cache["base color chances"],
-        "com3 basecolor"
-      )
-    ];
+    lp.f.colors[lp.f.randomizer.hchoose(lp.f.colorChances, "com3 basecolor")];
   var lightness0_mid = lp.f.randomizer.hd(0.5, 0.8, "com3 lightness0 mid");
   var lightness0_edge =
     lightness0_mid - lp.f.randomizer.hd(0.2, 0.4, "com3 lightness0 edge");

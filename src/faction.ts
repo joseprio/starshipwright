@@ -1,23 +1,28 @@
 import { Randomizer } from "./randomizer";
 import { clamp, hsvToRgb } from "./utils";
-import { Ship } from "./ship";
+import type { RGBColor } from "./utils";
+import type { Ship } from "./ship";
 
 export class Faction {
   seed: string;
   randomizer: Randomizer;
   cache: Object;
-  componentChances: Array<number>;
+  //Respective chances of each component
+  componentChances: Array<number> = [];
+  colors: Array<RGBColor> = [];
+  colorChances: Array<number> = [];
 
   constructor(seed: string) {
     this.seed = seed;
     this.randomizer = new Randomizer(this.seed);
     this.cache = {}; //Data cache.
     this.setupComponentChances();
+    this.setupColors();
   }
 
   setupComponentChances() {
-    this.componentChances = []; //Respective chances of each component.
-    var dp = 8; //Default maximum power.
+    this.componentChances = [];
+    var dp = 8; //Default maximum power
     this.componentChances[0] =
       0.8 *
       this.randomizer.sd(0.001, 1) *
@@ -39,19 +44,15 @@ export class Faction {
   }
 
   setupColors() {
-    if (this.cache["base colors"] == null) {
-      var dp = 6; //Default maximum power.
-      this.cache["base color count"] =
-        1 +
-        (this.randomizer.hb(0.7, "base color +1") ? 1 : 0) +
-        this.randomizer.hseq(0.3, 3, "base color count");
-      this.cache["base colors"] = new Array(this.cache["base color count"]);
-      this.cache["base color chances"] = new Array(
-        this.cache["base color count"]
-      );
-      for (var i = 0; i < this.cache["base color count"]; i++) {
-        var ls = "base color" + i;
-        this.cache["base colors"][i] = hsvToRgb([
+    var dp = 6; //Default maximum power.
+    const baseColorCount =
+      1 +
+      (this.randomizer.hb(0.7, "base color +1") ? 1 : 0) +
+      this.randomizer.hseq(0.3, 3, "base color count");
+    for (var i = 0; i < baseColorCount; i++) {
+      var ls = "base color" + i;
+      this.colors.push(
+        hsvToRgb([
           Math.pow(this.randomizer.hd(0, 1, ls + "hue"), 2),
           clamp(
             this.randomizer.hd(-0.2, 1, ls + "saturation"),
@@ -59,43 +60,30 @@ export class Faction {
             Math.pow(this.randomizer.hd(0, 1, ls + "saturation bound"), 4)
           ),
           clamp(this.randomizer.hd(0.7, 1.1, ls + "value"), 0, 1),
-        ]);
-        this.cache["base color chances"][i] = Math.pow(
-          2,
-          this.randomizer.hd(0, dp, ls + "chances")
-        );
-      }
+        ])
+      );
+      this.colorChances.push(
+        Math.pow(2, this.randomizer.hd(0, dp, ls + "chances"))
+      );
     }
   }
 
   //Where lp is the ship to get the color for.
   getBaseColor(lp: Ship) {
-    if (this.cache["base colors"] == null) {
-      this.setupColors();
-    }
-    var rv = this.cache["base colors"][
-      lp.r.schoose(this.cache["base color chances"])
-    ];
+    var rv = this.colors[lp.r.schoose(this.colorChances)];
     if (
       true &&
       lp.r.sb(
-        this.cache["base color shift chance"] == null
-          ? (this.cache["base color shift chance"] = Math.pow(
-              this.randomizer.hd(0, 0.5, "base color shift chance"),
-              2
-            ))
-          : this.cache["base color shift chance"]
+        Math.pow(this.randomizer.hd(0, 0.5, "base color shift chance"), 2)
       )
     ) {
       rv = [rv[0], rv[1], rv[2]];
       rv[0] = clamp(
         rv[0] +
-          (this.cache["base color shift range red"] == null
-            ? (this.cache["base color shift range red"] = Math.pow(
-                this.randomizer.hd(0, 0.6, "base color shift range red"),
-                2
-              ))
-            : this.cache["base color shift range red"]) *
+          Math.pow(
+            this.randomizer.hd(0, 0.6, "base color shift range red"),
+            2
+          ) *
             clamp(lp.r.sd(-1, 1.2), 0, 1) *
             clamp(lp.r.ss(0.7) + lp.r.ss(0.7), -1, 1),
         0,
@@ -103,12 +91,10 @@ export class Faction {
       );
       rv[1] = clamp(
         rv[1] +
-          (this.cache["base color shift range green"] == null
-            ? (this.cache["base color shift range green"] = Math.pow(
-                this.randomizer.hd(0, 0.6, "base color shift range green"),
-                2
-              ))
-            : this.cache["base color shift range green"]) *
+          Math.pow(
+            this.randomizer.hd(0, 0.6, "base color shift range green"),
+            2
+          ) *
             clamp(lp.r.sd(-1, 1.2), 0, 1) *
             clamp(lp.r.ss(0.7) + lp.r.ss(0.7), -1, 1),
         0,
@@ -116,12 +102,10 @@ export class Faction {
       );
       rv[2] = clamp(
         rv[2] +
-          (this.cache["base color shift range blue"] == null
-            ? (this.cache["base color shift range blue"] = Math.pow(
-                this.randomizer.hd(0, 0.6, "base color shift range blue"),
-                2
-              ))
-            : this.cache["base color shift range blue"]) *
+          Math.pow(
+            this.randomizer.hd(0, 0.6, "base color shift range blue"),
+            2
+          ) *
             clamp(lp.r.sd(-1, 1.2), 0, 1) *
             clamp(lp.r.ss(0.7) + lp.r.ss(0.7), -1, 1),
         0,
