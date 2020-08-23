@@ -94,8 +94,7 @@ var starshipwright =
 __webpack_require__.r(__webpack_exports__);
 
 // EXPORTS
-__webpack_require__.d(__webpack_exports__, "newship", function() { return /* binding */ newship; });
-__webpack_require__.d(__webpack_exports__, "newfaction", function() { return /* binding */ newfaction; });
+__webpack_require__.d(__webpack_exports__, "generateShip", function() { return /* binding */ generateShip; });
 
 // CONCATENATED MODULE: ./src/randomizer.ts
 class Randomizer {
@@ -379,7 +378,7 @@ class faction_Faction {
     }
     setupComponentChances() {
         this.componentChances = [];
-        var dp = 8; //Default maximum power
+        const dp = 8; //Default maximum power
         this.componentChances[0] =
             0.8 * this.r.sd(0.001, 1) * Math.pow(2, this.r.sd(0, dp));
         this.componentChances[1] =
@@ -396,12 +395,12 @@ class faction_Faction {
             0.5 * this.r.sd(0, 1) * Math.pow(2, this.r.sd(0, dp));
     }
     setupColors() {
-        var dp = 6; //Default maximum power.
+        const dp = 6; //Default maximum power.
         const baseColorCount = 1 +
             (this.r.hb(0.7, "base color +1") ? 1 : 0) +
             this.r.hseq(0.3, 3, "base color count");
-        for (var i = 0; i < baseColorCount; i++) {
-            var ls = "base color" + i;
+        for (let i = 0; i < baseColorCount; i++) {
+            const ls = "base color" + i;
             this.colors.push(hsvToRgb([
                 Math.pow(this.r.hd(0, 1, ls + "hue"), 2),
                 clamp(this.r.hd(-0.2, 1, ls + "saturation"), 0, Math.pow(this.r.hd(0, 1, ls + "saturation bound"), 4)),
@@ -412,7 +411,7 @@ class faction_Faction {
     }
     //Where lp is the ship to get the color for.
     getBaseColor(lp) {
-        var rv = this.colors[lp.r.schoose(this.colorChances)];
+        let rv = this.colors[lp.r.schoose(this.colorChances)];
         if ( true &&
             lp.r.sb(Math.pow(this.r.hd(0, 0.5, "base color shift chance"), 2))) {
             rv = [rv[0], rv[1], rv[2]];
@@ -491,10 +490,11 @@ const components = [];
 // Bordered block
 components[0] = function (lp, v) {
     let lcms = COMPONENT_MAXIMUM_SIZE;
-    var bn = Math.pow(bigness(lp, v), 0.3);
+    const bn = Math.pow(bigness(lp, v), 0.3);
     if (lp.r.sb(lp.f.r.hd(0, 0.9, "com0 bigchance") * bn)) {
-        while (lp.r.sb(lp.f.r.hd(0, 0.5, "com0 bigincchance") * bn)) {
-            var lw = leeway(lp, [
+        const chance = lp.f.r.hd(0, 0.5, "com0 bigincchance");
+        while (lp.r.sb(chance * bn)) {
+            const lw = leeway(lp, [
                 [v[0] - lcms, v[1] - lcms],
                 [v[0] + lcms, v[1] + lcms],
             ]);
@@ -506,31 +506,31 @@ components[0] = function (lp, v) {
             }
         }
     }
-    var lcms2 = lcms * 2;
-    var dhi = [
+    const lcms2 = lcms * 2;
+    const dhi = [
         Math.ceil(lp.r.sd(1, Math.max(2, 0.5 * lcms))),
         Math.ceil(lp.r.sd(1, Math.max(2, 0.5 * lcms))),
     ];
-    var borderwidth = Math.min(dhi[0], dhi[1]) * lp.r.sd(0.1, 1.2);
-    var dho = [dhi[0] + borderwidth * 2, dhi[1] + borderwidth * 2];
-    var counts = [Math.ceil(lcms2 / dho[0]), Math.ceil(lcms2 / dho[1])];
-    var trv = [
+    const borderwidth = Math.min(dhi[0], dhi[1]) * lp.r.sd(0.1, 1.2);
+    const dho = [dhi[0] + borderwidth * 2, dhi[1] + borderwidth * 2];
+    const counts = [Math.ceil(lcms2 / dho[0]), Math.ceil(lcms2 / dho[1])];
+    const trv = [
         Math.round((counts[0] * dho[0]) / 2),
         Math.round((counts[1] * dho[1]) / 2),
     ];
-    var pcdone = lp.getpcdone();
-    var basecolor = lp.f.getBaseColor(lp);
-    var icolorh = colorToHex(scaleColorBy(basecolor, lp.r.sd(0.4, 1)));
-    var ocolorh = colorToHex(scaleColorBy(basecolor, lp.r.sd(0.4, 1)));
+    const pcdone = lp.getpcdone();
+    const basecolor = lp.f.getBaseColor(lp);
+    const icolorh = colorToHex(scaleColorBy(basecolor, lp.r.sd(0.4, 1)));
+    const ocolorh = colorToHex(scaleColorBy(basecolor, lp.r.sd(0.4, 1)));
     lp.cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
     lp.cfx.fillRect(v[0] - trv[0] - 1, v[1] - trv[1] - 1, dho[0] * counts[0] + 2, dho[1] * counts[1] + 2);
     lp.cfx.fillStyle = ocolorh;
     lp.cfx.fillRect(v[0] - trv[0], v[1] - trv[1], dho[0] * counts[0], dho[1] * counts[1]);
     lp.cfx.fillStyle = icolorh;
-    for (var x = 0; x < counts[0]; x++) {
-        var bx = v[0] + borderwidth + x * dho[0] - trv[0];
-        for (var y = 0; y < counts[1]; y++) {
-            var by = v[1] + borderwidth + y * dho[1] - trv[1];
+    for (let x = 0; x < counts[0]; x++) {
+        const bx = v[0] + borderwidth + x * dho[0] - trv[0];
+        for (let y = 0; y < counts[1]; y++) {
+            const by = v[1] + borderwidth + y * dho[1] - trv[1];
             lp.cfx.fillRect(bx, by, dhi[0], dhi[1]);
         }
     }
@@ -541,11 +541,12 @@ components[0] = function (lp, v) {
 };
 // Cylinder array
 components[1] = function (lp, v) {
-    var lcms = COMPONENT_MAXIMUM_SIZE;
-    var bn = Math.pow(bigness(lp, v), 0.2);
+    let lcms = COMPONENT_MAXIMUM_SIZE;
+    const bn = Math.pow(bigness(lp, v), 0.2);
     if (lp.r.sb(lp.f.r.hd(0.3, 1, "com1 bigchance") * bn)) {
-        while (lp.r.sb(lp.f.r.hd(0, 0.6, "com1 bigincchance") * bn)) {
-            var lw = leeway(lp, [
+        const chance = lp.f.r.hd(0, 0.6, "com1 bigincchance");
+        while (lp.r.sb(chance * bn)) {
+            const lw = leeway(lp, [
                 [v[0] - lcms, v[1] - lcms],
                 [v[0] + lcms, v[1] + lcms],
             ]);
@@ -557,33 +558,34 @@ components[1] = function (lp, v) {
             }
         }
     }
-    var w = Math.ceil(lp.r.sd(0.8, 2) * lcms);
-    var h = Math.ceil(lp.r.sd(0.8, 2) * lcms);
-    var cw = lp.r.si(3, Math.max(4, w));
-    var count = Math.max(1, Math.round(w / cw));
+    let w = Math.ceil(lp.r.sd(0.8, 2) * lcms);
+    const h = Math.ceil(lp.r.sd(0.8, 2) * lcms);
+    const cw = lp.r.si(3, Math.max(4, w));
+    const count = Math.max(1, Math.round(w / cw));
     w = count * cw;
-    var basecolor = lp.f.getBaseColor(lp);
-    var ccolor = colorToHex(scaleColorBy(basecolor, lp.r.sd(0.5, 1)));
-    var darkness = lp.r.sd(0.3, 0.9);
-    var orientation = lp.r.sb(clamp(lp.f.r.hd(-0.2, 1.2, "com1 hchance"), 0, 1)); //true = horizontal array, false = vertical array.
+    const basecolor = lp.f.getBaseColor(lp);
+    const ccolor = colorToHex(scaleColorBy(basecolor, lp.r.sd(0.5, 1)));
+    const darkness = lp.r.sd(0.3, 0.9);
+    // true = horizontal array, false = vertical array
+    const orientation = lp.r.sb(clamp(lp.f.r.hd(-0.2, 1.2, "com1 hchance"), 0, 1));
     if (orientation) {
-        var bv = [v[0] - Math.floor(w / 2), v[1] - Math.floor(h / 2)];
+        const bv = [v[0] - Math.floor(w / 2), v[1] - Math.floor(h / 2)];
         lp.cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
         lp.cfx.fillRect(bv[0] - 1, bv[1] - 1, w + 2, h + 2);
         lp.cfx.fillStyle = ccolor;
         lp.cfx.fillRect(bv[0], bv[1], w, h);
-        for (var i = 0; i < count; i++) {
+        for (let i = 0; i < count; i++) {
             lp.cfx.fillStyle = shadowGradient(lp, [bv[0] + (i + 0.5) * cw, v[1]], [bv[0] + i * cw, v[1]], darkness);
             lp.cfx.fillRect(bv[0] + i * cw, bv[1], cw, h);
         }
     }
     else {
-        var bv = [v[0] - Math.floor(h / 2), v[1] - Math.floor(w / 2)];
+        const bv = [v[0] - Math.floor(h / 2), v[1] - Math.floor(w / 2)];
         lp.cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
         lp.cfx.fillRect(bv[0] - 1, bv[1] - 1, h + 2, w + 2);
         lp.cfx.fillStyle = ccolor;
         lp.cfx.fillRect(bv[0], bv[1], h, w);
-        for (var i = 0; i < count; i++) {
+        for (let i = 0; i < count; i++) {
             lp.cfx.fillStyle = shadowGradient(lp, [v[0], bv[1] + (i + 0.5) * cw], [v[0], bv[1] + i * cw], darkness);
             lp.cfx.fillRect(bv[0], bv[1] + i * cw, w, cw);
         }
@@ -592,10 +594,11 @@ components[1] = function (lp, v) {
 // Banded cylinder
 components[2] = function (lp, v) {
     let lcms = COMPONENT_MAXIMUM_SIZE;
-    var bn = Math.pow(bigness(lp, v), 0.05);
+    const bn = Math.pow(bigness(lp, v), 0.05);
     if (lp.r.sb(lp.f.r.hd(0, 1, "com2 bigchance") * bn)) {
-        while (lp.r.sb(lp.f.r.hd(0, 0.9, "com2 bigincchance") * bn)) {
-            var lw = leeway(lp, [
+        const chance = lp.f.r.hd(0, 0.9, "com2 bigincchance");
+        while (lp.r.sb(chance * bn)) {
+            const lw = leeway(lp, [
                 [v[0] - lcms, v[1] - lcms],
                 [v[0] + lcms, v[1] + lcms],
             ]);
@@ -607,34 +610,34 @@ components[2] = function (lp, v) {
             }
         }
     }
-    var w = Math.ceil(lp.r.sd(0.6, 1.4) * lcms);
-    var h = Math.ceil(lp.r.sd(1, 2) * lcms);
-    var wh2 = [
+    const w = Math.ceil(lp.r.sd(0.6, 1.4) * lcms);
+    const h = Math.ceil(lp.r.sd(1, 2) * lcms);
+    const wh2 = [
         Math.ceil(clamp((w * lp.r.sd(0.7, 1)) / 2, 1, w)),
         Math.ceil(clamp((w * lp.r.sd(0.8, 1)) / 2, 1, w)),
     ];
-    var h2 = [
+    const h2 = [
         Math.floor(clamp(w * lp.r.sd(0.05, 0.25), 1, h)),
         Math.floor(clamp(w * lp.r.sd(0.1, 0.3), 1, h)),
     ];
-    var hpair = h2[0] + h2[1];
-    var odd = lp.r.sb(Math.pow(lp.f.r.hd(0, 1, "com2 oddchance"), 0.5));
-    var count = clamp(Math.floor(h / hpair), 1, h);
-    var htotal = count * hpair + (odd ? h2[0] : 0);
-    var basecolor = lp.f.getBaseColor(lp);
-    var color2 = [
+    const hpair = h2[0] + h2[1];
+    const odd = lp.r.sb(Math.pow(lp.f.r.hd(0, 1, "com2 oddchance"), 0.5));
+    const count = clamp(Math.floor(h / hpair), 1, h);
+    const htotal = count * hpair + (odd ? h2[0] : 0);
+    const basecolor = lp.f.getBaseColor(lp);
+    const color2 = [
         scaleColorBy(basecolor, lp.r.sd(0.6, 1)),
         scaleColorBy(basecolor, lp.r.sd(0.6, 1)),
     ];
-    var darkness = lp.r.sd(0.5, 0.95);
-    var lightness = 1 - darkness;
-    var colord2 = [
+    const darkness = lp.r.sd(0.5, 0.95);
+    const lightness = 1 - darkness;
+    const colord2 = [
         scaleColorBy(color2[0], lightness),
         scaleColorBy(color2[1], lightness),
     ];
-    var orientation = lp.r.sb(Math.pow(lp.f.r.hd(0, 1, "com2 verticalchance"), 0.1));
+    const orientation = lp.r.sb(Math.pow(lp.f.r.hd(0, 1, "com2 verticalchance"), 0.1));
     if (orientation) {
-        var grad2 = [
+        const grad2 = [
             lp.cfx.createLinearGradient(v[0] - wh2[0], v[1], v[0] + wh2[0], v[1]),
             lp.cfx.createLinearGradient(v[0] - wh2[1], v[1], v[0] + wh2[1], v[1]),
         ];
@@ -644,8 +647,8 @@ components[2] = function (lp, v) {
         grad2[1].addColorStop(0, colorToHex(colord2[1]));
         grad2[1].addColorStop(0.5, colorToHex(color2[1]));
         grad2[1].addColorStop(1, colorToHex(colord2[1]));
-        var by = Math.floor(v[1] - htotal / 2);
-        for (var i = 0; i < count; i++) {
+        const by = Math.floor(v[1] - htotal / 2);
+        for (let i = 0; i < count; i++) {
             lp.cfx.fillStyle = grad2[0];
             lp.cfx.fillRect(v[0] - wh2[0], by + i * hpair, wh2[0] * 2, h2[0]);
             lp.cfx.fillStyle = grad2[1];
@@ -657,7 +660,7 @@ components[2] = function (lp, v) {
         }
     }
     else {
-        var grad2 = [
+        const grad2 = [
             lp.cfx.createLinearGradient(v[0], v[1] - wh2[0], v[0], v[1] + wh2[0]),
             lp.cfx.createLinearGradient(v[0], v[1] - wh2[1], v[0], v[1] + wh2[1]),
         ];
@@ -667,8 +670,8 @@ components[2] = function (lp, v) {
         grad2[1].addColorStop(0, colorToHex(colord2[1]));
         grad2[1].addColorStop(0.5, colorToHex(color2[1]));
         grad2[1].addColorStop(1, colorToHex(colord2[1]));
-        var bx = Math.floor(v[0] - htotal / 2);
-        for (var i = 0; i < count; i++) {
+        const bx = Math.floor(v[0] - htotal / 2);
+        for (let i = 0; i < count; i++) {
             lp.cfx.fillStyle = grad2[0];
             lp.cfx.fillRect(bx + i * hpair, v[1] - wh2[0], h2[0], wh2[0] * 2);
             lp.cfx.fillStyle = grad2[1];
@@ -685,8 +688,8 @@ components[3] = function (lp, v) {
     if (lp.r.sb(frontness(lp, v) - 0.3) ||
         lp.getcellstate(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) > 0 ||
         lp.getcellstate(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8) > 0) {
-        for (var tries = 0; tries < 100; tries++) {
-            var which = lp.r.schoose(lp.f.componentChances);
+        for (let tries = 0; tries < 100; tries++) {
+            const which = lp.r.schoose(lp.f.componentChances);
             if (which != 3) {
                 components[which](lp, v);
                 return;
@@ -694,9 +697,10 @@ components[3] = function (lp, v) {
         }
     }
     let lcms = COMPONENT_MAXIMUM_SIZE;
-    var bn = Math.pow(bigness(lp, v), 0.1);
+    const bn = Math.pow(bigness(lp, v), 0.1);
     if (lp.r.sb(lp.f.r.hd(0.6, 1, "com3 bigchance") * bn)) {
-        while (lp.r.sb(lp.f.r.hd(0.3, 0.8, "com3 bigincchance") * bn)) {
+        const chance = lp.f.r.hd(0.3, 0.8, "com3 bigincchance");
+        while (lp.r.sb(chance * bn)) {
             const lw = leeway(lp, [
                 [v[0] - lcms, v[1] - lcms],
                 [v[0] + lcms, v[1] + lcms],
@@ -709,25 +713,25 @@ components[3] = function (lp, v) {
             }
         }
     }
-    var w = lp.r.sd(1, 2) * lcms;
-    var h = Math.ceil(lp.r.sd(0.3, 1) * lcms);
-    var nratio = lp.r.sd(0.25, 0.6);
-    var nw = w * nratio;
-    var midw = (w + nw) / 2;
-    var midwh = midw / 2;
-    var h2 = [
+    const w = lp.r.sd(1, 2) * lcms;
+    let h = Math.ceil(lp.r.sd(0.3, 1) * lcms);
+    const nratio = lp.r.sd(0.25, 0.6);
+    const nw = w * nratio;
+    const midw = (w + nw) / 2;
+    const midwh = midw / 2;
+    const h2 = [
         Math.max(1, Math.ceil(h * lp.r.sd(0.08, 0.25))),
         Math.max(1, Math.ceil(h * lp.r.sd(0.03, 0.15))),
     ];
-    var hpair = h2[0] + h2[1];
-    var count = Math.ceil(h / hpair);
+    const hpair = h2[0] + h2[1];
+    const count = Math.ceil(h / hpair);
     h = count * hpair + h2[0];
     lp.f.setupColors();
-    var basecolor = lp.f.colors[lp.f.r.hchoose(lp.f.colorChances, "com3 basecolor")];
-    var lightness0_mid = lp.f.r.hd(0.5, 0.8, "com3 lightness0 mid");
-    var lightness0_edge = lightness0_mid - lp.f.r.hd(0.2, 0.4, "com3 lightness0 edge");
-    var lightness1_edge = lp.f.r.hd(0, 0.2, "com3 lightness1 edge");
-    var grad2 = [
+    const basecolor = lp.f.colors[lp.f.r.hchoose(lp.f.colorChances, "com3 basecolor")];
+    const lightness0_mid = lp.f.r.hd(0.5, 0.8, "com3 lightness0 mid");
+    const lightness0_edge = lightness0_mid - lp.f.r.hd(0.2, 0.4, "com3 lightness0 edge");
+    const lightness1_edge = lp.f.r.hd(0, 0.2, "com3 lightness1 edge");
+    const grad2 = [
         lp.cfx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
         lp.cfx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
     ];
@@ -746,7 +750,7 @@ components[3] = function (lp, v) {
     lp.cfx.lineTo(v[0] - w / 2, by + h);
     lp.cfx.fill();
     lp.cfx.fillStyle = grad2[1];
-    var byh = [by + h2[0], by + hpair];
+    const byh = [by + h2[0], by + hpair];
     for (let i = 0; i < count; i++) {
         const lyr = [i * hpair + h2[0], (i + 1) * hpair];
         const ly = [byh[0] + i * hpair, byh[1] + i * hpair];
@@ -764,12 +768,12 @@ components[3] = function (lp, v) {
 };
 //Elongated cylinder (calls component 0 - 2 on top of its starting point)
 components[4] = function (lp, v) {
-    var cn = centerness(lp, v, true, false);
-    var lightmid = lp.r.sd(0.7, 1);
-    var lightedge = lp.r.sd(0, 0.2);
-    var basecolor = lp.f.getBaseColor(lp);
-    var colormid = colorToHex(scaleColorBy(basecolor, lightmid));
-    var coloredge = colorToHex(scaleColorBy(basecolor, lightedge));
+    const cn = centerness(lp, v, true, false);
+    const lightmid = lp.r.sd(0.7, 1);
+    const lightedge = lp.r.sd(0, 0.2);
+    const basecolor = lp.f.getBaseColor(lp);
+    const colormid = colorToHex(scaleColorBy(basecolor, lightmid));
+    const coloredge = colorToHex(scaleColorBy(basecolor, lightedge));
     if (lp.f.cache["com4 directionc"] == null) {
         lp.f.cache["com4 directionc"] = [
             1 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc0"), 4),
@@ -777,26 +781,26 @@ components[4] = function (lp, v) {
             0.2 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc2"), 4),
         ];
     }
-    var w = Math.max(3, Math.ceil(lp.size *
+    const w = Math.max(3, Math.ceil(lp.size *
         Math.pow(lp.r.sd(0.4, 1), 2) *
         lp.f.r.hd(0.02, 0.1, "com4 maxwidth")));
-    var hwi = Math.floor(w / 2);
-    var hwe = w % 2;
-    var direction = lp.r.schoose([
+    const hwi = Math.floor(w / 2);
+    const hwe = w % 2;
+    const direction = lp.r.schoose([
         lp.f.cache["com4 directionc"][0] * (2 - cn),
         lp.f.cache["com4 directionc"][1],
         lp.f.cache["com4 directionc"][2] * (1 + cn),
     ]);
-    var ev = null;
+    let ev = null;
     if (direction == 0) {
         //forwards
-        var hlimit = v[1] - CANVAS_SHIP_EDGE;
-        var h = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.7 * lp.size * Math.pow(lp.r.sd(0, 1), lp.f.r.hd(2, 6, "com4 hpower0"))));
-        var bb = [
+        const hlimit = v[1] - CANVAS_SHIP_EDGE;
+        const h = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.7 * lp.size * Math.pow(lp.r.sd(0, 1), lp.f.r.hd(2, 6, "com4 hpower0"))));
+        const bb = [
             [v[0] - hwi, v[1] - h],
             [v[0] + hwi + hwe, v[1]],
         ];
-        var grad = lp.cfx.createLinearGradient(bb[0][0], bb[0][1], bb[1][0], bb[0][1]);
+        const grad = lp.cfx.createLinearGradient(bb[0][0], bb[0][1], bb[1][0], bb[0][1]);
         grad.addColorStop(0, coloredge);
         grad.addColorStop(0.5, colormid);
         grad.addColorStop(1, coloredge);
@@ -806,13 +810,13 @@ components[4] = function (lp, v) {
     }
     else if (direction == 1) {
         //backwards
-        var hlimit = lp.h - (CANVAS_SHIP_EDGE + v[1]);
-        var h = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.6 * lp.size * Math.pow(lp.r.sd(0, 1), lp.f.r.hd(2, 7, "com4 hpower1"))));
-        var bb = [
+        const hlimit = lp.h - (CANVAS_SHIP_EDGE + v[1]);
+        const h = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.6 * lp.size * Math.pow(lp.r.sd(0, 1), lp.f.r.hd(2, 7, "com4 hpower1"))));
+        const bb = [
             [v[0] - hwi, v[1]],
             [v[0] + hwi + hwe, v[1] + h],
         ];
-        var grad = lp.cfx.createLinearGradient(bb[0][0], bb[0][1], bb[1][0], bb[0][1]);
+        const grad = lp.cfx.createLinearGradient(bb[0][0], bb[0][1], bb[1][0], bb[0][1]);
         grad.addColorStop(0, coloredge);
         grad.addColorStop(0.5, colormid);
         grad.addColorStop(1, coloredge);
@@ -822,13 +826,13 @@ components[4] = function (lp, v) {
     }
     else if (direction == 2) {
         //to center
-        var grad = lp.cfx.createLinearGradient(v[0], v[1] - hwi, v[0], v[1] + hwi + hwe);
+        const grad = lp.cfx.createLinearGradient(v[0], v[1] - hwi, v[0], v[1] + hwi + hwe);
         grad.addColorStop(0, coloredge);
         grad.addColorStop(0.5, colormid);
         grad.addColorStop(1, coloredge);
         lp.cfx.fillStyle = grad;
         lp.cfx.fillRect(v[0], v[1] - hwi, Math.ceil(lp.hw - v[0]) + 1, w);
-        ev = [Math.floor(lp.hw), v[1] + h];
+        ev = [Math.floor(lp.hw), v[1]];
     }
     if (lp.f.cache["com4 covercomc"] == null) {
         lp.f.cache["com4 covercomc"] = [
@@ -839,7 +843,7 @@ components[4] = function (lp, v) {
     }
     components[lp.r.schoose(lp.f.cache["com4 covercomc"])](lp, v);
     if (lp.getcellstate(ev[0], ev[1]) > 0) {
-        var nev = [
+        const nev = [
             ev[0] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
             ev[1] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
         ];
@@ -854,10 +858,11 @@ components[4] = function (lp, v) {
 //Ball
 components[5] = function (lp, v) {
     let lcms = COMPONENT_MAXIMUM_SIZE;
-    var bn = Math.pow(bigness(lp, v), 0.1);
+    const bn = Math.pow(bigness(lp, v), 0.1);
     if (lp.r.sb(lp.f.r.hd(0, 0.9, "com5 bigchance") * bn)) {
-        while (lp.r.sb(lp.f.r.hd(0, 0.8, "com5 bigincchance") * bn)) {
-            var lw = leeway(lp, [
+        const chance = lp.f.r.hd(0, 0.8, "com5 bigincchance");
+        while (lp.r.sb(chance * bn)) {
+            const lw = leeway(lp, [
                 [v[0] - lcms, v[1] - lcms],
                 [v[0] + lcms, v[1] + lcms],
             ]);
@@ -869,37 +874,37 @@ components[5] = function (lp, v) {
             }
         }
     }
-    var lightmid = lp.r.sd(0.75, 1);
-    var lightedge = lp.r.sd(0, 0.25);
-    var basecolor = lp.f.getBaseColor(lp);
-    var colormid = colorToHex(scaleColorBy(basecolor, lightmid));
-    var coloredge = colorToHex(scaleColorBy(basecolor, lightedge));
-    var countx = 1 +
+    const lightmid = lp.r.sd(0.75, 1);
+    const lightedge = lp.r.sd(0, 0.25);
+    const basecolor = lp.f.getBaseColor(lp);
+    const colormid = colorToHex(scaleColorBy(basecolor, lightmid));
+    const coloredge = colorToHex(scaleColorBy(basecolor, lightedge));
+    const countx = 1 +
         lp.r.sseq(lp.f.r.hd(0, 1, "com5 multxc"), Math.floor(1.2 * Math.pow(lcms / COMPONENT_MAXIMUM_SIZE, 0.6)));
-    var county = 1 +
+    const county = 1 +
         lp.r.sseq(lp.f.r.hd(0, 1, "com5 multyc"), Math.floor(1.2 * Math.pow(lcms / COMPONENT_MAXIMUM_SIZE, 0.6)));
-    var smallr = (lp.r.sd(0.5, 1) * lcms) / Math.max(countx, county);
-    var drawr = smallr + 0.5;
-    var shadowr = smallr + 1;
-    var centerr = smallr * 0.2;
-    var hw = smallr * countx;
-    var hh = smallr * county;
-    var bv = [v[0] - hw, v[1] - hh];
+    const smallr = (lp.r.sd(0.5, 1) * lcms) / Math.max(countx, county);
+    const drawr = smallr + 0.5;
+    const shadowr = smallr + 1;
+    const centerr = smallr * 0.2;
+    const hw = smallr * countx;
+    const hh = smallr * county;
+    const bv = [v[0] - hw, v[1] - hh];
     lp.cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.2) + ")";
-    for (var ax = 0; ax < countx; ax++) {
-        var px = bv[0] + (ax * 2 + 1) * smallr;
-        for (var ay = 0; ay < county; ay++) {
-            var py = bv[1] + (ay * 2 + 1) * smallr;
+    for (let ax = 0; ax < countx; ax++) {
+        const px = bv[0] + (ax * 2 + 1) * smallr;
+        for (let ay = 0; ay < county; ay++) {
+            const py = bv[1] + (ay * 2 + 1) * smallr;
             lp.cfx.beginPath();
             lp.cfx.arc(px, py, shadowr, 0, 2 * Math.PI);
             lp.cfx.fill();
         }
     }
-    for (var ax = 0; ax < countx; ax++) {
-        var px = bv[0] + (ax * 2 + 1) * smallr;
-        for (var ay = 0; ay < county; ay++) {
-            var py = bv[1] + (ay * 2 + 1) * smallr;
-            var grad = lp.cfx.createRadialGradient(px, py, centerr, px, py, drawr);
+    for (let ax = 0; ax < countx; ax++) {
+        const px = bv[0] + (ax * 2 + 1) * smallr;
+        for (let ay = 0; ay < county; ay++) {
+            const py = bv[1] + (ay * 2 + 1) * smallr;
+            const grad = lp.cfx.createRadialGradient(px, py, centerr, px, py, drawr);
             grad.addColorStop(0, colormid);
             grad.addColorStop(1, coloredge);
             lp.cfx.fillStyle = grad;
@@ -916,10 +921,11 @@ components[6] = function (lp, v) {
         return;
     }
     let lcms = COMPONENT_MAXIMUM_SIZE;
-    var bn = Math.pow(bigness(lp, v), 0.05);
+    const bn = Math.pow(bigness(lp, v), 0.05);
     if (lp.r.sb(lp.f.r.hd(0, 0.9, "com6 bigchance") * bn)) {
-        while (lp.r.sb(lp.f.r.hd(0, 0.8, "com6 bigincchance") * bn)) {
-            var lw = leeway(lp, [
+        const chance = lp.f.r.hd(0, 0.8, "com6 bigincchance");
+        while (lp.r.sb(chance * bn)) {
+            const lw = leeway(lp, [
                 [v[0] - lcms, v[1] - lcms],
                 [v[0] + lcms, v[1] + lcms],
             ]);
@@ -931,30 +937,31 @@ components[6] = function (lp, v) {
             }
         }
     }
-    var h0 = Math.ceil(lcms * 2 * lp.r.sd(0.6, 1)); //Inner height, longer.
-    var hh0i = Math.floor(h0 / 2);
-    var hh0e = h0 % 2;
-    var h1 = h0 *
-        Math.pow(lp.r.sd(Math.pow(lp.f.r.hd(0, 0.8, "com6 h1min"), 0.5), 0.9), lp.f.r.hd(0.5, 1.5, "com6 h1power")); //Outer height, shorter.
-    var hh1i = Math.floor(h1 / 2);
-    var hh1e = h0 % 2;
-    var backamount = Math.max(0 - (h0 - h1) / 2, h0 *
+    const h0 = Math.ceil(lcms * 2 * lp.r.sd(0.6, 1)); //Inner height, longer.
+    const hh0i = Math.floor(h0 / 2);
+    const hh0e = h0 % 2;
+    //Outer height, shorter
+    const h1 = h0 *
+        Math.pow(lp.r.sd(Math.pow(lp.f.r.hd(0, 0.8, "com6 h1min"), 0.5), 0.9), lp.f.r.hd(0.5, 1.5, "com6 h1power"));
+    const hh1i = Math.floor(h1 / 2);
+    const hh1e = h0 % 2;
+    const backamount = Math.max(0 - (h0 - h1) / 2, h0 *
         (lp.r.sd(0, 0.45) + lp.r.sd(0, 0.45)) *
         (lp.f.cache["com6 backness"] == null
             ? (lp.f.cache["com6 backness"] = lp.f.r.hb(0.8, "com6 backnesstype")
                 ? lp.f.r.hd(0.2, 0.9, "com6 backness#pos")
                 : lp.f.r.hd(-0.2, -0.05, "com6 backness#neg"))
             : lp.f.cache["com6 backness"]));
-    var w = Math.ceil(lcms * lp.r.sd(0.7, 1) * Math.pow(lp.f.r.hd(0.1, 3.5, "com6 width"), 0.5));
-    var hwi = Math.floor(w / 2);
-    var hwe = w % 2;
-    var quad = [
+    const w = Math.ceil(lcms * lp.r.sd(0.7, 1) * Math.pow(lp.f.r.hd(0.1, 3.5, "com6 width"), 0.5));
+    const hwi = Math.floor(w / 2);
+    const hwe = w % 2;
+    const quad = [
         [v[0] - hwi, v[1] + backamount - hh1i],
         [v[0] + hwi + hwe, v[1] - hh0i],
         [v[0] + hwi + hwe, v[1] + hh0i + hh0e],
         [v[0] - hwi, v[1] + backamount + hh1i + hh1e],
     ];
-    var basecolor = lp.f.getBaseColor(lp);
+    const basecolor = lp.f.getBaseColor(lp);
     lp.cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.2) + ")";
     lp.cfx.beginPath();
     lp.cfx.moveTo(quad[0][0] - 1, quad[0][1]);
@@ -1210,17 +1217,21 @@ outlines[2] = function (lp) {
 
 
 class ship_Ship {
-    constructor(p_faction, p_seed) {
+    constructor(p_faction, p_seed, size) {
         this.extradone = 0;
         this.nextpass = 0;
         this.nextcell = 0;
         this.totaldone = 0;
         this.f = p_faction;
-        this.baseSeed = p_seed; //Base seed for this ship, without appending the faction seed.
+        //Base seed for this ship, without appending the faction seed
+        this.baseSeed = p_seed;
         this.seed = this.f.seed + this.baseSeed;
         this.r = new Randomizer(this.seed);
-        //this.c = []; //Data cache.
-        this.size = Math.pow(this.r.sd(this.f.r.hd(2.5, 3.5, "size min"), this.f.r.hd(5, 7, "size max")), 3); //The initial overall size of this ship, in pixels.
+        //The initial overall size of this ship, in pixels
+        this.size =
+            size == null
+                ? Math.pow(this.r.sd(this.f.r.hd(2.5, 3.5, "size min"), this.f.r.hd(5, 7, "size max")), 3)
+                : size;
         const wratio = this.r.sd(this.f.r.hd(0.5, 1, "wratio min"), this.f.r.hd(1, 1.3, "wratio max"));
         const hratio = this.r.sd(this.f.r.hd(0.7, 1, "hratio min"), this.f.r.hd(1.1, 1.7, "hratio max"));
         this.w = Math.floor(this.size * wratio) + 2 * CANVAS_SHIP_EDGE; //Maximum width of this ship, in pixels.
@@ -1242,9 +1253,9 @@ class ship_Ship {
         outlines[this.f.r.hchoose([1, 1, 1], "outline type")](this);
         this.csd = this.csx.getImageData(0, 0, this.w, this.h);
         this.cgrid = [];
-        for (var gx = 0; gx < this.gw; gx++) {
+        for (let gx = 0; gx < this.gw; gx++) {
             this.cgrid[gx] = [];
-            for (var gy = 0; gy < this.gh; gy++) {
+            for (let gy = 0; gy < this.gh; gy++) {
                 this.cgrid[gx][gy] = {
                     gx: gx,
                     gy: gy,
@@ -1257,11 +1268,11 @@ class ship_Ship {
         this.goodcells = [
             this.cgrid[Math.floor(this.gw / 2)][Math.floor(this.gh / 2)],
         ];
-        var nextcheck = 0;
+        let nextcheck = 0;
         while (nextcheck < this.goodcells.length) {
-            var lcell = this.goodcells[nextcheck];
+            const lcell = this.goodcells[nextcheck];
             if (lcell.gx > 0) {
-                var ncell = this.cgrid[lcell.gx - 1][lcell.gy];
+                const ncell = this.cgrid[lcell.gx - 1][lcell.gy];
                 if (ncell.state == 0) {
                     if (this.getspa(ncell.x, ncell.y) > 0) {
                         ncell.state = 1;
@@ -1273,7 +1284,7 @@ class ship_Ship {
                 }
             }
             if (lcell.gx < this.gw - 1) {
-                var ncell = this.cgrid[lcell.gx + 1][lcell.gy];
+                const ncell = this.cgrid[lcell.gx + 1][lcell.gy];
                 if (ncell.state == 0) {
                     if (this.getspa(ncell.x, ncell.y) > 0) {
                         ncell.state = 1;
@@ -1285,7 +1296,7 @@ class ship_Ship {
                 }
             }
             if (lcell.gy > 0) {
-                var ncell = this.cgrid[lcell.gx][lcell.gy - 1];
+                const ncell = this.cgrid[lcell.gx][lcell.gy - 1];
                 if (ncell.state == 0) {
                     if (this.getspa(ncell.x, ncell.y) > 0) {
                         ncell.state = 1;
@@ -1297,7 +1308,7 @@ class ship_Ship {
                 }
             }
             if (lcell.gy < this.gh - 1) {
-                var ncell = this.cgrid[lcell.gx][lcell.gy + 1];
+                const ncell = this.cgrid[lcell.gx][lcell.gy + 1];
                 if (ncell.state == 0) {
                     if (this.getspa(ncell.x, ncell.y) > 0) {
                         ncell.state = 1;
@@ -1310,9 +1321,9 @@ class ship_Ship {
             }
             nextcheck++;
         }
-        for (var i = 0; i < this.goodcells.length; i++) {
-            var lcell = this.goodcells[i];
-            var ocell = this.cgrid[this.gw - 1 - lcell.gx][lcell.gy];
+        for (let i = 0; i < this.goodcells.length; i++) {
+            const lcell = this.goodcells[i];
+            const ocell = this.cgrid[this.gw - 1 - lcell.gx][lcell.gy];
             if (ocell.state != 1) {
                 ocell.state = 1;
                 this.goodcells.push(ocell);
@@ -1325,16 +1336,16 @@ class ship_Ship {
     }
     // Returns the cell containing (X,Y), if there is one, or null otherwise
     getcell(x, y) {
-        var gx = Math.floor((x - this.gwextra) / COMPONENT_GRID_SIZE);
-        var gy = Math.floor((y - this.ghextra) / COMPONENT_GRID_SIZE);
+        const gx = Math.floor((x - this.gwextra) / COMPONENT_GRID_SIZE);
+        const gy = Math.floor((y - this.ghextra) / COMPONENT_GRID_SIZE);
         if (gx < 0 || gx >= this.gw || gy < 0 || gy >= this.gh) {
             return null;
         }
         return this.cgrid[gx][gy];
     }
-    getcellstate(x, y //Returns the state of the cell containing (X,Y), or 0 if there is no such cell.
-    ) {
-        var lcell = this.getcell(x, y);
+    //Returns the state of the cell containing (X,Y), or 0 if there is no such cell
+    getcellstate(x, y) {
+        const lcell = this.getcell(x, y);
         if (lcell == null) {
             return 0;
         }
@@ -1354,7 +1365,7 @@ class ship_Ship {
     }
     addcomponent() {
         //Generates the next component of this ship. Returns true if the ship is finished, false if there are still more components to add.
-        var ncell;
+        let ncell;
         if (this.nextpass < this.passes) {
             if (this.nextcell < this.goodcells.length) {
                 ncell = this.goodcells[this.nextcell];
@@ -1373,9 +1384,9 @@ class ship_Ship {
         else {
             return true;
         }
-        var lv = [ncell.x, ncell.y];
-        for (var t = 0; t < 10; t++) {
-            var nv = [
+        let lv = [ncell.x, ncell.y];
+        for (let t = 0; t < 10; t++) {
+            const nv = [
                 ncell.x + this.r.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
                 ncell.y + this.r.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
             ];
@@ -1402,87 +1413,50 @@ class ship_Ship {
     }
 }
 
-// CONCATENATED MODULE: ./src/index.js
+// CONCATENATED MODULE: ./src/index.ts
 //
 
 
-
-function hashi(seed) {
-  var t = 1206170165;
-
-  for (var x = seed.length - 1; x >= 0; x--) {
-    var c = seed.charCodeAt(x);
-    t = (t << 5) + t ^ c ^ t << c % 13 + 1 ^ t >> c % 17 + 1;
-  }
-
-  return t >>> 0;
+const characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const DEFAULT_SEED_LENGTH = 16;
+// min and max included
+function randomIntFromInterval(min, max) {
+    return Math.floor(Math.random() * (max - min + 1) + min);
 }
-
-function hashd(seed) {
-  return (hashi("." + seed) * 4294967296 + hashi(seed)) / 18446744073709551616;
+function randomSeed() {
+    var s = "";
+    for (var c = 0; c < DEFAULT_SEED_LENGTH; c++) {
+        s = s + characters[randomIntFromInterval(0, characters.length)];
+    }
+    return s;
 }
-
-function zi(min, max, seed) {
-  if (seed == null) {
-    return Math.floor(min + Math.random() * (1 + (max - min)));
-  } else {
-    return Math.floor(min + hashd(seed) * (1 + (max - min)));
-  }
-}
-
-var characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-
-function randomseed(n, seed) {
-  var s = "";
-
-  for (var x = 0; x < n; x++) {
-    s = s + characters[zi(0, characters.length - 1, seed + "_" + x)];
-  }
-
-  return s;
-}
-
-var defaultseedlength = 16;
-var currentship = null;
-
-function renderShip() {
-  if (currentship != null) {
+function renderShip(lp) {
     var done = false;
-
     do {
-      done = currentship.addcomponent();
+        done = lp.addcomponent();
     } while (!done);
-
-    currentship.cfx.clearRect(currentship.hw + currentship.w % 2, 0, currentship.w, currentship.h);
-    currentship.cfx.scale(-1, 1);
-    currentship.cfx.drawImage(currentship.cf, 0 - currentship.w, 0);
-  }
+    lp.cfx.clearRect(lp.hw + (lp.w % 2), 0, lp.w, lp.h);
+    lp.cfx.scale(-1, 1);
+    lp.cfx.drawImage(lp.cf, 0 - lp.w, 0);
+}
+function generateShip() {
+    const nfs = randomSeed();
+    const sseed = randomSeed();
+    const newShip = new ship_Ship(new faction_Faction(nfs), sseed, 100);
+    renderShip(newShip);
+    // currentship.cf has the canvas with the image
+    // currentship.width
+    // currentship.height
+    return newShip.cf;
 }
 
-function createShip(nfs, sseed) {
-  currentship = new ship_Ship(new faction_Faction(nfs), sseed);
-  renderShip(); // currentship.cf has the canvas with the image
-  // currentship.width
-  // currentship.height
-
-  return currentship;
-}
-
-function newship(faction) {
-  return createShip(faction, randomseed(defaultseedlength, "_" + Math.random()));
-}
-function newfaction() {
-  return newship(randomseed(defaultseedlength, "_" + Math.random()));
-}
 
 /***/ })
 /******/ ]);
 
 
-const _starshipwright$newship = starshipwright['newship'];
-const _starshipwright$newfaction = starshipwright['newfaction'];
+const _starshipwright$generateShip = starshipwright['generateShip'];
 
 export {
-    _starshipwright$newship as newship,
-    _starshipwright$newfaction as newfaction
+    _starshipwright$generateShip as generateShip
 }

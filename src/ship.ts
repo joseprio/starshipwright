@@ -41,19 +41,23 @@ export class Ship {
   goodcells: Array<Cell>;
   csd: ImageData;
 
-  constructor(p_faction: Faction, p_seed: string) {
+  constructor(p_faction: Faction, p_seed: string, size?: number) {
     this.f = p_faction;
-    this.baseSeed = p_seed; //Base seed for this ship, without appending the faction seed.
+    //Base seed for this ship, without appending the faction seed
+    this.baseSeed = p_seed;
     this.seed = this.f.seed + this.baseSeed;
     this.r = new Randomizer(this.seed);
-    //this.c = []; //Data cache.
-    this.size = Math.pow(
-      this.r.sd(
-        this.f.r.hd(2.5, 3.5, "size min"),
-        this.f.r.hd(5, 7, "size max")
-      ),
-      3
-    ); //The initial overall size of this ship, in pixels.
+    //The initial overall size of this ship, in pixels
+    this.size =
+      size == null
+        ? Math.pow(
+            this.r.sd(
+              this.f.r.hd(2.5, 3.5, "size min"),
+              this.f.r.hd(5, 7, "size max")
+            ),
+            3
+          )
+        : size;
     const wratio = this.r.sd(
       this.f.r.hd(0.5, 1, "wratio min"),
       this.f.r.hd(1, 1.3, "wratio max")
@@ -81,9 +85,9 @@ export class Ship {
     outlines[this.f.r.hchoose([1, 1, 1], "outline type")](this);
     this.csd = this.csx.getImageData(0, 0, this.w, this.h);
     this.cgrid = [];
-    for (var gx = 0; gx < this.gw; gx++) {
+    for (let gx = 0; gx < this.gw; gx++) {
       this.cgrid[gx] = [];
-      for (var gy = 0; gy < this.gh; gy++) {
+      for (let gy = 0; gy < this.gh; gy++) {
         this.cgrid[gx][gy] = {
           gx: gx,
           gy: gy,
@@ -96,11 +100,11 @@ export class Ship {
     this.goodcells = [
       this.cgrid[Math.floor(this.gw / 2)][Math.floor(this.gh / 2)],
     ];
-    var nextcheck = 0;
+    let nextcheck = 0;
     while (nextcheck < this.goodcells.length) {
-      var lcell = this.goodcells[nextcheck];
+      const lcell = this.goodcells[nextcheck];
       if (lcell.gx > 0) {
-        var ncell = this.cgrid[lcell.gx - 1][lcell.gy];
+        const ncell = this.cgrid[lcell.gx - 1][lcell.gy];
         if (ncell.state == 0) {
           if (this.getspa(ncell.x, ncell.y) > 0) {
             ncell.state = 1;
@@ -111,7 +115,7 @@ export class Ship {
         }
       }
       if (lcell.gx < this.gw - 1) {
-        var ncell = this.cgrid[lcell.gx + 1][lcell.gy];
+        const ncell = this.cgrid[lcell.gx + 1][lcell.gy];
         if (ncell.state == 0) {
           if (this.getspa(ncell.x, ncell.y) > 0) {
             ncell.state = 1;
@@ -122,7 +126,7 @@ export class Ship {
         }
       }
       if (lcell.gy > 0) {
-        var ncell = this.cgrid[lcell.gx][lcell.gy - 1];
+        const ncell = this.cgrid[lcell.gx][lcell.gy - 1];
         if (ncell.state == 0) {
           if (this.getspa(ncell.x, ncell.y) > 0) {
             ncell.state = 1;
@@ -133,7 +137,7 @@ export class Ship {
         }
       }
       if (lcell.gy < this.gh - 1) {
-        var ncell = this.cgrid[lcell.gx][lcell.gy + 1];
+        const ncell = this.cgrid[lcell.gx][lcell.gy + 1];
         if (ncell.state == 0) {
           if (this.getspa(ncell.x, ncell.y) > 0) {
             ncell.state = 1;
@@ -145,9 +149,9 @@ export class Ship {
       }
       nextcheck++;
     }
-    for (var i = 0; i < this.goodcells.length; i++) {
-      var lcell = this.goodcells[i];
-      var ocell = this.cgrid[this.gw - 1 - lcell.gx][lcell.gy];
+    for (let i = 0; i < this.goodcells.length; i++) {
+      const lcell = this.goodcells[i];
+      const ocell = this.cgrid[this.gw - 1 - lcell.gx][lcell.gy];
       if (ocell.state != 1) {
         ocell.state = 1;
         this.goodcells.push(ocell);
@@ -166,19 +170,17 @@ export class Ship {
 
   // Returns the cell containing (X,Y), if there is one, or null otherwise
   getcell(x: number, y: number) {
-    var gx = Math.floor((x - this.gwextra) / COMPONENT_GRID_SIZE);
-    var gy = Math.floor((y - this.ghextra) / COMPONENT_GRID_SIZE);
+    const gx = Math.floor((x - this.gwextra) / COMPONENT_GRID_SIZE);
+    const gy = Math.floor((y - this.ghextra) / COMPONENT_GRID_SIZE);
     if (gx < 0 || gx >= this.gw || gy < 0 || gy >= this.gh) {
       return null;
     }
     return this.cgrid[gx][gy];
   }
 
-  getcellstate(
-    x,
-    y //Returns the state of the cell containing (X,Y), or 0 if there is no such cell.
-  ) {
-    var lcell = this.getcell(x, y);
+  //Returns the state of the cell containing (X,Y), or 0 if there is no such cell
+  getcellstate(x: number, y: number): number {
+    const lcell = this.getcell(x, y);
     if (lcell == null) {
       return 0;
     }
@@ -201,7 +203,7 @@ export class Ship {
 
   addcomponent() {
     //Generates the next component of this ship. Returns true if the ship is finished, false if there are still more components to add.
-    var ncell;
+    let ncell: Cell;
     if (this.nextpass < this.passes) {
       if (this.nextcell < this.goodcells.length) {
         ncell = this.goodcells[this.nextcell];
@@ -217,9 +219,9 @@ export class Ship {
     } else {
       return true;
     }
-    var lv = [ncell.x, ncell.y];
-    for (var t = 0; t < 10; t++) {
-      var nv = [
+    let lv = [ncell.x, ncell.y];
+    for (let t = 0; t < 10; t++) {
+      const nv = [
         ncell.x + this.r.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
         ncell.y + this.r.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
       ];
