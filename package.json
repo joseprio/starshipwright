@@ -2,7 +2,7 @@
   "name": "starshipwright",
   "version": "1.0.0",
   "description": "Generate 2D starships",
-  "module": "src/index.js",
+  "module": "dist/starshipwright.esm.js",
   "scripts": {
     "build": "webpack --config demo.config.js && webpack --config umd.config.js && webpack --config umd.min.config.js && webpack --config esm.config.js && webpack --config esm.min.config.js"
   },
