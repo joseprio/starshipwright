@@ -1,6 +1,6 @@
 # Starshipwright
 
-JS library to procedurally generate starships
+JS library to procedurally generate starships. Based on a [procedural generation monthly challenge entry from Reddit](https://www.reddit.com/r/proceduralgeneration/comments/4quifo/monthly_challenge_7_2d_spaceships_in/) by green_meklar, used with permission.
 
 ## Installation
 

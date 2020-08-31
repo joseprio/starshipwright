@@ -2,6 +2,8 @@
 import { Faction } from "./faction";
 import { Ship } from "./ship";
 
+export { Randomizer } from "./randomizer";
+
 const characters =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
@@ -15,7 +17,7 @@ function randomIntFromInterval(min: number, max: number): number {
 function randomSeed() {
   var s = "";
   for (var c = 0; c < DEFAULT_SEED_LENGTH; c++) {
-    s = s + characters[randomIntFromInterval(0, characters.length)];
+    s = s + characters[randomIntFromInterval(0, characters.length - 1)];
   }
   return s;
 }
@@ -30,13 +32,19 @@ function renderShip(lp: Ship) {
   lp.cfx.drawImage(lp.cf, 0 - lp.w, 0);
 }
 
-export function generateShip() {
-  const nfs = randomSeed();
-  const sseed = randomSeed();
-  const newShip = new Ship(new Faction(nfs), sseed, 100);
+export function generateFaction(seed?: string): Faction {
+  return new Faction(seed || randomSeed());
+}
+
+export function generateShip(
+  faction: Faction,
+  seed?: string,
+  size?: number
+): Ship {
+  const newShip = new Ship(faction, seed || randomSeed(), size);
   renderShip(newShip);
   // currentship.cf has the canvas with the image
   // currentship.width
   // currentship.height
-  return newShip.cf;
+  return newShip;
 }

@@ -432,7 +432,7 @@ class faction_Faction {
 //Size of the component grid
 const COMPONENT_GRID_SIZE = 6;
 //Minimum distance between the edge of the ship outline and the edge of the canvas
-const CANVAS_SHIP_EDGE = 24;
+const CANVAS_SHIP_EDGE = 0;
 //Base maximum extent of a component from its origin point. Should be at least equal to cgridsize, but no greater than csedge.
 const COMPONENT_MAXIMUM_SIZE = 8;
 
@@ -1413,6 +1413,7 @@ class ship_Ship {
 //
 
 
+
 const characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 const DEFAULT_SEED_LENGTH = 16;
 // min and max included
@@ -1422,7 +1423,7 @@ function randomIntFromInterval(min, max) {
 function randomSeed() {
     var s = "";
     for (var c = 0; c < DEFAULT_SEED_LENGTH; c++) {
-        s = s + characters[randomIntFromInterval(0, characters.length)];
+        s = s + characters[randomIntFromInterval(0, characters.length - 1)];
     }
     return s;
 }
@@ -1435,24 +1436,50 @@ function renderShip(lp) {
     lp.cfx.scale(-1, 1);
     lp.cfx.drawImage(lp.cf, 0 - lp.w, 0);
 }
-function generateShip() {
-    const nfs = randomSeed();
-    const sseed = randomSeed();
-    const newShip = new ship_Ship(new faction_Faction(nfs), sseed, 100);
+function generateFaction(seed) {
+    return new faction_Faction(seed || randomSeed());
+}
+function generateShip(faction, seed, size) {
+    const newShip = new ship_Ship(faction, seed || randomSeed(), size);
     renderShip(newShip);
     // currentship.cf has the canvas with the image
     // currentship.width
     // currentship.height
-    return newShip.cf;
+    return newShip;
 }
 
 // CONCATENATED MODULE: ./src/demo.js
 
 
-window.onload = function () {
+function update() {
+  const container = document.getElementById("container");
+  // Empty it
+  while (container.firstChild) container.removeChild(container.firstChild);
+
+  const factionSeed = document.getElementById("fseed").value;
+  const size = document.getElementById("size").value;
+  const faction =
+    factionSeed.length > 1 ? generateFaction(factionSeed) : undefined;
   for (let c = 0; c < 20; c++) {
-    document.body.appendChild(generateShip());
+    const shipDiv = document.createElement("div");
+    shipDiv.className = "ship";
+    const shipCaption = document.createElement("div");
+    const factionCaption = document.createElement("div");
+    const currentFaction = faction || generateFaction();
+    const ship = generateShip(currentFaction, undefined, size || undefined);
+    shipCaption.textContent = "Seed: " + ship.baseSeed;
+    factionCaption.textContent = "Faction: " + currentFaction.seed;
+    shipDiv.appendChild(ship.cf);
+    shipDiv.appendChild(shipCaption);
+    shipDiv.appendChild(factionCaption);
+    container.appendChild(shipDiv);
   }
+}
+
+window.onload = function () {
+  document
+    .getElementById("updateAction")
+    .addEventListener("click", update, false);
 };
 
 

@@ -94,6 +94,8 @@ var starshipwright =
 __webpack_require__.r(__webpack_exports__);
 
 // EXPORTS
+__webpack_require__.d(__webpack_exports__, "Randomizer", function() { return /* reexport */ Randomizer; });
+__webpack_require__.d(__webpack_exports__, "generateFaction", function() { return /* binding */ generateFaction; });
 __webpack_require__.d(__webpack_exports__, "generateShip", function() { return /* binding */ generateShip; });
 
 // CONCATENATED MODULE: ./src/randomizer.ts
@@ -436,7 +438,7 @@ class faction_Faction {
 //Size of the component grid
 const COMPONENT_GRID_SIZE = 6;
 //Minimum distance between the edge of the ship outline and the edge of the canvas
-const CANVAS_SHIP_EDGE = 24;
+const CANVAS_SHIP_EDGE = 0;
 //Base maximum extent of a component from its origin point. Should be at least equal to cgridsize, but no greater than csedge.
 const COMPONENT_MAXIMUM_SIZE = 8;
 
@@ -1417,6 +1419,7 @@ class ship_Ship {
 //
 
 
+
 const characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 const DEFAULT_SEED_LENGTH = 16;
 // min and max included
@@ -1426,7 +1429,7 @@ function randomIntFromInterval(min, max) {
 function randomSeed() {
     var s = "";
     for (var c = 0; c < DEFAULT_SEED_LENGTH; c++) {
-        s = s + characters[randomIntFromInterval(0, characters.length)];
+        s = s + characters[randomIntFromInterval(0, characters.length - 1)];
     }
     return s;
 }
@@ -1439,15 +1442,16 @@ function renderShip(lp) {
     lp.cfx.scale(-1, 1);
     lp.cfx.drawImage(lp.cf, 0 - lp.w, 0);
 }
-function generateShip() {
-    const nfs = randomSeed();
-    const sseed = randomSeed();
-    const newShip = new ship_Ship(new faction_Faction(nfs), sseed, 100);
+function generateFaction(seed) {
+    return new faction_Faction(seed || randomSeed());
+}
+function generateShip(faction, seed, size) {
+    const newShip = new ship_Ship(faction, seed || randomSeed(), size);
     renderShip(newShip);
     // currentship.cf has the canvas with the image
     // currentship.width
     // currentship.height
-    return newShip.cf;
+    return newShip;
 }
 
 
@@ -1455,8 +1459,12 @@ function generateShip() {
 /******/ ]);
 
 
+const _starshipwright$Randomizer = starshipwright['Randomizer'];
+const _starshipwright$generateFaction = starshipwright['generateFaction'];
 const _starshipwright$generateShip = starshipwright['generateShip'];
 
 export {
+    _starshipwright$Randomizer as Randomizer,
+    _starshipwright$generateFaction as generateFaction,
     _starshipwright$generateShip as generateShip
 }

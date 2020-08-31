@@ -2,7 +2,30 @@
   <head>
     <title>Space shipwright demo</title>
     <script type="text/javascript" src="demo.js"></script>
+    <style>
+      body {
+        color: white;
+        background-color: black;
+      }
+      .ship {
+        display: inline-block;
+        text-align: center;
+        margin: 20px;
+      }
+    </style>
   </head>
-
-  <body style="background-color: black;"></body>
+  <body>
+    <div>
+      <label for="fseed">Faction hash: </label>
+      <input id="fseed"></input>
+    </div>
+    <div>
+      <label for="size">Size: </label>
+      <input id="size"></input>
+    </div>
+    <div>
+      <button id="updateAction">Update</button>
+    </div>
+    <div id="container"></div>
+  </body>
 </html>
