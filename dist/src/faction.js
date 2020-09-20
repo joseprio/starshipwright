@@ -8,7 +8,6 @@ export class Faction {
         this.colorChances = [];
         this.seed = seed;
         this.r = new Randomizer(this.seed);
-        this.cache = {}; //Data cache.
         this.setupComponentChances();
         this.setupColors();
     }

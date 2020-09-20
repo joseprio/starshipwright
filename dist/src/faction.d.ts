@@ -4,7 +4,6 @@ import type { Ship } from "./ship";
 export declare class Faction {
     seed: string;
     r: Randomizer;
-    cache: Object;
     componentChances: Array<number>;
     colors: Array<RGBColor>;
     colorChances: Array<number>;

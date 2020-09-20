@@ -6,7 +6,6 @@ import type { Ship } from "./ship";
 export class Faction {
   seed: string;
   r: Randomizer;
-  cache: Object;
   //Respective chances of each component
   componentChances: Array<number> = [];
   colors: Array<RGBColor> = [];
@@ -15,7 +14,6 @@ export class Faction {
   constructor(seed: string) {
     this.seed = seed;
     this.r = new Randomizer(this.seed);
-    this.cache = {}; //Data cache.
     this.setupComponentChances();
     this.setupColors();
   }
