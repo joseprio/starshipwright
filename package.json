@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "scripts": {
-    "build": "tsc && webpack --config demo.config.js"
+    "build": "tsc -p src && webpack --config demo.config.js"
   },
   "repository": {
     "type": "git",

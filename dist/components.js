@@ -29,14 +29,10 @@ function leeway(lp, boundingBox) {
         Math.min(boundingBox[0][1] - CANVAS_SHIP_EDGE, lp.h - CANVAS_SHIP_EDGE - boundingBox[1][1]),
     ];
 }
-function shadowcolor(amount) {
-    //amount is the amount of shadow, 0 - 1.
-    return "rgba(0,0,0," + clamp(amount, 0, 1) + ")";
-}
 //lp is the ship. amount is the amount of shadow at the edges, 0 - 1 (the middle is always 0). middlep and edgep should be vectors at the middle and edge of the gradient.
-function shadowGradient(lp, middlePoint, edgePoint, amount) {
-    const grad = lp.cfx.createLinearGradient(edgePoint[0], edgePoint[1], middlePoint[0] * 2 - edgePoint[0], middlePoint[1] * 2 - edgePoint[1]);
-    const darkness = shadowcolor(amount);
+function shadowGradient(ctx, middlePoint, edgePoint, amount) {
+    const grad = ctx.createLinearGradient(edgePoint[0], edgePoint[1], middlePoint[0] * 2 - edgePoint[0], middlePoint[1] * 2 - edgePoint[1]);
+    const darkness = `rgba(0,0,0,${clamp(amount, 0, 1)})`;
     grad.addColorStop(0, darkness);
     grad.addColorStop(0.5, "rgba(0,0,0,0)");
     grad.addColorStop(1, darkness);
@@ -92,7 +88,7 @@ components[0] = function (lp, v) {
         }
     }
     if (lp.r.sb(clamp((pcdone * 0.6 + 0.3) * (lcms / COMPONENT_MAXIMUM_SIZE), 0, 0.98))) {
-        lp.cfx.fillStyle = shadowGradient(lp, v, [v[0] + trv[0], v[1]], lp.r.sd(0, 0.9));
+        lp.cfx.fillStyle = shadowGradient(lp.cfx, v, [v[0] + trv[0], v[1]], lp.r.sd(0, 0.9));
         lp.cfx.fillRect(v[0] - trv[0], v[1] - trv[1], dho[0] * counts[0], dho[1] * counts[1]);
     }
 };
@@ -132,7 +128,7 @@ components[1] = function (lp, v) {
         lp.cfx.fillStyle = ccolor;
         lp.cfx.fillRect(bv[0], bv[1], w, h);
         for (let i = 0; i < count; i++) {
-            lp.cfx.fillStyle = shadowGradient(lp, [bv[0] + (i + 0.5) * cw, v[1]], [bv[0] + i * cw, v[1]], darkness);
+            lp.cfx.fillStyle = shadowGradient(lp.cfx, [bv[0] + (i + 0.5) * cw, v[1]], [bv[0] + i * cw, v[1]], darkness);
             lp.cfx.fillRect(bv[0] + i * cw, bv[1], cw, h);
         }
     }
@@ -143,7 +139,7 @@ components[1] = function (lp, v) {
         lp.cfx.fillStyle = ccolor;
         lp.cfx.fillRect(bv[0], bv[1], h, w);
         for (let i = 0; i < count; i++) {
-            lp.cfx.fillStyle = shadowGradient(lp, [v[0], bv[1] + (i + 0.5) * cw], [v[0], bv[1] + i * cw], darkness);
+            lp.cfx.fillStyle = shadowGradient(lp.cfx, [v[0], bv[1] + (i + 0.5) * cw], [v[0], bv[1] + i * cw], darkness);
             lp.cfx.fillRect(bv[0], bv[1] + i * cw, w, cw);
         }
     }
@@ -331,22 +327,18 @@ components[4] = function (lp, v) {
     const basecolor = lp.f.getBaseColor(lp);
     const colormid = colorToHex(scaleColorBy(basecolor, lightmid));
     const coloredge = colorToHex(scaleColorBy(basecolor, lightedge));
-    if (lp.f.cache["com4 directionc"] == null) {
-        lp.f.cache["com4 directionc"] = [
-            1 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc0"), 4),
-            0.1 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc1"), 4),
-            0.2 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc2"), 4),
-        ];
-    }
     const w = Math.max(3, Math.ceil(lp.size *
         Math.pow(lp.r.sd(0.4, 1), 2) *
         lp.f.r.hd(0.02, 0.1, "com4 maxwidth")));
     const hwi = Math.floor(w / 2);
     const hwe = w % 2;
+    const forwards = 1 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc0"), 4);
+    const backwards = 0.1 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc1"), 4);
+    const toCenter = 0.2 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc2"), 4);
     const direction = lp.r.schoose([
-        lp.f.cache["com4 directionc"][0] * (2 - cn),
-        lp.f.cache["com4 directionc"][1],
-        lp.f.cache["com4 directionc"][2] * (1 + cn),
+        forwards * (2 - cn),
+        backwards,
+        toCenter * (1 + cn),
     ]);
     let ev = null;
     if (direction == 0) {
@@ -391,24 +383,22 @@ components[4] = function (lp, v) {
         lp.cfx.fillRect(v[0], v[1] - hwi, Math.ceil(lp.hw - v[0]) + 1, w);
         ev = [Math.floor(lp.hw), v[1]];
     }
-    if (lp.f.cache["com4 covercomc"] == null) {
-        lp.f.cache["com4 covercomc"] = [
-            0.6 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc0"), 2),
-            0.2 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc1"), 2),
-            1 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc2"), 2),
-        ];
-    }
-    components[lp.r.schoose(lp.f.cache["com4 covercomc"])](lp, v);
+    const coverComC = [
+        0.6 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc0"), 2),
+        0.2 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc1"), 2),
+        1 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc2"), 2),
+    ];
+    components[lp.r.schoose(coverComC)](lp, v);
     if (lp.getcellstate(ev[0], ev[1]) > 0) {
         const nev = [
             ev[0] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
             ev[1] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
         ];
         if (lp.getcellstate(nev[0], nev[1]) > 0) {
-            components[lp.r.schoose(lp.f.cache["com4 covercomc"])](lp, nev);
+            components[lp.r.schoose(coverComC)](lp, nev);
         }
         else {
-            components[lp.r.schoose(lp.f.cache["com4 covercomc"])](lp, ev);
+            components[lp.r.schoose(coverComC)](lp, ev);
         }
     }
 };
@@ -504,11 +494,9 @@ components[6] = function (lp, v) {
     const hh1e = h0 % 2;
     const backamount = Math.max(0 - (h0 - h1) / 2, h0 *
         (lp.r.sd(0, 0.45) + lp.r.sd(0, 0.45)) *
-        (lp.f.cache["com6 backness"] == null
-            ? (lp.f.cache["com6 backness"] = lp.f.r.hb(0.8, "com6 backnesstype")
-                ? lp.f.r.hd(0.2, 0.9, "com6 backness#pos")
-                : lp.f.r.hd(-0.2, -0.05, "com6 backness#neg"))
-            : lp.f.cache["com6 backness"]));
+        (lp.f.r.hb(0.8, "com6 backnesstype")
+            ? lp.f.r.hd(0.2, 0.9, "com6 backness#pos")
+            : lp.f.r.hd(-0.2, -0.05, "com6 backness#neg")));
     const w = Math.ceil(lcms * lp.r.sd(0.7, 1) * Math.pow(lp.f.r.hd(0.1, 3.5, "com6 width"), 0.5));
     const hwi = Math.floor(w / 2);
     const hwe = w % 2;

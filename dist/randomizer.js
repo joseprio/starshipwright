@@ -70,7 +70,7 @@ export class Randomizer {
     }
     */
     //Returns a raw unsigned 32-bit integer based on hashing this object's seed with the specified string
-    hr_xorshift(seed) {
+    hr(seed) {
         const state = [1160605769, 1424711319, 876532818, 1419174464];
         let rv = 1206170165;
         if (seed == null) {
@@ -113,7 +113,7 @@ export class Randomizer {
     }
     //Returns a double between the specified minimum and maximum, by hashing this object's seed with the specified string.
     hd(min, max, seed) {
-        return (((this.hr_xorshift(seed) * 4294967296 + this.hr_xorshift(seed + "@")) /
+        return (((this.hr(seed) * 4294967296 + this.hr(seed + "@")) /
             18446744073709551616) *
             (max - min) +
             min);
@@ -126,8 +126,7 @@ export class Randomizer {
     }
     //Returns an integer between the specified minimum and maximum, by hashing this object's seed with the specified string.
     hi(min, max, s) {
-        return Math.floor(((this.hr_xorshift(s) * 4294967296 + this.hr_xorshift(s + "@")) /
-            18446744073709551616) *
+        return Math.floor(((this.hr(s) * 4294967296 + this.hr(s + "@")) / 18446744073709551616) *
             (max + 1 - min) +
             min);
     }
@@ -137,8 +136,7 @@ export class Randomizer {
     }
     //Returns a boolean with the specified chance of being true (and false otherwise), by hashing this object's seed with the specified string.
     hb(chance, s) {
-        return ((this.hr_xorshift(s) * 4294967296 + this.hr_xorshift(s + "@")) /
-            18446744073709551616 <
+        return ((this.hr(s) * 4294967296 + this.hr(s + "@")) / 18446744073709551616 <
             chance);
     }
     //Returns an integer with the specified chance of being -1 (and 1 otherwise), from the stream.
@@ -148,14 +146,16 @@ export class Randomizer {
             : 1;
     }
     //Returns an integer with the specified chance of being -1 (and 1 otherwise), by hashing this object's seed with the specified string.
-    hs(chance, seed) {
-        return (this.hr_xorshift(seed) * 4294967296 +
-            this.hr_xorshift(seed + "@")) /
-            18446744073709551616 <
-            chance
-            ? -1
-            : 1;
+    /*
+    hs(chance: number, seed: string): number {
+      return (this.hr(seed) * 4294967296 +
+        this.hr(seed + "@")) /
+        18446744073709551616 <
+        chance
+        ? -1
+        : 1;
     }
+    */
     //Returns an integer {0,1,2,...}, starting from 0, with the specified chance of advancing to each successive integer, from the stream.
     sseq(chance, max) {
         var rv = 0;
@@ -168,8 +168,7 @@ export class Randomizer {
     //Returns an integer {0,1,2,...}, starting from 0, with the specified chance of advancing to each successive integer, by hashing this object's seed with the specified string.
     hseq(chance, max, seed) {
         var rv = 0;
-        while ((this.hr_xorshift(seed + rv) * 4294967296 +
-            this.hr_xorshift(seed + "@" + rv)) /
+        while ((this.hr(seed + rv) * 4294967296 + this.hr(seed + "@" + rv)) /
             18446744073709551616 <
             chance &&
             rv < max) {
@@ -179,12 +178,12 @@ export class Randomizer {
     }
     //Returns an index of the array chances with the relative probability equal to that element of chances, based on a stream value.
     schoose(chances) {
-        var sum = 0;
-        for (var i = 0; i < chances.length; i++) {
+        let sum = 0;
+        for (let i = 0; i < chances.length; i++) {
             sum += chances[i];
         }
-        var which = this.sd(0, sum);
-        for (var j = 0; j < chances.length; j++) {
+        let which = this.sd(0, sum);
+        for (let j = 0; j < chances.length; j++) {
             which -= chances[j];
             if (which < 0) {
                 return j;
@@ -194,12 +193,12 @@ export class Randomizer {
     }
     //Returns an index of the array chances with the relative probability equal to that element of chances, based on a hash value with the specified seed.
     hchoose(chances, seed) {
-        var sum = 0;
-        for (var i = 0; i < chances.length; i++) {
+        let sum = 0;
+        for (let i = 0; i < chances.length; i++) {
             sum += chances[i];
         }
-        var which = this.hd(0, sum, seed);
-        for (var j = 0; j < chances.length; j++) {
+        let which = this.hd(0, sum, seed);
+        for (let j = 0; j < chances.length; j++) {
             which -= chances[j];
             if (which < 0) {
                 return j;
