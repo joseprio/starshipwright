@@ -173,7 +173,7 @@
             }
             */
             //Returns a raw unsigned 32-bit integer based on hashing this object's seed with the specified string
-            hr_xorshift(seed) {
+            hr(seed) {
                 const state = [1160605769, 1424711319, 876532818, 1419174464];
                 let rv = 1206170165;
                 if (seed == null) {
@@ -216,7 +216,7 @@
             }
             //Returns a double between the specified minimum and maximum, by hashing this object's seed with the specified string.
             hd(min, max, seed) {
-                return (((this.hr_xorshift(seed) * 4294967296 + this.hr_xorshift(seed + "@")) /
+                return (((this.hr(seed) * 4294967296 + this.hr(seed + "@")) /
                     18446744073709551616) *
                     (max - min) +
                     min);
@@ -229,8 +229,7 @@
             }
             //Returns an integer between the specified minimum and maximum, by hashing this object's seed with the specified string.
             hi(min, max, s) {
-                return Math.floor(((this.hr_xorshift(s) * 4294967296 + this.hr_xorshift(s + "@")) /
-                    18446744073709551616) *
+                return Math.floor(((this.hr(s) * 4294967296 + this.hr(s + "@")) / 18446744073709551616) *
                     (max + 1 - min) +
                     min);
             }
@@ -240,8 +239,7 @@
             }
             //Returns a boolean with the specified chance of being true (and false otherwise), by hashing this object's seed with the specified string.
             hb(chance, s) {
-                return ((this.hr_xorshift(s) * 4294967296 + this.hr_xorshift(s + "@")) /
-                    18446744073709551616 <
+                return ((this.hr(s) * 4294967296 + this.hr(s + "@")) / 18446744073709551616 <
                     chance);
             }
             //Returns an integer with the specified chance of being -1 (and 1 otherwise), from the stream.
@@ -251,14 +249,16 @@
                     : 1;
             }
             //Returns an integer with the specified chance of being -1 (and 1 otherwise), by hashing this object's seed with the specified string.
-            hs(chance, seed) {
-                return (this.hr_xorshift(seed) * 4294967296 +
-                    this.hr_xorshift(seed + "@")) /
-                    18446744073709551616 <
-                    chance
-                    ? -1
-                    : 1;
+            /*
+            hs(chance: number, seed: string): number {
+              return (this.hr(seed) * 4294967296 +
+                this.hr(seed + "@")) /
+                18446744073709551616 <
+                chance
+                ? -1
+                : 1;
             }
+            */
             //Returns an integer {0,1,2,...}, starting from 0, with the specified chance of advancing to each successive integer, from the stream.
             sseq(chance, max) {
                 var rv = 0;
@@ -271,8 +271,7 @@
             //Returns an integer {0,1,2,...}, starting from 0, with the specified chance of advancing to each successive integer, by hashing this object's seed with the specified string.
             hseq(chance, max, seed) {
                 var rv = 0;
-                while ((this.hr_xorshift(seed + rv) * 4294967296 +
-                    this.hr_xorshift(seed + "@" + rv)) /
+                while ((this.hr(seed + rv) * 4294967296 + this.hr(seed + "@" + rv)) /
                     18446744073709551616 <
                     chance &&
                     rv < max) {
@@ -282,12 +281,12 @@
             }
             //Returns an index of the array chances with the relative probability equal to that element of chances, based on a stream value.
             schoose(chances) {
-                var sum = 0;
-                for (var i = 0; i < chances.length; i++) {
+                let sum = 0;
+                for (let i = 0; i < chances.length; i++) {
                     sum += chances[i];
                 }
-                var which = this.sd(0, sum);
-                for (var j = 0; j < chances.length; j++) {
+                let which = this.sd(0, sum);
+                for (let j = 0; j < chances.length; j++) {
                     which -= chances[j];
                     if (which < 0) {
                         return j;
@@ -297,12 +296,12 @@
             }
             //Returns an index of the array chances with the relative probability equal to that element of chances, based on a hash value with the specified seed.
             hchoose(chances, seed) {
-                var sum = 0;
-                for (var i = 0; i < chances.length; i++) {
+                let sum = 0;
+                for (let i = 0; i < chances.length; i++) {
                     sum += chances[i];
                 }
-                var which = this.hd(0, sum, seed);
-                for (var j = 0; j < chances.length; j++) {
+                let which = this.hd(0, sum, seed);
+                for (let j = 0; j < chances.length; j++) {
                     which -= chances[j];
                     if (which < 0) {
                         return j;
@@ -372,7 +371,6 @@
                 this.colorChances = [];
                 this.seed = seed;
                 this.r = new Randomizer(this.seed);
-                this.cache = {}; //Data cache.
                 this.setupComponentChances();
                 this.setupColors();
             }
@@ -468,14 +466,10 @@
                 Math.min(boundingBox[0][1] - CANVAS_SHIP_EDGE, lp.h - CANVAS_SHIP_EDGE - boundingBox[1][1]),
             ];
         }
-        function shadowcolor(amount) {
-            //amount is the amount of shadow, 0 - 1.
-            return "rgba(0,0,0," + clamp(amount, 0, 1) + ")";
-        }
         //lp is the ship. amount is the amount of shadow at the edges, 0 - 1 (the middle is always 0). middlep and edgep should be vectors at the middle and edge of the gradient.
-        function shadowGradient(lp, middlePoint, edgePoint, amount) {
-            const grad = lp.cfx.createLinearGradient(edgePoint[0], edgePoint[1], middlePoint[0] * 2 - edgePoint[0], middlePoint[1] * 2 - edgePoint[1]);
-            const darkness = shadowcolor(amount);
+        function shadowGradient(ctx, middlePoint, edgePoint, amount) {
+            const grad = ctx.createLinearGradient(edgePoint[0], edgePoint[1], middlePoint[0] * 2 - edgePoint[0], middlePoint[1] * 2 - edgePoint[1]);
+            const darkness = `rgba(0,0,0,${clamp(amount, 0, 1)})`;
             grad.addColorStop(0, darkness);
             grad.addColorStop(0.5, "rgba(0,0,0,0)");
             grad.addColorStop(1, darkness);
@@ -531,7 +525,7 @@
                 }
             }
             if (lp.r.sb(clamp((pcdone * 0.6 + 0.3) * (lcms / COMPONENT_MAXIMUM_SIZE), 0, 0.98))) {
-                lp.cfx.fillStyle = shadowGradient(lp, v, [v[0] + trv[0], v[1]], lp.r.sd(0, 0.9));
+                lp.cfx.fillStyle = shadowGradient(lp.cfx, v, [v[0] + trv[0], v[1]], lp.r.sd(0, 0.9));
                 lp.cfx.fillRect(v[0] - trv[0], v[1] - trv[1], dho[0] * counts[0], dho[1] * counts[1]);
             }
         };
@@ -571,7 +565,7 @@
                 lp.cfx.fillStyle = ccolor;
                 lp.cfx.fillRect(bv[0], bv[1], w, h);
                 for (let i = 0; i < count; i++) {
-                    lp.cfx.fillStyle = shadowGradient(lp, [bv[0] + (i + 0.5) * cw, v[1]], [bv[0] + i * cw, v[1]], darkness);
+                    lp.cfx.fillStyle = shadowGradient(lp.cfx, [bv[0] + (i + 0.5) * cw, v[1]], [bv[0] + i * cw, v[1]], darkness);
                     lp.cfx.fillRect(bv[0] + i * cw, bv[1], cw, h);
                 }
             }
@@ -582,7 +576,7 @@
                 lp.cfx.fillStyle = ccolor;
                 lp.cfx.fillRect(bv[0], bv[1], h, w);
                 for (let i = 0; i < count; i++) {
-                    lp.cfx.fillStyle = shadowGradient(lp, [v[0], bv[1] + (i + 0.5) * cw], [v[0], bv[1] + i * cw], darkness);
+                    lp.cfx.fillStyle = shadowGradient(lp.cfx, [v[0], bv[1] + (i + 0.5) * cw], [v[0], bv[1] + i * cw], darkness);
                     lp.cfx.fillRect(bv[0], bv[1] + i * cw, w, cw);
                 }
             }
@@ -770,22 +764,18 @@
             const basecolor = lp.f.getBaseColor(lp);
             const colormid = colorToHex(scaleColorBy(basecolor, lightmid));
             const coloredge = colorToHex(scaleColorBy(basecolor, lightedge));
-            if (lp.f.cache["com4 directionc"] == null) {
-                lp.f.cache["com4 directionc"] = [
-                    1 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc0"), 4),
-                    0.1 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc1"), 4),
-                    0.2 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc2"), 4),
-                ];
-            }
             const w = Math.max(3, Math.ceil(lp.size *
                 Math.pow(lp.r.sd(0.4, 1), 2) *
                 lp.f.r.hd(0.02, 0.1, "com4 maxwidth")));
             const hwi = Math.floor(w / 2);
             const hwe = w % 2;
+            const forwards = 1 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc0"), 4);
+            const backwards = 0.1 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc1"), 4);
+            const toCenter = 0.2 * Math.pow(lp.f.r.hd(0, 1, "com4 directionc2"), 4);
             const direction = lp.r.schoose([
-                lp.f.cache["com4 directionc"][0] * (2 - cn),
-                lp.f.cache["com4 directionc"][1],
-                lp.f.cache["com4 directionc"][2] * (1 + cn),
+                forwards * (2 - cn),
+                backwards,
+                toCenter * (1 + cn),
             ]);
             let ev = null;
             if (direction == 0) {
@@ -830,24 +820,22 @@
                 lp.cfx.fillRect(v[0], v[1] - hwi, Math.ceil(lp.hw - v[0]) + 1, w);
                 ev = [Math.floor(lp.hw), v[1]];
             }
-            if (lp.f.cache["com4 covercomc"] == null) {
-                lp.f.cache["com4 covercomc"] = [
-                    0.6 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc0"), 2),
-                    0.2 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc1"), 2),
-                    1 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc2"), 2),
-                ];
-            }
-            components[lp.r.schoose(lp.f.cache["com4 covercomc"])](lp, v);
+            const coverComC = [
+                0.6 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc0"), 2),
+                0.2 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc1"), 2),
+                1 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc2"), 2),
+            ];
+            components[lp.r.schoose(coverComC)](lp, v);
             if (lp.getcellstate(ev[0], ev[1]) > 0) {
                 const nev = [
                     ev[0] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
                     ev[1] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
                 ];
                 if (lp.getcellstate(nev[0], nev[1]) > 0) {
-                    components[lp.r.schoose(lp.f.cache["com4 covercomc"])](lp, nev);
+                    components[lp.r.schoose(coverComC)](lp, nev);
                 }
                 else {
-                    components[lp.r.schoose(lp.f.cache["com4 covercomc"])](lp, ev);
+                    components[lp.r.schoose(coverComC)](lp, ev);
                 }
             }
         };
@@ -943,11 +931,9 @@
             const hh1e = h0 % 2;
             const backamount = Math.max(0 - (h0 - h1) / 2, h0 *
                 (lp.r.sd(0, 0.45) + lp.r.sd(0, 0.45)) *
-                (lp.f.cache["com6 backness"] == null
-                    ? (lp.f.cache["com6 backness"] = lp.f.r.hb(0.8, "com6 backnesstype")
-                        ? lp.f.r.hd(0.2, 0.9, "com6 backness#pos")
-                        : lp.f.r.hd(-0.2, -0.05, "com6 backness#neg"))
-                    : lp.f.cache["com6 backness"]));
+                (lp.f.r.hb(0.8, "com6 backnesstype")
+                    ? lp.f.r.hd(0.2, 0.9, "com6 backness#pos")
+                    : lp.f.r.hd(-0.2, -0.05, "com6 backness#neg")));
             const w = Math.ceil(lcms * lp.r.sd(0.7, 1) * Math.pow(lp.f.r.hd(0.1, 3.5, "com6 width"), 0.5));
             const hwi = Math.floor(w / 2);
             const hwe = w % 2;
@@ -1070,20 +1056,20 @@
         const outlines = [];
         //Joined rectangles.
         outlines[0] = function (lp) {
-            var csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
-            var csarealimit = csarea * 0.05;
-            var initialwidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.r.hd(0.1, 1, "outline0 iw") * 0.2);
-            var blocks = [
+            const csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
+            const csarealimit = csarea * 0.05;
+            const initialwidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.r.hd(0.1, 1, "outline0 iw") * 0.2);
+            const blocks = [
                 [
                     [lp.hw - initialwidth, CANVAS_SHIP_EDGE],
                     [lp.hw + initialwidth, lp.h - CANVAS_SHIP_EDGE],
                 ],
             ];
-            var blockcount = 2 +
+            const blockcount = 2 +
                 Math.floor(lp.r.sd(0.5, 1) * lp.f.r.hd(2, 8, "outline0 bc") * Math.sqrt(lp.size));
-            for (var i = 1; i < blockcount; i++) {
-                var base = blocks[lp.r.si(0, blocks.length - 1)];
-                var v0 = [
+            for (let i = 1; i < blockcount; i++) {
+                const base = blocks[lp.r.si(0, blocks.length - 1)];
+                const v0 = [
                     base[0][0] + lp.r.sd(0, 1) * (base[1][0] - base[0][0]),
                     base[0][1] + lp.r.sd(0, 1) * (base[1][1] - base[0][1]),
                 ];
@@ -1091,23 +1077,23 @@
                     lp.r.sb(lp.f.r.hd(0.5, 1.5, "outline0 frontbias"))) {
                     v0[1] = base[1][1] - (v0[1] - base[0][1]);
                 }
-                var v1 = [
+                const v1 = [
                     clamp(lp.r.sd(0, 1) * lp.w, CANVAS_SHIP_EDGE, lp.w - CANVAS_SHIP_EDGE),
                     clamp(lp.r.sd(0, 1) * lp.h, CANVAS_SHIP_EDGE, lp.h - CANVAS_SHIP_EDGE),
                 ];
-                var area = Math.abs((v1[0] - v0[0]) * (v1[1] - v0[1]));
-                var ratio = csarealimit / area;
+                const area = Math.abs((v1[0] - v0[0]) * (v1[1] - v0[1]));
+                const ratio = csarealimit / area;
                 if (ratio < 1) {
                     v1[0] = v0[0] + (v1[0] - v0[0]) * ratio;
                     v1[1] = v0[1] + (v1[1] - v0[1]) * ratio;
                 }
                 if (v0[0] > v1[0]) {
-                    var t = v0[0];
+                    const t = v0[0];
                     v0[0] = v1[0];
                     v1[0] = t;
                 }
                 if (v0[1] > v1[1]) {
-                    var t = v0[1];
+                    const t = v0[1];
                     v0[1] = v1[1];
                     v1[1] = t;
                 }
@@ -1117,33 +1103,33 @@
                 ]);
             }
             lp.csx.fillStyle = "#FFFFFF";
-            for (var i = 0; i < blocks.length; i++) {
-                var lb = blocks[i];
+            for (let i = 0; i < blocks.length; i++) {
+                const lb = blocks[i];
                 lp.csx.fillRect(lb[0][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
                 lp.csx.fillRect(lp.w - lb[1][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
             }
         };
         //Joined circles
         outlines[1] = function (lp) {
-            var csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
-            var csarealimit = csarea * 0.05;
-            var csrlimit = Math.max(2, Math.sqrt(csarealimit / Math.PI));
-            var initialwidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.r.hd(0.1, 1, "outline1 iw") * 0.2);
-            var circles = [];
-            var initialcount = Math.floor((lp.h - 2 * CANVAS_SHIP_EDGE) / (initialwidth * 2));
-            for (var i = 0; i < initialcount; i++) {
+            const csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
+            const csarealimit = csarea * 0.05;
+            const csrlimit = Math.max(2, Math.sqrt(csarealimit / Math.PI));
+            const initialwidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.r.hd(0.1, 1, "outline1 iw") * 0.2);
+            const circles = [];
+            const initialcount = Math.floor((lp.h - 2 * CANVAS_SHIP_EDGE) / (initialwidth * 2));
+            for (let i = 0; i < initialcount; i++) {
                 let lv = [lp.hw, lp.h - (CANVAS_SHIP_EDGE + initialwidth * (i * 2 + 1))];
                 circles.push({ v: lv, r: initialwidth });
             }
-            var circlecount = initialcount +
+            const circlecount = initialcount +
                 Math.floor(lp.r.sd(0.5, 1) * lp.f.r.hd(10, 50, "outline1 cc") * Math.sqrt(lp.size));
-            for (var i = initialcount; i < circlecount; i++) {
-                var base = circles[Math.max(lp.r.si(0, circles.length - 1), lp.r.si(0, circles.length - 1))];
-                var ncr = lp.r.sd(1, csrlimit);
-                var pr = lp.r.sd(Math.max(0, base.r - ncr), base.r);
-                var pa = lp.r.sd(0, 2 * Math.PI);
+            for (let i = initialcount; i < circlecount; i++) {
+                const base = circles[Math.max(lp.r.si(0, circles.length - 1), lp.r.si(0, circles.length - 1))];
+                let ncr = lp.r.sd(1, csrlimit);
+                const pr = lp.r.sd(Math.max(0, base.r - ncr), base.r);
+                let pa = lp.r.sd(0, 2 * Math.PI);
                 if (pa > Math.PI && lp.r.sb(lp.f.r.hd(0.5, 1.5, "outline1 frontbias"))) {
-                    var pa = lp.r.sd(0, Math.PI);
+                    pa = lp.r.sd(0, Math.PI);
                 }
                 let lv = [base.v[0] + Math.cos(pa) * pr, base.v[1] + Math.sin(pa) * pr];
                 ncr = Math.min(ncr, lv[0] - CANVAS_SHIP_EDGE);
@@ -1152,7 +1138,7 @@
                 ncr = Math.min(ncr, lp.h - CANVAS_SHIP_EDGE - lv[1]);
                 circles.push({ v: lv, r: ncr });
             }
-            lp.csx.fillStyle = "#FFFFFF";
+            lp.csx.fillStyle = "#fff";
             for (let i = 0; i < circles.length; i++) {
                 const lc = circles[i];
                 lp.csx.beginPath();
@@ -1165,20 +1151,20 @@
         };
         //Mess of lines
         outlines[2] = function (lp) {
-            var innersize = [lp.w - 2 * CANVAS_SHIP_EDGE, lp.h - 2 * CANVAS_SHIP_EDGE];
-            var points = [
+            const innersize = [lp.w - 2 * CANVAS_SHIP_EDGE, lp.h - 2 * CANVAS_SHIP_EDGE];
+            const points = [
                 [lp.hw, lp.r.sd(0, 0.05) * innersize[1] + CANVAS_SHIP_EDGE],
                 [lp.hw, lp.r.sd(0.95, 1) * innersize[1] + CANVAS_SHIP_EDGE],
             ];
-            var basefatness = COMPONENT_GRID_SIZE / lp.size +
+            const basefatness = COMPONENT_GRID_SIZE / lp.size +
                 lp.f.r.hd(0.03, 0.1, "outline2 basefatness");
-            var basemessiness = 1 / basefatness;
-            var pointcount = Math.max(3, Math.ceil(basemessiness * lp.r.sd(0.05, 0.1) * Math.sqrt(lp.size)));
+            const basemessiness = 1 / basefatness;
+            const pointcount = Math.max(3, Math.ceil(basemessiness * lp.r.sd(0.05, 0.1) * Math.sqrt(lp.size)));
             // @ts-ignore - We're doing it properly
             lp.csx.lineCap = ["round", "square"][lp.f.r.hi(0, 1, "outline2 linecap")];
-            lp.csx.strokeStyle = "#FFFFFF";
-            for (var npi = 1; npi < pointcount; npi++) {
-                var np = points[npi];
+            lp.csx.strokeStyle = "#fff";
+            for (let npi = 1; npi < pointcount; npi++) {
+                let np = points[npi];
                 if (np == null) {
                     np = [
                         lp.r.sd(0, 1) * innersize[0] + CANVAS_SHIP_EDGE,
@@ -1188,9 +1174,9 @@
                     ];
                     points.push(np);
                 }
-                var cons = 1 + lp.r.sseq(lp.f.r.hd(0, 1, "outline2 conadjust"), 3);
-                for (var nci = 0; nci < cons; nci++) {
-                    var pre = points[lp.r.si(0, points.length - 2)];
+                const cons = 1 + lp.r.sseq(lp.f.r.hd(0, 1, "outline2 conadjust"), 3);
+                for (let nci = 0; nci < cons; nci++) {
+                    const pre = points[lp.r.si(0, points.length - 2)];
                     lp.csx.lineWidth = lp.r.sd(0.7, 1) * basefatness * lp.size;
                     lp.csx.beginPath();
                     lp.csx.moveTo(pre[0], pre[1]);
@@ -1218,7 +1204,7 @@
                 //The initial overall size of this ship, in pixels
                 this.size =
                     size == null
-                        ? Math.pow(this.r.sd(this.f.r.hd(2.5, 3.5, "size min"), this.f.r.hd(5, 7, "size max")), 3)
+                        ? this.r.sd(this.f.r.hd(2.5, 3.5, "size min"), this.f.r.hd(5, 7, "size max")) ** 3
                         : size;
                 const wratio = this.r.sd(this.f.r.hd(0.5, 1, "wratio min"), this.f.r.hd(1, 1.3, "wratio max"));
                 const hratio = this.r.sd(this.f.r.hd(0.7, 1, "hratio min"), this.f.r.hd(1.1, 1.7, "hratio max"));
@@ -1402,6 +1388,27 @@
         }
         // CONCATENATED MODULE: ./src/index.ts
         //
+        function renderShip(lp) {
+            var done = false;
+            do {
+                done = lp.addcomponent();
+            } while (!done);
+            lp.cfx.clearRect(lp.hw + (lp.w % 2), 0, lp.w, lp.h);
+            lp.cfx.scale(-1, 1);
+            lp.cfx.drawImage(lp.cf, 0 - lp.w, 0);
+        }
+        function generateFaction(seed) {
+            return new faction_Faction(seed);
+        }
+        function generateShip(faction, seed, size) {
+            const newShip = new ship_Ship(faction, seed, size);
+            renderShip(newShip);
+            // currentship.cf has the canvas with the image
+            // currentship.width
+            // currentship.height
+            return newShip;
+        }
+        // CONCATENATED MODULE: ./src/demo.js
         const characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
         const DEFAULT_SEED_LENGTH = 16;
         // min and max included
@@ -1415,27 +1422,6 @@
             }
             return s;
         }
-        function renderShip(lp) {
-            var done = false;
-            do {
-                done = lp.addcomponent();
-            } while (!done);
-            lp.cfx.clearRect(lp.hw + (lp.w % 2), 0, lp.w, lp.h);
-            lp.cfx.scale(-1, 1);
-            lp.cfx.drawImage(lp.cf, 0 - lp.w, 0);
-        }
-        function generateFaction(seed) {
-            return new faction_Faction(seed || randomSeed());
-        }
-        function generateShip(faction, seed, size) {
-            const newShip = new ship_Ship(faction, seed || randomSeed(), size);
-            renderShip(newShip);
-            // currentship.cf has the canvas with the image
-            // currentship.width
-            // currentship.height
-            return newShip;
-        }
-        // CONCATENATED MODULE: ./src/demo.js
         function update() {
             const container = document.getElementById("container");
             // Empty it
@@ -1443,14 +1429,14 @@
                 container.removeChild(container.firstChild);
             const factionSeed = document.getElementById("fseed").value;
             const size = document.getElementById("size").value;
-            const faction = factionSeed.length > 1 ? generateFaction(factionSeed) : undefined;
+            const faction = factionSeed.length > 1 ? generateFaction(factionSeed) : null;
             for (let c = 0; c < 20; c++) {
                 const shipDiv = document.createElement("div");
                 shipDiv.className = "ship";
                 const shipCaption = document.createElement("div");
                 const factionCaption = document.createElement("div");
-                const currentFaction = faction || generateFaction();
-                const ship = generateShip(currentFaction, undefined, size || undefined);
+                const currentFaction = faction || generateFaction(randomSeed());
+                const ship = generateShip(currentFaction, randomSeed(), size || undefined);
                 shipCaption.textContent = "Seed: " + ship.baseSeed;
                 factionCaption.textContent = "Faction: " + currentFaction.seed;
                 shipDiv.appendChild(ship.cf);

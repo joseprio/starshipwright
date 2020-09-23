@@ -47,25 +47,20 @@ function leeway(lp: Ship, boundingBox: [Vec, Vec]): Vec {
   ];
 }
 
-function shadowcolor(amount: number): string {
-  //amount is the amount of shadow, 0 - 1.
-  return "rgba(0,0,0," + clamp(amount, 0, 1) + ")";
-}
-
 //lp is the ship. amount is the amount of shadow at the edges, 0 - 1 (the middle is always 0). middlep and edgep should be vectors at the middle and edge of the gradient.
 function shadowGradient(
-  lp: Ship,
+  ctx: CanvasRenderingContext2D,
   middlePoint: Vec,
   edgePoint: Vec,
   amount: number
 ): CanvasGradient {
-  const grad = lp.cfx.createLinearGradient(
+  const grad = ctx.createLinearGradient(
     edgePoint[0],
     edgePoint[1],
     middlePoint[0] * 2 - edgePoint[0],
     middlePoint[1] * 2 - edgePoint[1]
   );
-  const darkness = shadowcolor(amount);
+  const darkness = `rgba(0,0,0,${clamp(amount, 0, 1)})`;
   grad.addColorStop(0, darkness);
   grad.addColorStop(0.5, "rgba(0,0,0,0)");
   grad.addColorStop(1, darkness);
@@ -137,7 +132,7 @@ components[0] = function (lp: Ship, v: Vec) {
     )
   ) {
     lp.cfx.fillStyle = shadowGradient(
-      lp,
+      lp.cfx,
       v,
       [v[0] + trv[0], v[1]],
       lp.r.sd(0, 0.9)
@@ -189,7 +184,7 @@ components[1] = function (lp: Ship, v: Vec) {
     lp.cfx.fillRect(bv[0], bv[1], w, h);
     for (let i = 0; i < count; i++) {
       lp.cfx.fillStyle = shadowGradient(
-        lp,
+        lp.cfx,
         [bv[0] + (i + 0.5) * cw, v[1]],
         [bv[0] + i * cw, v[1]],
         darkness
@@ -204,7 +199,7 @@ components[1] = function (lp: Ship, v: Vec) {
     lp.cfx.fillRect(bv[0], bv[1], h, w);
     for (let i = 0; i < count; i++) {
       lp.cfx.fillStyle = shadowGradient(
-        lp,
+        lp.cfx,
         [v[0], bv[1] + (i + 0.5) * cw],
         [v[0], bv[1] + i * cw],
         darkness

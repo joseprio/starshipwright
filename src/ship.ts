@@ -50,13 +50,10 @@ export class Ship {
     //The initial overall size of this ship, in pixels
     this.size =
       size == null
-        ? Math.pow(
-            this.r.sd(
-              this.f.r.hd(2.5, 3.5, "size min"),
-              this.f.r.hd(5, 7, "size max")
-            ),
-            3
-          )
+        ? this.r.sd(
+            this.f.r.hd(2.5, 3.5, "size min"),
+            this.f.r.hd(5, 7, "size max")
+          ) ** 3
         : size;
     const wratio = this.r.sd(
       this.f.r.hd(0.5, 1, "wratio min"),

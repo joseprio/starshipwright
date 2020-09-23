@@ -29,14 +29,10 @@ function leeway(lp, boundingBox) {
         Math.min(boundingBox[0][1] - CANVAS_SHIP_EDGE, lp.h - CANVAS_SHIP_EDGE - boundingBox[1][1]),
     ];
 }
-function shadowcolor(amount) {
-    //amount is the amount of shadow, 0 - 1.
-    return "rgba(0,0,0," + clamp(amount, 0, 1) + ")";
-}
 //lp is the ship. amount is the amount of shadow at the edges, 0 - 1 (the middle is always 0). middlep and edgep should be vectors at the middle and edge of the gradient.
-function shadowGradient(lp, middlePoint, edgePoint, amount) {
-    const grad = lp.cfx.createLinearGradient(edgePoint[0], edgePoint[1], middlePoint[0] * 2 - edgePoint[0], middlePoint[1] * 2 - edgePoint[1]);
-    const darkness = shadowcolor(amount);
+function shadowGradient(ctx, middlePoint, edgePoint, amount) {
+    const grad = ctx.createLinearGradient(edgePoint[0], edgePoint[1], middlePoint[0] * 2 - edgePoint[0], middlePoint[1] * 2 - edgePoint[1]);
+    const darkness = `rgba(0,0,0,${clamp(amount, 0, 1)})`;
     grad.addColorStop(0, darkness);
     grad.addColorStop(0.5, "rgba(0,0,0,0)");
     grad.addColorStop(1, darkness);
@@ -92,7 +88,7 @@ components[0] = function (lp, v) {
         }
     }
     if (lp.r.sb(clamp((pcdone * 0.6 + 0.3) * (lcms / COMPONENT_MAXIMUM_SIZE), 0, 0.98))) {
-        lp.cfx.fillStyle = shadowGradient(lp, v, [v[0] + trv[0], v[1]], lp.r.sd(0, 0.9));
+        lp.cfx.fillStyle = shadowGradient(lp.cfx, v, [v[0] + trv[0], v[1]], lp.r.sd(0, 0.9));
         lp.cfx.fillRect(v[0] - trv[0], v[1] - trv[1], dho[0] * counts[0], dho[1] * counts[1]);
     }
 };
@@ -132,7 +128,7 @@ components[1] = function (lp, v) {
         lp.cfx.fillStyle = ccolor;
         lp.cfx.fillRect(bv[0], bv[1], w, h);
         for (let i = 0; i < count; i++) {
-            lp.cfx.fillStyle = shadowGradient(lp, [bv[0] + (i + 0.5) * cw, v[1]], [bv[0] + i * cw, v[1]], darkness);
+            lp.cfx.fillStyle = shadowGradient(lp.cfx, [bv[0] + (i + 0.5) * cw, v[1]], [bv[0] + i * cw, v[1]], darkness);
             lp.cfx.fillRect(bv[0] + i * cw, bv[1], cw, h);
         }
     }
@@ -143,7 +139,7 @@ components[1] = function (lp, v) {
         lp.cfx.fillStyle = ccolor;
         lp.cfx.fillRect(bv[0], bv[1], h, w);
         for (let i = 0; i < count; i++) {
-            lp.cfx.fillStyle = shadowGradient(lp, [v[0], bv[1] + (i + 0.5) * cw], [v[0], bv[1] + i * cw], darkness);
+            lp.cfx.fillStyle = shadowGradient(lp.cfx, [v[0], bv[1] + (i + 0.5) * cw], [v[0], bv[1] + i * cw], darkness);
             lp.cfx.fillRect(bv[0], bv[1] + i * cw, w, cw);
         }
     }
