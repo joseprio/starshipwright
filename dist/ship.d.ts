@@ -5,7 +5,7 @@ declare type Cell = {
     gy: number;
     x: number;
     y: number;
-    state: number;
+    phase: number;
 };
 export declare class Ship {
     f: Faction;
@@ -37,7 +37,7 @@ export declare class Ship {
     csd: ImageData;
     constructor(p_faction: Faction, p_seed: string, size?: number);
     getcell(x: number, y: number): Cell;
-    getcellstate(x: number, y: number): number;
+    getCellPhase(x: number, y: number): number;
     getspa(x: number, y: number): number;
     getpcdone(): number;
     addcomponent(): boolean;

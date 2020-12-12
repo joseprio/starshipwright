@@ -1,7 +1,7 @@
 export declare class Randomizer {
     seed: string;
     stateArray: Array<number>;
-    state: number;
+    current: number;
     seedPosition: number;
     arrayPosition: number;
     hrCache: {

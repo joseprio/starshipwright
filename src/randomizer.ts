@@ -1,7 +1,7 @@
 export class Randomizer {
   seed: string;
   stateArray: Array<number>;
-  state: number;
+  current: number;
   seedPosition: number = 0;
   arrayPosition: number = 0;
   hrCache: { [key: string]: number } = {};
@@ -24,17 +24,17 @@ export class Randomizer {
       2923087685,
       1593177610,
     ];
-    this.state = 3234042090;
+    this.current = 3234042090;
     for (var i = this.seed.length - 1; i >= 0; i--) {
       var c = this.seed.charCodeAt(i);
-      this.state =
-        (((this.state << 5) + this.state) ^
+      this.current =
+        (((this.current << 5) + this.current) ^
           c ^
-          (this.state << ((c % 13) + 1)) ^
-          (this.state >> ((c % 17) + 1))) >>>
+          (this.current << ((c % 13) + 1)) ^
+          (this.current >> ((c % 17) + 1))) >>>
         0;
       this.stateArray[i % 8] ^=
-        (((this.state >> 9) * ((this.state % 16384) + 3427)) ^ c) >>> 0;
+        (((this.current >> 9) * ((this.current % 16384) + 3427)) ^ c) >>> 0;
     }
   }
 
@@ -42,20 +42,20 @@ export class Randomizer {
   sr() {
     var c = this.seed.charCodeAt(this.seedPosition);
     var lsa = this.stateArray[this.arrayPosition];
-    this.state =
-      (((this.state << 5) + this.state + lsa) ^
+    this.current =
+      (((this.current << 5) + this.current + lsa) ^
         c ^
-        (this.state << ((c % 17) + 1)) ^
-        (this.state >> ((c % 13) + 1))) >>>
+        (this.current << ((c % 17) + 1)) ^
+        (this.current >> ((c % 13) + 1))) >>>
       0;
     this.stateArray[this.arrayPosition] =
       ((lsa >> 3) ^
         (lsa << ((c % 19) + 1)) ^
-        ((this.state % 134217728) * 3427)) >>>
+        ((this.current % 134217728) * 3427)) >>>
       0;
     this.seedPosition = (this.seedPosition + 1) % this.seed.length;
     this.arrayPosition = (this.arrayPosition + 1) % 8;
-    return this.state;
+    return this.current;
   }
 
   //Returns a raw unsigned 32-bit integer based on hashing this object's seed with the specified string.

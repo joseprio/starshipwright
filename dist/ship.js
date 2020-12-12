@@ -47,8 +47,8 @@ export class Ship {
                     gy: gy,
                     x: Math.floor(this.gwextra + (gx + 0.5) * COMPONENT_GRID_SIZE),
                     y: Math.floor(this.ghextra + (gy + 0.5) * COMPONENT_GRID_SIZE),
-                    state: 0,
-                }; //state is 0 for unchecked, 1 for checked and good, and -1 for checked and bad.
+                    phase: 0,
+                }; // phase is 0 for unchecked, 1 for checked and good, and -1 for checked and bad.
             }
         }
         this.goodcells = [
@@ -59,49 +59,49 @@ export class Ship {
             const lcell = this.goodcells[nextcheck];
             if (lcell.gx > 0) {
                 const ncell = this.cgrid[lcell.gx - 1][lcell.gy];
-                if (ncell.state == 0) {
+                if (ncell.phase == 0) {
                     if (this.getspa(ncell.x, ncell.y) > 0) {
-                        ncell.state = 1;
+                        ncell.phase = 1;
                         this.goodcells.push(ncell);
                     }
                     else {
-                        ncell.state = -1;
+                        ncell.phase = -1;
                     }
                 }
             }
             if (lcell.gx < this.gw - 1) {
                 const ncell = this.cgrid[lcell.gx + 1][lcell.gy];
-                if (ncell.state == 0) {
+                if (ncell.phase == 0) {
                     if (this.getspa(ncell.x, ncell.y) > 0) {
-                        ncell.state = 1;
+                        ncell.phase = 1;
                         this.goodcells.push(ncell);
                     }
                     else {
-                        ncell.state = -1;
+                        ncell.phase = -1;
                     }
                 }
             }
             if (lcell.gy > 0) {
                 const ncell = this.cgrid[lcell.gx][lcell.gy - 1];
-                if (ncell.state == 0) {
+                if (ncell.phase == 0) {
                     if (this.getspa(ncell.x, ncell.y) > 0) {
-                        ncell.state = 1;
+                        ncell.phase = 1;
                         this.goodcells.push(ncell);
                     }
                     else {
-                        ncell.state = -1;
+                        ncell.phase = -1;
                     }
                 }
             }
             if (lcell.gy < this.gh - 1) {
                 const ncell = this.cgrid[lcell.gx][lcell.gy + 1];
-                if (ncell.state == 0) {
+                if (ncell.phase == 0) {
                     if (this.getspa(ncell.x, ncell.y) > 0) {
-                        ncell.state = 1;
+                        ncell.phase = 1;
                         this.goodcells.push(ncell);
                     }
                     else {
-                        ncell.state = -1;
+                        ncell.phase = -1;
                     }
                 }
             }
@@ -110,8 +110,8 @@ export class Ship {
         for (let i = 0; i < this.goodcells.length; i++) {
             const lcell = this.goodcells[i];
             const ocell = this.cgrid[this.gw - 1 - lcell.gx][lcell.gy];
-            if (ocell.state != 1) {
-                ocell.state = 1;
+            if (ocell.phase != 1) {
+                ocell.phase = 1;
                 this.goodcells.push(ocell);
             }
         }
@@ -129,13 +129,13 @@ export class Ship {
         }
         return this.cgrid[gx][gy];
     }
-    //Returns the state of the cell containing (X,Y), or 0 if there is no such cell
-    getcellstate(x, y) {
+    //Returns the phase of the cell containing (X,Y), or 0 if there is no such cell
+    getCellPhase(x, y) {
         const lcell = this.getcell(x, y);
         if (lcell == null) {
             return 0;
         }
-        return lcell.state;
+        return lcell.phase;
     }
     //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or -1 if (X,Y) is out of bounds.
     getspa(x, y) {

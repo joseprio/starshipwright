@@ -3,7 +3,7 @@ import {
   COMPONENT_MAXIMUM_SIZE,
   CANVAS_SHIP_EDGE,
 } from "./constants";
-import { clamp, colorToHex, copyArray, scaleColorBy } from "./utils";
+import { clamp, colorToHex, scaleColorBy } from "./utils";
 import type { Ship } from "./ship";
 import type { Vec } from "./types";
 
@@ -102,8 +102,8 @@ components[0] = function (lp: Ship, v: Vec) {
   ];
   const pcdone = lp.getpcdone();
   const basecolor = lp.f.getBaseColor(lp);
-  const icolorh = colorToHex(scaleColorBy(basecolor, lp.r.sd(0.4, 1)));
-  const ocolorh = colorToHex(scaleColorBy(basecolor, lp.r.sd(0.4, 1)));
+  const icolorh = scaleColorBy(basecolor, lp.r.sd(0.4, 1));
+  const ocolorh = scaleColorBy(basecolor, lp.r.sd(0.4, 1));
   lp.cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
   lp.cfx.fillRect(
     v[0] - trv[0] - 1,
@@ -170,7 +170,7 @@ components[1] = function (lp: Ship, v: Vec) {
   const count = Math.max(1, Math.round(w / cw));
   w = count * cw;
   const basecolor = lp.f.getBaseColor(lp);
-  const ccolor = colorToHex(scaleColorBy(basecolor, lp.r.sd(0.5, 1)));
+  const ccolor = scaleColorBy(basecolor, lp.r.sd(0.5, 1));
   const darkness = lp.r.sd(0.3, 0.9);
   // true = horizontal array, false = vertical array
   const orientation = lp.r.sb(
@@ -242,61 +242,60 @@ components[2] = function (lp: Ship, v: Vec) {
   const count = clamp(Math.floor(h / hpair), 1, h);
   const htotal = count * hpair + (odd ? h2[0] : 0);
   const basecolor = lp.f.getBaseColor(lp);
+  const scale_0 = lp.r.sd(0.6, 1);
+  const scale_1 = lp.r.sd(0.6, 1);
   const color2 = [
-    scaleColorBy(basecolor, lp.r.sd(0.6, 1)),
-    scaleColorBy(basecolor, lp.r.sd(0.6, 1)),
+    scaleColorBy(basecolor, scale_0),
+    scaleColorBy(basecolor, scale_1),
   ];
-  const darkness = lp.r.sd(0.5, 0.95);
-  const lightness = 1 - darkness;
+  const lightness = 1 - lp.r.sd(0.5, 0.95);
   const colord2 = [
-    scaleColorBy(color2[0], lightness),
-    scaleColorBy(color2[1], lightness),
+    scaleColorBy(basecolor, lightness * scale_0),
+    scaleColorBy(basecolor, lightness * scale_1),
   ];
   const orientation = lp.r.sb(
     Math.pow(lp.f.r.hd(0, 1, "com2 verticalchance"), 0.1)
   );
   if (orientation) {
-    const grad2 = [
-      lp.cfx.createLinearGradient(v[0] - wh2[0], v[1], v[0] + wh2[0], v[1]),
-      lp.cfx.createLinearGradient(v[0] - wh2[1], v[1], v[0] + wh2[1], v[1]),
-    ];
-    grad2[0].addColorStop(0, colorToHex(colord2[0]));
-    grad2[0].addColorStop(0.5, colorToHex(color2[0]));
-    grad2[0].addColorStop(1, colorToHex(colord2[0]));
-    grad2[1].addColorStop(0, colorToHex(colord2[1]));
-    grad2[1].addColorStop(0.5, colorToHex(color2[1]));
-    grad2[1].addColorStop(1, colorToHex(colord2[1]));
+    const grad2_0 = lp.cfx.createLinearGradient(v[0] - wh2[0], v[1], v[0] + wh2[0], v[1]);
+    const grad2_1 = lp.cfx.createLinearGradient(v[0] - wh2[1], v[1], v[0] + wh2[1], v[1]);
+
+    grad2_0.addColorStop(0, colord2[0]);
+    grad2_0.addColorStop(0.5, color2[0]);
+    grad2_0.addColorStop(1, colord2[0]);
+    grad2_1.addColorStop(0, colord2[1]);
+    grad2_1.addColorStop(0.5, color2[1]);
+    grad2_1.addColorStop(1, colord2[1]);
     const by = Math.floor(v[1] - htotal / 2);
     for (let i = 0; i < count; i++) {
-      lp.cfx.fillStyle = grad2[0];
+      lp.cfx.fillStyle = grad2_0;
       lp.cfx.fillRect(v[0] - wh2[0], by + i * hpair, wh2[0] * 2, h2[0]);
-      lp.cfx.fillStyle = grad2[1];
+      lp.cfx.fillStyle = grad2_1;
       lp.cfx.fillRect(v[0] - wh2[1], by + i * hpair + h2[0], wh2[1] * 2, h2[1]);
     }
     if (odd) {
-      lp.cfx.fillStyle = grad2[0];
+      lp.cfx.fillStyle = grad2_0;
       lp.cfx.fillRect(v[0] - wh2[0], by + count * hpair, wh2[0] * 2, h2[0]);
     }
   } else {
-    const grad2 = [
-      lp.cfx.createLinearGradient(v[0], v[1] - wh2[0], v[0], v[1] + wh2[0]),
-      lp.cfx.createLinearGradient(v[0], v[1] - wh2[1], v[0], v[1] + wh2[1]),
-    ];
-    grad2[0].addColorStop(0, colorToHex(colord2[0]));
-    grad2[0].addColorStop(0.5, colorToHex(color2[0]));
-    grad2[0].addColorStop(1, colorToHex(colord2[0]));
-    grad2[1].addColorStop(0, colorToHex(colord2[1]));
-    grad2[1].addColorStop(0.5, colorToHex(color2[1]));
-    grad2[1].addColorStop(1, colorToHex(colord2[1]));
+    const grad2_0 = lp.cfx.createLinearGradient(v[0], v[1] - wh2[0], v[0], v[1] + wh2[0]);
+    const grad2_1 = lp.cfx.createLinearGradient(v[0], v[1] - wh2[1], v[0], v[1] + wh2[1]);
+
+    grad2_0.addColorStop(0, colord2[0]);
+    grad2_0.addColorStop(0.5, color2[0]);
+    grad2_0.addColorStop(1, colord2[0]);
+    grad2_1.addColorStop(0, colord2[1]);
+    grad2_1.addColorStop(0.5, color2[1]);
+    grad2_1.addColorStop(1, colord2[1]);
     const bx = Math.floor(v[0] - htotal / 2);
     for (let i = 0; i < count; i++) {
-      lp.cfx.fillStyle = grad2[0];
+      lp.cfx.fillStyle = grad2_0;
       lp.cfx.fillRect(bx + i * hpair, v[1] - wh2[0], h2[0], wh2[0] * 2);
-      lp.cfx.fillStyle = grad2[1];
+      lp.cfx.fillStyle = grad2_1;
       lp.cfx.fillRect(bx + i * hpair + h2[0], v[1] - wh2[1], h2[1], wh2[1] * 2);
     }
     if (odd) {
-      lp.cfx.fillStyle = grad2[0];
+      lp.cfx.fillStyle = grad2_0;
       lp.cfx.fillRect(bx + count * hpair, v[1] - wh2[0], h2[0], wh2[0] * 2);
     }
   }
@@ -306,8 +305,8 @@ components[2] = function (lp: Ship, v: Vec) {
 components[3] = function (lp: Ship, v: Vec) {
   if (
     lp.r.sb(frontness(lp, v) - 0.3) ||
-    lp.getcellstate(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) > 0 ||
-    lp.getcellstate(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8) > 0
+    lp.getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) > 0 ||
+    lp.getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8) > 0
   ) {
     for (let tries = 0; tries < 100; tries++) {
       const which = lp.r.schoose(lp.f.componentChances);
@@ -359,24 +358,24 @@ components[3] = function (lp: Ship, v: Vec) {
   ];
   grad2[0].addColorStop(
     0,
-    colorToHex(scaleColorBy(basecolor, lightness0_edge))
+    scaleColorBy(basecolor, lightness0_edge)
   );
   grad2[0].addColorStop(
     0.5,
-    colorToHex(scaleColorBy(basecolor, lightness0_mid))
+    scaleColorBy(basecolor, lightness0_mid)
   );
   grad2[0].addColorStop(
     1,
-    colorToHex(scaleColorBy(basecolor, lightness0_edge))
+    scaleColorBy(basecolor, lightness0_edge)
   );
   grad2[1].addColorStop(
     0,
-    colorToHex(scaleColorBy(basecolor, lightness1_edge))
+    scaleColorBy(basecolor, lightness1_edge)
   );
   grad2[1].addColorStop(0.5, colorToHex(basecolor));
   grad2[1].addColorStop(
     1,
-    colorToHex(scaleColorBy(basecolor, lightness1_edge))
+    scaleColorBy(basecolor, lightness1_edge)
   );
   const by = Math.ceil(v[1] - h / 2);
   lp.cfx.fillStyle = grad2[0];
@@ -410,8 +409,8 @@ components[4] = function (lp: Ship, v: Vec) {
   const lightmid = lp.r.sd(0.7, 1);
   const lightedge = lp.r.sd(0, 0.2);
   const basecolor = lp.f.getBaseColor(lp);
-  const colormid = colorToHex(scaleColorBy(basecolor, lightmid));
-  const coloredge = colorToHex(scaleColorBy(basecolor, lightedge));
+  const colormid = scaleColorBy(basecolor, lightmid);
+  const coloredge = scaleColorBy(basecolor, lightedge);
   const w = Math.max(
     3,
     Math.ceil(
@@ -508,12 +507,12 @@ components[4] = function (lp: Ship, v: Vec) {
     1 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc2"), 2),
   ];
   components[lp.r.schoose(coverComC)](lp, v);
-  if (lp.getcellstate(ev[0], ev[1]) > 0) {
+  if (lp.getCellPhase(ev[0], ev[1]) > 0) {
     const nev = [
       ev[0] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
       ev[1] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
     ];
-    if (lp.getcellstate(nev[0], nev[1]) > 0) {
+    if (lp.getCellPhase(nev[0], nev[1]) > 0) {
       components[lp.r.schoose(coverComC)](lp, nev);
     } else {
       components[lp.r.schoose(coverComC)](lp, ev);
@@ -542,8 +541,8 @@ components[5] = function (lp: Ship, v: Vec) {
   const lightmid = lp.r.sd(0.75, 1);
   const lightedge = lp.r.sd(0, 0.25);
   const basecolor = lp.f.getBaseColor(lp);
-  const colormid = colorToHex(scaleColorBy(basecolor, lightmid));
-  const coloredge = colorToHex(scaleColorBy(basecolor, lightedge));
+  const colormid = scaleColorBy(basecolor, lightmid);
+  const coloredge = scaleColorBy(basecolor, lightedge);
   const countx =
     1 +
     lp.r.sseq(
@@ -591,7 +590,7 @@ components[5] = function (lp: Ship, v: Vec) {
 //Forward-facing trapezoidal fin
 components[6] = function (lp: Ship, v: Vec) {
   if (lp.nextpass <= 0 || lp.r.sb(frontness(lp, v))) {
-    components[lp.r.schoose(copyArray(lp.f.componentChances, 0, 5))](lp, v);
+    components[lp.r.schoose(lp.f.componentChances.slice(0, 6))](lp, v);
     return;
   }
   let lcms = COMPONENT_MAXIMUM_SIZE;
@@ -649,7 +648,7 @@ components[6] = function (lp: Ship, v: Vec) {
   lp.cfx.lineTo(quad[2][0] - 1, quad[2][1]);
   lp.cfx.lineTo(quad[3][0] - 1, quad[3][1]);
   lp.cfx.fill();
-  lp.cfx.fillStyle = colorToHex(scaleColorBy(basecolor, lp.r.sd(0.7, 1)));
+  lp.cfx.fillStyle = scaleColorBy(basecolor, lp.r.sd(0.7, 1));
   lp.cfx.beginPath();
   lp.cfx.moveTo(quad[0][0], quad[0][1]);
   lp.cfx.lineTo(quad[1][0], quad[1][1]);
@@ -664,7 +663,7 @@ components["cabin !UNUSED"] = function (
   v //Cabin
 ) {
   if (lp.nextpass <= 0 || lp.r.sb(backness(lp, v))) {
-    components[lp.r.schoose(copyArray(lp.f.componentChances, 0, 5))](lp, v);
+    components[lp.r.schoose(lp.f.componentChances.slice(0, 6))](lp, v);
     return;
   }
   var lcms = cms;

@@ -1,30 +1,23 @@
-export function copyArray(a, begin, end) {
-    const rv = new Array(end - begin);
-    for (let i = end; i >= begin; i--) {
-        rv[i - begin] = a[i];
-    }
-    return rv;
-}
 export function clamp(n, min, max) {
     return Math.max(min, Math.min(max, n));
 }
-function hexpad(n, l) {
+function colorChannelToHex(n) {
     //For integer n and length l.
-    var s = Math.floor(n).toString(16);
-    while (s.length < l) {
+    var s = Math.floor(clamp(n, 0, 1) * 255).toString(16);
+    if (s.length < 2) {
         s = "0" + s;
     }
     return s;
 }
 export function colorToHex(color) {
     return ("#" +
-        hexpad(Math.floor(clamp(color[0], 0, 1) * 255), 2) +
-        (hexpad(Math.floor(clamp(color[1], 0, 1) * 255), 2) +
-            hexpad(Math.floor(clamp(color[2], 0, 1) * 255), 2)));
+        colorChannelToHex(color[0]) +
+        colorChannelToHex(color[1]) +
+        colorChannelToHex(color[2]));
 }
 // Take a color and multiplies it with a factor. factor = 0 produces black.
 export function scaleColorBy(color, factor) {
-    return [color[0] * factor, color[1] * factor, color[2] * factor];
+    return colorToHex([color[0] * factor, color[1] * factor, color[2] * factor]);
 }
 // Takes a triplet [H,S,V] and returns a triplet [R,G,B], representing the same color. All components are 0 - 1.
 export function hsvToRgb(hsv) {
