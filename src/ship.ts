@@ -63,19 +63,19 @@ export class Ship {
       this.f.r.hd(0.7, 1, "hratio min"),
       this.f.r.hd(1.1, 1.7, "hratio max")
     );
-    this.w = Math.floor(this.size * wratio) + 2 * CANVAS_SHIP_EDGE; //Maximum width of this ship, in pixels.
+    this.w = Math.floor(this.size * wratio) + 2 * CANVAS_SHIP_EDGE; // Maximum width of this ship, in pixels
     this.hw = Math.floor(this.w / 2);
     this.gw = Math.floor((this.w - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
     this.gwextra = (this.w - this.gw * COMPONENT_GRID_SIZE) * 0.5;
-    this.h = Math.floor(this.size * hratio) + 2 * CANVAS_SHIP_EDGE; //Maximum height of this ship, in pixels.
+    this.h = Math.floor(this.size * hratio) + 2 * CANVAS_SHIP_EDGE; // Maximum height of this ship, in pixels
     this.hh = Math.floor(this.h / 2);
     this.gh = Math.floor((this.h - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
     this.ghextra = (this.h - this.gh * COMPONENT_GRID_SIZE) * 0.5;
-    this.cs = document.createElement("canvas"); //Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0.
-    this.cs.setAttribute("width", String(this.w));
-    this.cs.setAttribute("height", String(this.h));
-    this.csx = this.cs.getContext("2d");
-    this.cf = document.createElement("canvas"); //Canvas on which the actual ship components are drawn. Ships face upwards, with front towards Y=0.
+    const cs = document.createElement("canvas"); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
+    cs.width = this.w;
+    cs.height = this.h;
+    this.csx = cs.getContext("2d");
+    this.cf = document.createElement("canvas"); // Canvas on which the actual ship components are drawn. Ships face upwards, with front towards Y=0
     this.cf.setAttribute("width", String(this.w));
     this.cf.setAttribute("height", String(this.h));
     this.cfx = this.cf.getContext("2d");
@@ -91,7 +91,7 @@ export class Ship {
           x: Math.floor(this.gwextra + (gx + 0.5) * COMPONENT_GRID_SIZE),
           y: Math.floor(this.ghextra + (gy + 0.5) * COMPONENT_GRID_SIZE),
           phase: 0,
-        }; // phase is 0 for unchecked, 1 for checked and good, and -1 for checked and bad.
+        }; // Phase is 0 for unchecked, 1 for checked and good, and -1 for checked and bad
       }
     }
     this.goodcells = [
@@ -163,6 +163,11 @@ export class Ship {
       )
     );
     this.totalcomponents = this.passes * this.goodcells.length + this.extra;
+
+    let done = false;
+    do {
+      done = this.addcomponent();
+    } while (!done);
   }
 
   // Returns the cell containing (X,Y), if there is one, or null otherwise
@@ -238,7 +243,7 @@ export class Ship {
     }
     if (Math.abs(lv[0] - this.hw) < COMPONENT_GRID_SIZE) {
       if (this.r.sb(this.f.r.hd(0, 1, "com middleness"))) {
-        lv[0] = Math.floor(this.hw);
+        lv[0] = this.hw;
       }
     }
     components[this.r.schoose(this.f.componentChances)](this, lv);
