@@ -378,12 +378,12 @@ components[4] = function (lp, v) {
         grad.addColorStop(1, coloredge);
         lp.cfx.fillStyle = grad;
         lp.cfx.fillRect(v[0], v[1] - hwi, Math.ceil(lp.hw - v[0]) + 1, w);
-        ev = [Math.floor(lp.hw), v[1]];
+        ev = [lp.hw, v[1]];
     }
     const coverComC = [
         0.6 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc0"), 2),
         0.2 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc1"), 2),
-        1 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc2"), 2),
+        Math.pow(lp.f.r.hd(0, 1, "com4 covercomc2"), 2),
     ];
     components[lp.r.schoose(coverComC)](lp, v);
     if (lp.getCellPhase(ev[0], ev[1]) > 0) {

@@ -1,1 +1,2 @@
-export declare const outlines: any[];
+import { Ship } from "./ship";
+export declare const outlines: ((lp: Ship) => void)[];

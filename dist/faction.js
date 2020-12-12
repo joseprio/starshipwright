@@ -7,13 +7,12 @@ export class Faction {
         this.colors = [];
         this.colorChances = [];
         this.seed = seed;
-        this.r = new Randomizer(this.seed);
+        this.r = new Randomizer(seed);
         this.setupComponentChances();
         this.setupColors();
     }
     setupComponentChances() {
-        this.componentChances = [];
-        const dp = 8; //Default maximum power
+        const dp = 8; // Default maximum power
         this.componentChances[0] =
             0.8 * this.r.sd(0.001, 1) * Math.pow(2, this.r.sd(0, dp));
         this.componentChances[1] =
@@ -30,7 +29,7 @@ export class Faction {
             0.5 * this.r.sd(0, 1) * Math.pow(2, this.r.sd(0, dp));
     }
     setupColors() {
-        const dp = 6; //Default maximum power.
+        const dp = 6; // Default maximum power
         const baseColorCount = 1 +
             (this.r.hb(0.7, "base color +1") ? 1 : 0) +
             this.r.hseq(0.3, 3, "base color count");
@@ -47,8 +46,7 @@ export class Faction {
     //Where lp is the ship to get the color for.
     getBaseColor(lp) {
         let rv = this.colors[lp.r.schoose(this.colorChances)];
-        if (true &&
-            lp.r.sb(Math.pow(this.r.hd(0, 0.5, "base color shift chance"), 2))) {
+        if (lp.r.sb(Math.pow(this.r.hd(0, 0.5, "base color shift chance"), 2))) {
             rv = [rv[0], rv[1], rv[2]];
             rv[0] = clamp(rv[0] +
                 Math.pow(this.r.hd(0, 0.6, "base color shift range red"), 2) *

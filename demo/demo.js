@@ -359,13 +359,12 @@ class faction_Faction {
         this.colors = [];
         this.colorChances = [];
         this.seed = seed;
-        this.r = new Randomizer(this.seed);
+        this.r = new Randomizer(seed);
         this.setupComponentChances();
         this.setupColors();
     }
     setupComponentChances() {
-        this.componentChances = [];
-        const dp = 8; //Default maximum power
+        const dp = 8; // Default maximum power
         this.componentChances[0] =
             0.8 * this.r.sd(0.001, 1) * Math.pow(2, this.r.sd(0, dp));
         this.componentChances[1] =
@@ -382,7 +381,7 @@ class faction_Faction {
             0.5 * this.r.sd(0, 1) * Math.pow(2, this.r.sd(0, dp));
     }
     setupColors() {
-        const dp = 6; //Default maximum power.
+        const dp = 6; // Default maximum power
         const baseColorCount = 1 +
             (this.r.hb(0.7, "base color +1") ? 1 : 0) +
             this.r.hseq(0.3, 3, "base color count");
@@ -399,8 +398,7 @@ class faction_Faction {
     //Where lp is the ship to get the color for.
     getBaseColor(lp) {
         let rv = this.colors[lp.r.schoose(this.colorChances)];
-        if ( true &&
-            lp.r.sb(Math.pow(this.r.hd(0, 0.5, "base color shift chance"), 2))) {
+        if (lp.r.sb(Math.pow(this.r.hd(0, 0.5, "base color shift chance"), 2))) {
             rv = [rv[0], rv[1], rv[2]];
             rv[0] = clamp(rv[0] +
                 Math.pow(this.r.hd(0, 0.6, "base color shift range red"), 2) *
@@ -808,12 +806,12 @@ components[4] = function (lp, v) {
         grad.addColorStop(1, coloredge);
         lp.cfx.fillStyle = grad;
         lp.cfx.fillRect(v[0], v[1] - hwi, Math.ceil(lp.hw - v[0]) + 1, w);
-        ev = [Math.floor(lp.hw), v[1]];
+        ev = [lp.hw, v[1]];
     }
     const coverComC = [
         0.6 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc0"), 2),
         0.2 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc1"), 2),
-        1 * Math.pow(lp.f.r.hd(0, 1, "com4 covercomc2"), 2),
+        Math.pow(lp.f.r.hd(0, 1, "com4 covercomc2"), 2),
     ];
     components[lp.r.schoose(coverComC)](lp, v);
     if (lp.getCellPhase(ev[0], ev[1]) > 0) {
@@ -1046,142 +1044,143 @@ components["cabin !UNUSED"] = function (
 
 
 //Each outline function takes a single argument 'lp' denoting the ship to draw the outline for.
-const outlines = [];
-//Joined rectangles.
-outlines[0] = function (lp) {
-    const csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
-    const csarealimit = csarea * 0.05;
-    const initialwidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.r.hd(0.1, 1, "outline0 iw") * 0.2);
-    const blocks = [
-        [
-            [lp.hw - initialwidth, CANVAS_SHIP_EDGE],
-            [lp.hw + initialwidth, lp.h - CANVAS_SHIP_EDGE],
-        ],
-    ];
-    const blockcount = 2 +
-        Math.floor(lp.r.sd(0.5, 1) * lp.f.r.hd(2, 8, "outline0 bc") * Math.sqrt(lp.size));
-    for (let i = 1; i < blockcount; i++) {
-        const base = blocks[lp.r.si(0, blocks.length - 1)];
-        const v0 = [
-            base[0][0] + lp.r.sd(0, 1) * (base[1][0] - base[0][0]),
-            base[0][1] + lp.r.sd(0, 1) * (base[1][1] - base[0][1]),
+const outlines = [
+    // 0: Joined rectangles.
+    function (lp) {
+        const csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
+        const csarealimit = csarea * 0.05;
+        const initialwidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.r.hd(0.1, 1, "outline0 iw") * 0.2);
+        const blocks = [
+            [
+                [lp.hw - initialwidth, CANVAS_SHIP_EDGE],
+                [lp.hw + initialwidth, lp.h - CANVAS_SHIP_EDGE],
+            ],
         ];
-        if (v0[1] < (base[0][1] + base[1][1]) * 0.5 &&
-            lp.r.sb(lp.f.r.hd(0.5, 1.5, "outline0 frontbias"))) {
-            v0[1] = base[1][1] - (v0[1] - base[0][1]);
-        }
-        const v1 = [
-            clamp(lp.r.sd(0, 1) * lp.w, CANVAS_SHIP_EDGE, lp.w - CANVAS_SHIP_EDGE),
-            clamp(lp.r.sd(0, 1) * lp.h, CANVAS_SHIP_EDGE, lp.h - CANVAS_SHIP_EDGE),
-        ];
-        const area = Math.abs((v1[0] - v0[0]) * (v1[1] - v0[1]));
-        const ratio = csarealimit / area;
-        if (ratio < 1) {
-            v1[0] = v0[0] + (v1[0] - v0[0]) * ratio;
-            v1[1] = v0[1] + (v1[1] - v0[1]) * ratio;
-        }
-        if (v0[0] > v1[0]) {
-            const t = v0[0];
-            v0[0] = v1[0];
-            v1[0] = t;
-        }
-        if (v0[1] > v1[1]) {
-            const t = v0[1];
-            v0[1] = v1[1];
-            v1[1] = t;
-        }
-        blocks.push([
-            [Math.floor(v0[0]), Math.floor(v0[1])],
-            [Math.ceil(v1[0]), Math.ceil(v1[1])],
-        ]);
-    }
-    lp.csx.fillStyle = "#FFFFFF";
-    for (let i = 0; i < blocks.length; i++) {
-        const lb = blocks[i];
-        lp.csx.fillRect(lb[0][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
-        lp.csx.fillRect(lp.w - lb[1][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
-    }
-};
-//Joined circles
-outlines[1] = function (lp) {
-    const csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
-    const csarealimit = csarea * 0.05;
-    const csrlimit = Math.max(2, Math.sqrt(csarealimit / Math.PI));
-    const initialwidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.r.hd(0.1, 1, "outline1 iw") * 0.2);
-    const circles = [];
-    const initialcount = Math.floor((lp.h - 2 * CANVAS_SHIP_EDGE) / (initialwidth * 2));
-    for (let i = 0; i < initialcount; i++) {
-        let lv = [lp.hw, lp.h - (CANVAS_SHIP_EDGE + initialwidth * (i * 2 + 1))];
-        circles.push({ v: lv, r: initialwidth });
-    }
-    const circlecount = initialcount +
-        Math.floor(lp.r.sd(0.5, 1) * lp.f.r.hd(10, 50, "outline1 cc") * Math.sqrt(lp.size));
-    for (let i = initialcount; i < circlecount; i++) {
-        const base = circles[Math.max(lp.r.si(0, circles.length - 1), lp.r.si(0, circles.length - 1))];
-        let ncr = lp.r.sd(1, csrlimit);
-        const pr = lp.r.sd(Math.max(0, base.r - ncr), base.r);
-        let pa = lp.r.sd(0, 2 * Math.PI);
-        if (pa > Math.PI && lp.r.sb(lp.f.r.hd(0.5, 1.5, "outline1 frontbias"))) {
-            pa = lp.r.sd(0, Math.PI);
-        }
-        let lv = [base.v[0] + Math.cos(pa) * pr, base.v[1] + Math.sin(pa) * pr];
-        ncr = Math.min(ncr, lv[0] - CANVAS_SHIP_EDGE);
-        ncr = Math.min(ncr, lp.w - CANVAS_SHIP_EDGE - lv[0]);
-        ncr = Math.min(ncr, lv[1] - CANVAS_SHIP_EDGE);
-        ncr = Math.min(ncr, lp.h - CANVAS_SHIP_EDGE - lv[1]);
-        circles.push({ v: lv, r: ncr });
-    }
-    lp.csx.fillStyle = "#fff";
-    for (let i = 0; i < circles.length; i++) {
-        const lc = circles[i];
-        lp.csx.beginPath();
-        lp.csx.arc(lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
-        lp.csx.fill();
-        lp.csx.beginPath();
-        lp.csx.arc(lp.w - lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
-        lp.csx.fill();
-    }
-};
-//Mess of lines
-outlines[2] = function (lp) {
-    const innersize = [lp.w - 2 * CANVAS_SHIP_EDGE, lp.h - 2 * CANVAS_SHIP_EDGE];
-    const points = [
-        [lp.hw, lp.r.sd(0, 0.05) * innersize[1] + CANVAS_SHIP_EDGE],
-        [lp.hw, lp.r.sd(0.95, 1) * innersize[1] + CANVAS_SHIP_EDGE],
-    ];
-    const basefatness = COMPONENT_GRID_SIZE / lp.size +
-        lp.f.r.hd(0.03, 0.1, "outline2 basefatness");
-    const basemessiness = 1 / basefatness;
-    const pointcount = Math.max(3, Math.ceil(basemessiness * lp.r.sd(0.05, 0.1) * Math.sqrt(lp.size)));
-    // @ts-ignore - We're doing it properly
-    lp.csx.lineCap = ["round", "square"][lp.f.r.hi(0, 1, "outline2 linecap")];
-    lp.csx.strokeStyle = "#fff";
-    for (let npi = 1; npi < pointcount; npi++) {
-        let np = points[npi];
-        if (np == null) {
-            np = [
-                lp.r.sd(0, 1) * innersize[0] + CANVAS_SHIP_EDGE,
-                Math.pow(lp.r.sd(0, 1), lp.f.r.hd(0.1, 1, "outline2 frontbias")) *
-                    innersize[1] +
-                    CANVAS_SHIP_EDGE,
+        const blockcount = 2 +
+            Math.floor(lp.r.sd(0.5, 1) * lp.f.r.hd(2, 8, "outline0 bc") * Math.sqrt(lp.size));
+        for (let i = 1; i < blockcount; i++) {
+            const base = blocks[lp.r.si(0, blocks.length - 1)];
+            const v0 = [
+                base[0][0] + lp.r.sd(0, 1) * (base[1][0] - base[0][0]),
+                base[0][1] + lp.r.sd(0, 1) * (base[1][1] - base[0][1]),
             ];
-            points.push(np);
+            if (v0[1] < (base[0][1] + base[1][1]) * 0.5 &&
+                lp.r.sb(lp.f.r.hd(0.5, 1.5, "outline0 frontbias"))) {
+                v0[1] = base[1][1] - (v0[1] - base[0][1]);
+            }
+            const v1 = [
+                clamp(lp.r.sd(0, 1) * lp.w, CANVAS_SHIP_EDGE, lp.w - CANVAS_SHIP_EDGE),
+                clamp(lp.r.sd(0, 1) * lp.h, CANVAS_SHIP_EDGE, lp.h - CANVAS_SHIP_EDGE),
+            ];
+            const area = Math.abs((v1[0] - v0[0]) * (v1[1] - v0[1]));
+            const ratio = csarealimit / area;
+            if (ratio < 1) {
+                v1[0] = v0[0] + (v1[0] - v0[0]) * ratio;
+                v1[1] = v0[1] + (v1[1] - v0[1]) * ratio;
+            }
+            if (v0[0] > v1[0]) {
+                const t = v0[0];
+                v0[0] = v1[0];
+                v1[0] = t;
+            }
+            if (v0[1] > v1[1]) {
+                const t = v0[1];
+                v0[1] = v1[1];
+                v1[1] = t;
+            }
+            blocks.push([
+                [Math.floor(v0[0]), Math.floor(v0[1])],
+                [Math.ceil(v1[0]), Math.ceil(v1[1])],
+            ]);
         }
-        const cons = 1 + lp.r.sseq(lp.f.r.hd(0, 1, "outline2 conadjust"), 3);
-        for (let nci = 0; nci < cons; nci++) {
-            const pre = points[lp.r.si(0, points.length - 2)];
-            lp.csx.lineWidth = lp.r.sd(0.7, 1) * basefatness * lp.size;
+        lp.csx.fillStyle = "#FFFFFF";
+        for (let i = 0; i < blocks.length; i++) {
+            const lb = blocks[i];
+            lp.csx.fillRect(lb[0][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
+            lp.csx.fillRect(lp.w - lb[1][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
+        }
+    },
+    // 1: Joined circles
+    function (lp) {
+        const csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
+        const csarealimit = csarea * 0.05;
+        const csrlimit = Math.max(2, Math.sqrt(csarealimit / Math.PI));
+        const initialwidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.r.hd(0.1, 1, "outline1 iw") * 0.2);
+        const circles = [];
+        const initialcount = Math.floor((lp.h - 2 * CANVAS_SHIP_EDGE) / (initialwidth * 2));
+        for (let i = 0; i < initialcount; i++) {
+            let lv = [lp.hw, lp.h - (CANVAS_SHIP_EDGE + initialwidth * (i * 2 + 1))];
+            circles.push({ v: lv, r: initialwidth });
+        }
+        const circlecount = initialcount +
+            Math.floor(lp.r.sd(0.5, 1) * lp.f.r.hd(10, 50, "outline1 cc") * Math.sqrt(lp.size));
+        for (let i = initialcount; i < circlecount; i++) {
+            const base = circles[Math.max(lp.r.si(0, circles.length - 1), lp.r.si(0, circles.length - 1))];
+            let ncr = lp.r.sd(1, csrlimit);
+            const pr = lp.r.sd(Math.max(0, base.r - ncr), base.r);
+            let pa = lp.r.sd(0, 2 * Math.PI);
+            if (pa > Math.PI && lp.r.sb(lp.f.r.hd(0.5, 1.5, "outline1 frontbias"))) {
+                pa = lp.r.sd(0, Math.PI);
+            }
+            let lv = [base.v[0] + Math.cos(pa) * pr, base.v[1] + Math.sin(pa) * pr];
+            ncr = Math.min(ncr, lv[0] - CANVAS_SHIP_EDGE);
+            ncr = Math.min(ncr, lp.w - CANVAS_SHIP_EDGE - lv[0]);
+            ncr = Math.min(ncr, lv[1] - CANVAS_SHIP_EDGE);
+            ncr = Math.min(ncr, lp.h - CANVAS_SHIP_EDGE - lv[1]);
+            circles.push({ v: lv, r: ncr });
+        }
+        lp.csx.fillStyle = "#fff";
+        for (let i = 0; i < circles.length; i++) {
+            const lc = circles[i];
             lp.csx.beginPath();
-            lp.csx.moveTo(pre[0], pre[1]);
-            lp.csx.lineTo(np[0], np[1]);
-            lp.csx.stroke();
+            lp.csx.arc(lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
+            lp.csx.fill();
             lp.csx.beginPath();
-            lp.csx.moveTo(lp.w - pre[0], pre[1]);
-            lp.csx.lineTo(lp.w - np[0], np[1]);
-            lp.csx.stroke();
+            lp.csx.arc(lp.w - lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
+            lp.csx.fill();
+        }
+    },
+    // 2: Mess of lines
+    function (lp) {
+        const innersize = [lp.w - 2 * CANVAS_SHIP_EDGE, lp.h - 2 * CANVAS_SHIP_EDGE];
+        const points = [
+            [lp.hw, lp.r.sd(0, 0.05) * innersize[1] + CANVAS_SHIP_EDGE],
+            [lp.hw, lp.r.sd(0.95, 1) * innersize[1] + CANVAS_SHIP_EDGE],
+        ];
+        const basefatness = COMPONENT_GRID_SIZE / lp.size +
+            lp.f.r.hd(0.03, 0.1, "outline2 basefatness");
+        const basemessiness = 1 / basefatness;
+        const pointcount = Math.max(3, Math.ceil(basemessiness * lp.r.sd(0.05, 0.1) * Math.sqrt(lp.size)));
+        // @ts-ignore - We're doing it properly
+        lp.csx.lineCap = ["round", "square"][lp.f.r.hi(0, 1, "outline2 linecap")];
+        lp.csx.strokeStyle = "#fff";
+        for (let npi = 1; npi < pointcount; npi++) {
+            let np = points[npi];
+            if (np == null) {
+                np = [
+                    lp.r.sd(0, 1) * innersize[0] + CANVAS_SHIP_EDGE,
+                    Math.pow(lp.r.sd(0, 1), lp.f.r.hd(0.1, 1, "outline2 frontbias")) *
+                        innersize[1] +
+                        CANVAS_SHIP_EDGE,
+                ];
+                points.push(np);
+            }
+            const cons = 1 + lp.r.sseq(lp.f.r.hd(0, 1, "outline2 conadjust"), 3);
+            for (let nci = 0; nci < cons; nci++) {
+                const pre = points[lp.r.si(0, points.length - 2)];
+                lp.csx.lineWidth = lp.r.sd(0.7, 1) * basefatness * lp.size;
+                lp.csx.beginPath();
+                lp.csx.moveTo(pre[0], pre[1]);
+                lp.csx.lineTo(np[0], np[1]);
+                lp.csx.stroke();
+                lp.csx.beginPath();
+                lp.csx.moveTo(lp.w - pre[0], pre[1]);
+                lp.csx.lineTo(lp.w - np[0], np[1]);
+                lp.csx.stroke();
+            }
         }
     }
-};
+];
 
 // CONCATENATED MODULE: ./src/ship.ts
 
@@ -1206,19 +1205,19 @@ class ship_Ship {
                 : size;
         const wratio = this.r.sd(this.f.r.hd(0.5, 1, "wratio min"), this.f.r.hd(1, 1.3, "wratio max"));
         const hratio = this.r.sd(this.f.r.hd(0.7, 1, "hratio min"), this.f.r.hd(1.1, 1.7, "hratio max"));
-        this.w = Math.floor(this.size * wratio) + 2 * CANVAS_SHIP_EDGE; //Maximum width of this ship, in pixels.
+        this.w = Math.floor(this.size * wratio) + 2 * CANVAS_SHIP_EDGE; // Maximum width of this ship, in pixels
         this.hw = Math.floor(this.w / 2);
         this.gw = Math.floor((this.w - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
         this.gwextra = (this.w - this.gw * COMPONENT_GRID_SIZE) * 0.5;
-        this.h = Math.floor(this.size * hratio) + 2 * CANVAS_SHIP_EDGE; //Maximum height of this ship, in pixels.
+        this.h = Math.floor(this.size * hratio) + 2 * CANVAS_SHIP_EDGE; // Maximum height of this ship, in pixels
         this.hh = Math.floor(this.h / 2);
         this.gh = Math.floor((this.h - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
         this.ghextra = (this.h - this.gh * COMPONENT_GRID_SIZE) * 0.5;
-        this.cs = document.createElement("canvas"); //Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0.
-        this.cs.setAttribute("width", String(this.w));
-        this.cs.setAttribute("height", String(this.h));
-        this.csx = this.cs.getContext("2d");
-        this.cf = document.createElement("canvas"); //Canvas on which the actual ship components are drawn. Ships face upwards, with front towards Y=0.
+        const cs = document.createElement("canvas"); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
+        cs.width = this.w;
+        cs.height = this.h;
+        this.csx = cs.getContext("2d");
+        this.cf = document.createElement("canvas"); // Canvas on which the actual ship components are drawn. Ships face upwards, with front towards Y=0
         this.cf.setAttribute("width", String(this.w));
         this.cf.setAttribute("height", String(this.h));
         this.cfx = this.cf.getContext("2d");
@@ -1234,7 +1233,7 @@ class ship_Ship {
                     x: Math.floor(this.gwextra + (gx + 0.5) * COMPONENT_GRID_SIZE),
                     y: Math.floor(this.ghextra + (gy + 0.5) * COMPONENT_GRID_SIZE),
                     phase: 0,
-                }; // phase is 0 for unchecked, 1 for checked and good, and -1 for checked and bad.
+                }; // Phase is 0 for unchecked, 1 for checked and good, and -1 for checked and bad
             }
         }
         this.goodcells = [
@@ -1305,6 +1304,10 @@ class ship_Ship {
         this.extra = Math.max(1, Math.floor(this.goodcells.length *
             this.f.r.hd(0, 1 / this.passes, "extra component amount")));
         this.totalcomponents = this.passes * this.goodcells.length + this.extra;
+        let done = false;
+        do {
+            done = this.addcomponent();
+        } while (!done);
     }
     // Returns the cell containing (X,Y), if there is one, or null otherwise
     getcell(x, y) {
@@ -1376,7 +1379,7 @@ class ship_Ship {
         }
         if (Math.abs(lv[0] - this.hw) < COMPONENT_GRID_SIZE) {
             if (this.r.sb(this.f.r.hd(0, 1, "com middleness"))) {
-                lv[0] = Math.floor(this.hw);
+                lv[0] = this.hw;
             }
         }
         components[this.r.schoose(this.f.componentChances)](this, lv);
@@ -1391,10 +1394,6 @@ class ship_Ship {
 
 
 function renderShip(lp) {
-    var done = false;
-    do {
-        done = lp.addcomponent();
-    } while (!done);
     lp.cfx.clearRect(lp.hw + (lp.w % 2), 0, lp.w, lp.h);
     lp.cfx.scale(-1, 1);
     lp.cfx.drawImage(lp.cf, 0 - lp.w, 0);
