@@ -22,7 +22,6 @@ export declare class Ship {
     gh: number;
     ghextra: number;
     cf: HTMLCanvasElement;
-    cfx: CanvasRenderingContext2D;
     passes: number;
     extra: number;
     extradone: number;
@@ -38,6 +37,6 @@ export declare class Ship {
     getCellPhase(x: number, y: number): number;
     getspa(x: number, y: number): number;
     getpcdone(): number;
-    addcomponent(componentChances: ComponentChances, colorData: ColorData): boolean;
+    addcomponent(cfx: CanvasRenderingContext2D, componentChances: ComponentChances, colorData: ColorData): boolean;
 }
 export {};

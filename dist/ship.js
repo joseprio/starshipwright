@@ -35,10 +35,6 @@ export class Ship {
         cs.width = this.w;
         cs.height = this.h;
         const csx = cs.getContext("2d");
-        this.cf = document.createElement("canvas"); // Canvas on which the actual ship components are drawn. Ships face upwards, with front towards Y=0
-        this.cf.setAttribute("width", String(this.w));
-        this.cf.setAttribute("height", String(this.h));
-        this.cfx = this.cf.getContext("2d");
         outlines[this.f.hchoose([1, 1, 1], "outline type")](this, csx);
         this.csd = csx.getImageData(0, 0, this.w, this.h);
         this.cgrid = [];
@@ -122,10 +118,18 @@ export class Ship {
         this.extra = Math.max(1, Math.floor(this.goodcells.length *
             this.f.hd(0, 1 / this.passes, "extra component amount")));
         this.totalcomponents = this.passes * this.goodcells.length + this.extra;
+        this.cf = document.createElement("canvas"); // Canvas on which the actual ship components are drawn. Ships face upwards, with front towards Y=0
+        this.cf.width = this.w;
+        this.cf.height = this.h;
+        const cfx = this.cf.getContext("2d");
         let done = false;
         do {
-            done = this.addcomponent(componentChances, colorData);
+            done = this.addcomponent(cfx, componentChances, colorData);
         } while (!done);
+        // Mirror
+        cfx.clearRect(this.hw + (this.w % 2), 0, this.w, this.h);
+        cfx.scale(-1, 1);
+        cfx.drawImage(this.cf, 0 - this.w, 0);
     }
     // Returns the cell containing (X,Y), if there is one, or null otherwise
     getcell(x, y) {
@@ -156,7 +160,7 @@ export class Ship {
     getpcdone() {
         return this.totaldone / this.totalcomponents;
     }
-    addcomponent(componentChances, colorData) {
+    addcomponent(cfx, componentChances, colorData) {
         //Generates the next component of this ship. Returns true if the ship is finished, false if there are still more components to add.
         let ncell;
         if (this.nextpass < this.passes) {
@@ -200,7 +204,7 @@ export class Ship {
                 lv[0] = this.hw;
             }
         }
-        components[this.r.schoose(componentChances)](this, lv, componentChances, colorData);
+        components[this.r.schoose(componentChances)](cfx, this, lv, componentChances, colorData);
         this.totaldone++;
         return false;
     }

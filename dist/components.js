@@ -39,7 +39,7 @@ function shadowGradient(ctx, middlePoint, edgePoint, amount) {
 // Each component function takes an argument 'lp' (for the ship) and 'v' (an integral 2-vector denoting the center of the component)
 export const components = [
     // Bordered block
-    function (lp, v, componentChances, colorData) {
+    function (cfx, lp, v, componentChances, colorData) {
         let lcms = COMPONENT_MAXIMUM_SIZE;
         const bn = bigness(lp, v) ** 0.3;
         if (lp.r.sb(lp.f.hd(0, 0.9, "com0 bigchance") * bn)) {
@@ -73,25 +73,25 @@ export const components = [
         const baseColor = computeBaseColor(lp.f, colorData, lp);
         const icolorh = scaleColorBy(baseColor, lp.r.sd(0.4, 1));
         const ocolorh = scaleColorBy(baseColor, lp.r.sd(0.4, 1));
-        lp.cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
-        lp.cfx.fillRect(v[0] - trv[0] - 1, v[1] - trv[1] - 1, dho[0] * counts[0] + 2, dho[1] * counts[1] + 2);
-        lp.cfx.fillStyle = ocolorh;
-        lp.cfx.fillRect(v[0] - trv[0], v[1] - trv[1], dho[0] * counts[0], dho[1] * counts[1]);
-        lp.cfx.fillStyle = icolorh;
+        cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
+        cfx.fillRect(v[0] - trv[0] - 1, v[1] - trv[1] - 1, dho[0] * counts[0] + 2, dho[1] * counts[1] + 2);
+        cfx.fillStyle = ocolorh;
+        cfx.fillRect(v[0] - trv[0], v[1] - trv[1], dho[0] * counts[0], dho[1] * counts[1]);
+        cfx.fillStyle = icolorh;
         for (let x = 0; x < counts[0]; x++) {
             const bx = v[0] + borderwidth + x * dho[0] - trv[0];
             for (let y = 0; y < counts[1]; y++) {
                 const by = v[1] + borderwidth + y * dho[1] - trv[1];
-                lp.cfx.fillRect(bx, by, dhi[0], dhi[1]);
+                cfx.fillRect(bx, by, dhi[0], dhi[1]);
             }
         }
         if (lp.r.sb(clamp((pcdone * 0.6 + 0.3) * (lcms / COMPONENT_MAXIMUM_SIZE), 0, 0.98))) {
-            lp.cfx.fillStyle = shadowGradient(lp.cfx, v, [v[0] + trv[0], v[1]], lp.r.sd(0, 0.9));
-            lp.cfx.fillRect(v[0] - trv[0], v[1] - trv[1], dho[0] * counts[0], dho[1] * counts[1]);
+            cfx.fillStyle = shadowGradient(cfx, v, [v[0] + trv[0], v[1]], lp.r.sd(0, 0.9));
+            cfx.fillRect(v[0] - trv[0], v[1] - trv[1], dho[0] * counts[0], dho[1] * counts[1]);
         }
     },
     // Cylinder array
-    function (lp, v, componentChances, colorData) {
+    function (cfx, lp, v, componentChances, colorData) {
         let lcms = COMPONENT_MAXIMUM_SIZE;
         const bn = bigness(lp, v) ** 0.2;
         if (lp.r.sb(lp.f.hd(0.3, 1, "com1 bigchance") * bn)) {
@@ -121,29 +121,29 @@ export const components = [
         const orientation = lp.r.sb(clamp(lp.f.hd(-0.2, 1.2, "com1 hchance"), 0, 1));
         if (orientation) {
             const bv = [v[0] - Math.floor(w / 2), v[1] - Math.floor(h / 2)];
-            lp.cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
-            lp.cfx.fillRect(bv[0] - 1, bv[1] - 1, w + 2, h + 2);
-            lp.cfx.fillStyle = ccolor;
-            lp.cfx.fillRect(bv[0], bv[1], w, h);
+            cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
+            cfx.fillRect(bv[0] - 1, bv[1] - 1, w + 2, h + 2);
+            cfx.fillStyle = ccolor;
+            cfx.fillRect(bv[0], bv[1], w, h);
             for (let i = 0; i < count; i++) {
-                lp.cfx.fillStyle = shadowGradient(lp.cfx, [bv[0] + (i + 0.5) * cw, v[1]], [bv[0] + i * cw, v[1]], darkness);
-                lp.cfx.fillRect(bv[0] + i * cw, bv[1], cw, h);
+                cfx.fillStyle = shadowGradient(cfx, [bv[0] + (i + 0.5) * cw, v[1]], [bv[0] + i * cw, v[1]], darkness);
+                cfx.fillRect(bv[0] + i * cw, bv[1], cw, h);
             }
         }
         else {
             const bv = [v[0] - Math.floor(h / 2), v[1] - Math.floor(w / 2)];
-            lp.cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
-            lp.cfx.fillRect(bv[0] - 1, bv[1] - 1, h + 2, w + 2);
-            lp.cfx.fillStyle = ccolor;
-            lp.cfx.fillRect(bv[0], bv[1], h, w);
+            cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
+            cfx.fillRect(bv[0] - 1, bv[1] - 1, h + 2, w + 2);
+            cfx.fillStyle = ccolor;
+            cfx.fillRect(bv[0], bv[1], h, w);
             for (let i = 0; i < count; i++) {
-                lp.cfx.fillStyle = shadowGradient(lp.cfx, [v[0], bv[1] + (i + 0.5) * cw], [v[0], bv[1] + i * cw], darkness);
-                lp.cfx.fillRect(bv[0], bv[1] + i * cw, w, cw);
+                cfx.fillStyle = shadowGradient(cfx, [v[0], bv[1] + (i + 0.5) * cw], [v[0], bv[1] + i * cw], darkness);
+                cfx.fillRect(bv[0], bv[1] + i * cw, w, cw);
             }
         }
     },
     // Banded cylinder
-    function (lp, v, componentChances, colorData) {
+    function (cfx, lp, v, componentChances, colorData) {
         let lcms = COMPONENT_MAXIMUM_SIZE;
         const bn = bigness(lp, v) ** 0.05;
         if (lp.r.sb(lp.f.hd(0, 1, "com2 bigchance") * bn)) {
@@ -189,8 +189,8 @@ export const components = [
         ];
         const orientation = lp.r.sb(lp.f.hd(0, 1, "com2 verticalchance") ** 0.1);
         if (orientation) {
-            const grad2_0 = lp.cfx.createLinearGradient(v[0] - wh2[0], v[1], v[0] + wh2[0], v[1]);
-            const grad2_1 = lp.cfx.createLinearGradient(v[0] - wh2[1], v[1], v[0] + wh2[1], v[1]);
+            const grad2_0 = cfx.createLinearGradient(v[0] - wh2[0], v[1], v[0] + wh2[0], v[1]);
+            const grad2_1 = cfx.createLinearGradient(v[0] - wh2[1], v[1], v[0] + wh2[1], v[1]);
             grad2_0.addColorStop(0, colord2[0]);
             grad2_0.addColorStop(0.5, color2[0]);
             grad2_0.addColorStop(1, colord2[0]);
@@ -199,19 +199,19 @@ export const components = [
             grad2_1.addColorStop(1, colord2[1]);
             const by = Math.floor(v[1] - htotal / 2);
             for (let i = 0; i < count; i++) {
-                lp.cfx.fillStyle = grad2_0;
-                lp.cfx.fillRect(v[0] - wh2[0], by + i * hpair, wh2[0] * 2, h2[0]);
-                lp.cfx.fillStyle = grad2_1;
-                lp.cfx.fillRect(v[0] - wh2[1], by + i * hpair + h2[0], wh2[1] * 2, h2[1]);
+                cfx.fillStyle = grad2_0;
+                cfx.fillRect(v[0] - wh2[0], by + i * hpair, wh2[0] * 2, h2[0]);
+                cfx.fillStyle = grad2_1;
+                cfx.fillRect(v[0] - wh2[1], by + i * hpair + h2[0], wh2[1] * 2, h2[1]);
             }
             if (odd) {
-                lp.cfx.fillStyle = grad2_0;
-                lp.cfx.fillRect(v[0] - wh2[0], by + count * hpair, wh2[0] * 2, h2[0]);
+                cfx.fillStyle = grad2_0;
+                cfx.fillRect(v[0] - wh2[0], by + count * hpair, wh2[0] * 2, h2[0]);
             }
         }
         else {
-            const grad2_0 = lp.cfx.createLinearGradient(v[0], v[1] - wh2[0], v[0], v[1] + wh2[0]);
-            const grad2_1 = lp.cfx.createLinearGradient(v[0], v[1] - wh2[1], v[0], v[1] + wh2[1]);
+            const grad2_0 = cfx.createLinearGradient(v[0], v[1] - wh2[0], v[0], v[1] + wh2[0]);
+            const grad2_1 = cfx.createLinearGradient(v[0], v[1] - wh2[1], v[0], v[1] + wh2[1]);
             grad2_0.addColorStop(0, colord2[0]);
             grad2_0.addColorStop(0.5, color2[0]);
             grad2_0.addColorStop(1, colord2[0]);
@@ -220,26 +220,26 @@ export const components = [
             grad2_1.addColorStop(1, colord2[1]);
             const bx = Math.floor(v[0] - htotal / 2);
             for (let i = 0; i < count; i++) {
-                lp.cfx.fillStyle = grad2_0;
-                lp.cfx.fillRect(bx + i * hpair, v[1] - wh2[0], h2[0], wh2[0] * 2);
-                lp.cfx.fillStyle = grad2_1;
-                lp.cfx.fillRect(bx + i * hpair + h2[0], v[1] - wh2[1], h2[1], wh2[1] * 2);
+                cfx.fillStyle = grad2_0;
+                cfx.fillRect(bx + i * hpair, v[1] - wh2[0], h2[0], wh2[0] * 2);
+                cfx.fillStyle = grad2_1;
+                cfx.fillRect(bx + i * hpair + h2[0], v[1] - wh2[1], h2[1], wh2[1] * 2);
             }
             if (odd) {
-                lp.cfx.fillStyle = grad2_0;
-                lp.cfx.fillRect(bx + count * hpair, v[1] - wh2[0], h2[0], wh2[0] * 2);
+                cfx.fillStyle = grad2_0;
+                cfx.fillRect(bx + count * hpair, v[1] - wh2[0], h2[0], wh2[0] * 2);
             }
         }
     },
     //Rocket engine (or tries to call another random component if too far forward)
-    function (lp, v, componentChances, colorData) {
+    function (cfx, lp, v, componentChances, colorData) {
         if (lp.r.sb(frontness(lp, v) - 0.3) ||
             lp.getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) > 0 ||
             lp.getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8) > 0) {
             for (let tries = 0; tries < 100; tries++) {
                 const which = lp.r.schoose(componentChances);
                 if (which != 3) {
-                    components[which](lp, v, componentChances, colorData);
+                    components[which](cfx, lp, v, componentChances, colorData);
                     return;
                 }
             }
@@ -280,8 +280,8 @@ export const components = [
         const lightness0_edge = lightness0_mid - lp.f.hd(0.2, 0.4, "com3 lightness0 edge");
         const lightness1_edge = lp.f.hd(0, 0.2, "com3 lightness1 edge");
         const grad2 = [
-            lp.cfx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
-            lp.cfx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
+            cfx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
+            cfx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
         ];
         grad2[0].addColorStop(0, scaleColorBy(basecolor, lightness0_edge));
         grad2[0].addColorStop(0.5, scaleColorBy(basecolor, lightness0_mid));
@@ -290,14 +290,14 @@ export const components = [
         grad2[1].addColorStop(0.5, colorToHex(basecolor));
         grad2[1].addColorStop(1, scaleColorBy(basecolor, lightness1_edge));
         const by = Math.ceil(v[1] - h / 2);
-        lp.cfx.fillStyle = grad2[0];
-        lp.cfx.beginPath();
-        lp.cfx.moveTo(v[0] - nw / 2, by);
-        lp.cfx.lineTo(v[0] + nw / 2, by);
-        lp.cfx.lineTo(v[0] + w / 2, by + h);
-        lp.cfx.lineTo(v[0] - w / 2, by + h);
-        lp.cfx.fill();
-        lp.cfx.fillStyle = grad2[1];
+        cfx.fillStyle = grad2[0];
+        cfx.beginPath();
+        cfx.moveTo(v[0] - nw / 2, by);
+        cfx.lineTo(v[0] + nw / 2, by);
+        cfx.lineTo(v[0] + w / 2, by + h);
+        cfx.lineTo(v[0] - w / 2, by + h);
+        cfx.fill();
+        cfx.fillStyle = grad2[1];
         const byh = [by + h2[0], by + hpair];
         for (let i = 0; i < count; i++) {
             const lyr = [i * hpair + h2[0], (i + 1) * hpair];
@@ -306,16 +306,16 @@ export const components = [
                 (nw + (w - nw) * (lyr[0] / h)) / 2,
                 (nw + (w - nw) * (lyr[1] / h)) / 2,
             ];
-            lp.cfx.beginPath();
-            lp.cfx.moveTo(v[0] - lw[0], ly[0]);
-            lp.cfx.lineTo(v[0] + lw[0], ly[0]);
-            lp.cfx.lineTo(v[0] + lw[1], ly[1]);
-            lp.cfx.lineTo(v[0] - lw[1], ly[1]);
-            lp.cfx.fill();
+            cfx.beginPath();
+            cfx.moveTo(v[0] - lw[0], ly[0]);
+            cfx.lineTo(v[0] + lw[0], ly[0]);
+            cfx.lineTo(v[0] + lw[1], ly[1]);
+            cfx.lineTo(v[0] - lw[1], ly[1]);
+            cfx.fill();
         }
     },
     //Elongated cylinder (calls component 0 - 2 on top of its starting point)
-    function (lp, v, componentChances, colorData) {
+    function (cfx, lp, v, componentChances, colorData) {
         const cn = centerness(lp, v, true, false);
         const lightmid = lp.r.sd(0.7, 1);
         const lightedge = lp.r.sd(0, 0.2);
@@ -344,12 +344,12 @@ export const components = [
                 [v[0] - hwi, v[1] - h],
                 [v[0] + hwi + hwe, v[1]],
             ];
-            const grad = lp.cfx.createLinearGradient(bb[0][0], bb[0][1], bb[1][0], bb[0][1]);
+            const grad = cfx.createLinearGradient(bb[0][0], bb[0][1], bb[1][0], bb[0][1]);
             grad.addColorStop(0, coloredge);
             grad.addColorStop(0.5, colormid);
             grad.addColorStop(1, coloredge);
-            lp.cfx.fillStyle = grad;
-            lp.cfx.fillRect(bb[0][0], bb[0][1], w, h);
+            cfx.fillStyle = grad;
+            cfx.fillRect(bb[0][0], bb[0][1], w, h);
             ev = [v[0], v[1] - h];
         }
         else if (direction == 1) {
@@ -360,22 +360,22 @@ export const components = [
                 [v[0] - hwi, v[1]],
                 [v[0] + hwi + hwe, v[1] + h],
             ];
-            const grad = lp.cfx.createLinearGradient(bb[0][0], bb[0][1], bb[1][0], bb[0][1]);
+            const grad = cfx.createLinearGradient(bb[0][0], bb[0][1], bb[1][0], bb[0][1]);
             grad.addColorStop(0, coloredge);
             grad.addColorStop(0.5, colormid);
             grad.addColorStop(1, coloredge);
-            lp.cfx.fillStyle = grad;
-            lp.cfx.fillRect(bb[0][0], bb[0][1], w, h);
+            cfx.fillStyle = grad;
+            cfx.fillRect(bb[0][0], bb[0][1], w, h);
             ev = [v[0], v[1] + h];
         }
         else if (direction == 2) {
             //to center
-            const grad = lp.cfx.createLinearGradient(v[0], v[1] - hwi, v[0], v[1] + hwi + hwe);
+            const grad = cfx.createLinearGradient(v[0], v[1] - hwi, v[0], v[1] + hwi + hwe);
             grad.addColorStop(0, coloredge);
             grad.addColorStop(0.5, colormid);
             grad.addColorStop(1, coloredge);
-            lp.cfx.fillStyle = grad;
-            lp.cfx.fillRect(v[0], v[1] - hwi, Math.ceil(lp.hw - v[0]) + 1, w);
+            cfx.fillStyle = grad;
+            cfx.fillRect(v[0], v[1] - hwi, Math.ceil(lp.hw - v[0]) + 1, w);
             ev = [lp.hw, v[1]];
         }
         const coverComC = [
@@ -383,22 +383,22 @@ export const components = [
             0.2 * (lp.f.hd(0, 1, "com4 covercomc1") ** 2),
             (lp.f.hd(0, 1, "com4 covercomc2") ** 2),
         ];
-        components[lp.r.schoose(coverComC)](lp, v, componentChances, colorData);
+        components[lp.r.schoose(coverComC)](cfx, lp, v, componentChances, colorData);
         if (lp.getCellPhase(ev[0], ev[1]) > 0) {
             const nev = [
                 ev[0] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
                 ev[1] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
             ];
             if (lp.getCellPhase(nev[0], nev[1]) > 0) {
-                components[lp.r.schoose(coverComC)](lp, nev, componentChances, colorData);
+                components[lp.r.schoose(coverComC)](cfx, lp, nev, componentChances, colorData);
             }
             else {
-                components[lp.r.schoose(coverComC)](lp, ev, componentChances, colorData);
+                components[lp.r.schoose(coverComC)](cfx, lp, ev, componentChances, colorData);
             }
         }
     },
     //Ball
-    function (lp, v, componentChances, colorData) {
+    function (cfx, lp, v, componentChances, colorData) {
         let lcms = COMPONENT_MAXIMUM_SIZE;
         const bn = bigness(lp, v) ** 0.1;
         if (lp.r.sb(lp.f.hd(0, 0.9, "com5 bigchance") * bn)) {
@@ -432,34 +432,34 @@ export const components = [
         const hw = smallr * countx;
         const hh = smallr * county;
         const bv = [v[0] - hw, v[1] - hh];
-        lp.cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.2) + ")";
+        cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.2) + ")";
         for (let ax = 0; ax < countx; ax++) {
             const px = bv[0] + (ax * 2 + 1) * smallr;
             for (let ay = 0; ay < county; ay++) {
                 const py = bv[1] + (ay * 2 + 1) * smallr;
-                lp.cfx.beginPath();
-                lp.cfx.arc(px, py, shadowr, 0, 2 * Math.PI);
-                lp.cfx.fill();
+                cfx.beginPath();
+                cfx.arc(px, py, shadowr, 0, 2 * Math.PI);
+                cfx.fill();
             }
         }
         for (let ax = 0; ax < countx; ax++) {
             const px = bv[0] + (ax * 2 + 1) * smallr;
             for (let ay = 0; ay < county; ay++) {
                 const py = bv[1] + (ay * 2 + 1) * smallr;
-                const grad = lp.cfx.createRadialGradient(px, py, centerr, px, py, drawr);
+                const grad = cfx.createRadialGradient(px, py, centerr, px, py, drawr);
                 grad.addColorStop(0, colormid);
                 grad.addColorStop(1, coloredge);
-                lp.cfx.fillStyle = grad;
-                lp.cfx.beginPath();
-                lp.cfx.arc(px, py, drawr, 0, 2 * Math.PI);
-                lp.cfx.fill();
+                cfx.fillStyle = grad;
+                cfx.beginPath();
+                cfx.arc(px, py, drawr, 0, 2 * Math.PI);
+                cfx.fill();
             }
         }
     },
     //Forward-facing trapezoidal fin
-    function (lp, v, componentChances, colorData) {
+    function (cfx, lp, v, componentChances, colorData) {
         if (lp.nextpass <= 0 || lp.r.sb(frontness(lp, v))) {
-            components[lp.r.schoose(componentChances.slice(0, 6))](lp, v, componentChances, colorData);
+            components[lp.r.schoose(componentChances.slice(0, 6))](cfx, lp, v, componentChances, colorData);
             return;
         }
         let lcms = COMPONENT_MAXIMUM_SIZE;
@@ -503,20 +503,20 @@ export const components = [
             [v[0] - hwi, v[1] + backamount + hh1i + hh1e],
         ];
         const baseColor = computeBaseColor(lp.f, colorData, lp);
-        lp.cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.2) + ")";
-        lp.cfx.beginPath();
-        lp.cfx.moveTo(quad[0][0] - 1, quad[0][1]);
-        lp.cfx.lineTo(quad[1][0] - 1, quad[1][1]);
-        lp.cfx.lineTo(quad[2][0] - 1, quad[2][1]);
-        lp.cfx.lineTo(quad[3][0] - 1, quad[3][1]);
-        lp.cfx.fill();
-        lp.cfx.fillStyle = scaleColorBy(baseColor, lp.r.sd(0.7, 1));
-        lp.cfx.beginPath();
-        lp.cfx.moveTo(quad[0][0], quad[0][1]);
-        lp.cfx.lineTo(quad[1][0], quad[1][1]);
-        lp.cfx.lineTo(quad[2][0], quad[2][1]);
-        lp.cfx.lineTo(quad[3][0], quad[3][1]);
-        lp.cfx.fill();
+        cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.2) + ")";
+        cfx.beginPath();
+        cfx.moveTo(quad[0][0] - 1, quad[0][1]);
+        cfx.lineTo(quad[1][0] - 1, quad[1][1]);
+        cfx.lineTo(quad[2][0] - 1, quad[2][1]);
+        cfx.lineTo(quad[3][0] - 1, quad[3][1]);
+        cfx.fill();
+        cfx.fillStyle = scaleColorBy(baseColor, lp.r.sd(0.7, 1));
+        cfx.beginPath();
+        cfx.moveTo(quad[0][0], quad[0][1]);
+        cfx.lineTo(quad[1][0], quad[1][1]);
+        cfx.lineTo(quad[2][0], quad[2][1]);
+        cfx.lineTo(quad[3][0], quad[3][1]);
+        cfx.fill();
     }
 ];
 /*
@@ -582,7 +582,7 @@ components["cabin !UNUSED"] = function (
     lp.f.cache["com7 transparency"] == null
       ? (lp.f.cache["com7 transparency"] = lp.f.r.hd(0.3, 0.5, "com7 transparency"))
       : lp.f.cache["com7 transparency"];
-  var grad = lp.cfx.createRadialGradient(0, 0, w / 20, 0, 0, w / 2);
+  var grad = cfx.createRadialGradient(0, 0, w / 20, 0, 0, w / 2);
   grad.addColorStop(0, "rgba(255,255,255,1)");
   grad.addColorStop(
     0.3,
@@ -602,12 +602,12 @@ components["cabin !UNUSED"] = function (
         clamp(Math.round(color1[2] * 255), 0, 255) +
         ("," + (1 - transparency / 2) + ")"))
   );
-  lp.cfx.setTransform(1, 0, 0, h / w, v[0], v[1]);
-  lp.cfx.fillStyle = grad;
-  lp.cfx.beginPath();
-  lp.cfx.arc(0, 0, w / 2, 0, pi2);
-  lp.cfx.fill();
-  lp.cfx.setTransform(1, 0, 0, 1, 0, 0);
+  cfx.setTransform(1, 0, 0, h / w, v[0], v[1]);
+  cfx.fillStyle = grad;
+  cfx.beginPath();
+  cfx.arc(0, 0, w / 2, 0, pi2);
+  cfx.fill();
+  cfx.setTransform(1, 0, 0, 1, 0, 0);
 };
 */
 //END COMPONENTS
