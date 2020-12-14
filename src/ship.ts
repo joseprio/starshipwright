@@ -36,7 +36,6 @@ export class Ship {
   totalcomponents: number;
   totaldone: number = 0;
   cgrid: Array<Array<Cell>>;
-  csd: ImageData;
 
   constructor(factionRandomizer: Randomizer, p_seed: string, size?: number) {
     this.f = factionRandomizer;
@@ -72,7 +71,7 @@ export class Ship {
     cs.height = this.h;
     const csx = cs.getContext("2d");
     outlines[this.f.hchoose([1, 1, 1], "outline type")](this, csx);
-    this.csd = csx.getImageData(0, 0, this.w, this.h);
+    const outline = csx.getImageData(0, 0, this.w, this.h);
     this.cgrid = [];
     for (let gx = 0; gx < this.gw; gx++) {
       this.cgrid[gx] = [];
@@ -95,7 +94,7 @@ export class Ship {
       if (lcell.gx > 0) {
         const ncell = this.cgrid[lcell.gx - 1][lcell.gy];
         if (ncell.phase == 0) {
-          if (this.getspa(ncell.x, ncell.y) > 0) {
+          if (getAlpha(outline, ncell.x, ncell.y) > 0) {
             ncell.phase = 1;
             goodcells.push(ncell);
           } else {
@@ -106,7 +105,7 @@ export class Ship {
       if (lcell.gx < this.gw - 1) {
         const ncell = this.cgrid[lcell.gx + 1][lcell.gy];
         if (ncell.phase == 0) {
-          if (this.getspa(ncell.x, ncell.y) > 0) {
+          if (getAlpha(outline, ncell.x, ncell.y) > 0) {
             ncell.phase = 1;
             goodcells.push(ncell);
           } else {
@@ -117,7 +116,7 @@ export class Ship {
       if (lcell.gy > 0) {
         const ncell = this.cgrid[lcell.gx][lcell.gy - 1];
         if (ncell.phase == 0) {
-          if (this.getspa(ncell.x, ncell.y) > 0) {
+          if (getAlpha(outline, ncell.x, ncell.y) > 0) {
             ncell.phase = 1;
             goodcells.push(ncell);
           } else {
@@ -128,7 +127,7 @@ export class Ship {
       if (lcell.gy < this.gh - 1) {
         const ncell = this.cgrid[lcell.gx][lcell.gy + 1];
         if (ncell.phase == 0) {
-          if (this.getspa(ncell.x, ncell.y) > 0) {
+          if (getAlpha(outline, ncell.x, ncell.y) > 0) {
             ncell.phase = 1;
             goodcells.push(ncell);
           } else {
@@ -161,7 +160,7 @@ export class Ship {
     this.cf.height = this.h;
     const cfx = this.cf.getContext("2d");
 
-    this.addComponents(cfx, componentChances, colorData, goodcells);
+    this.addComponents(cfx, componentChances, colorData, goodcells, outline);
 
     // Mirror
     cfx.clearRect(this.hw + (this.w % 2), 0, this.w, this.h);
@@ -179,21 +178,11 @@ export class Ship {
     return this.cgrid[gx][gy].phase;
   }
 
-  //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or -1 if (X,Y) is out of bounds.
-  getspa(x: number, y: number): number {
-    x = Math.floor(x);
-    y = Math.floor(y);
-    if (x < 0 || x > this.w || y < 0 || y > this.h) {
-      return -1;
-    }
-    return this.csd.data[(y * this.w + x) * 4 + 3];
-  }
-
   getpcdone() {
     return this.totaldone / this.totalcomponents;
   }
 
-  addComponents(cfx: CanvasRenderingContext2D, componentChances: ComponentChances, colorData: ColorData, goodcells: Array<Cell>) {
+  addComponents(cfx: CanvasRenderingContext2D, componentChances: ComponentChances, colorData: ColorData, goodcells: Array<Cell>, outline: ImageData) {
     let extradone = 0, nextpass = 0, nextcell = 0;
 
     while(true) {
@@ -227,7 +216,7 @@ export class Ship {
         ) {
           continue;
         }
-        if (this.getspa(nv[0], nv[1]) <= 0) {
+        if (getAlpha(outline, nv[0], nv[1]) <= 0) {
           continue;
         }
         lv = nv;
@@ -242,4 +231,14 @@ export class Ship {
       this.totaldone++;
     }
   } 
+}
+
+  //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or -1 if (X,Y) is out of bounds.
+function getAlpha(imageData: ImageData, x: number, y: number): number {
+  x = Math.floor(x);
+  y = Math.floor(y);
+  if (x < 0 || x > imageData.width || y < 0 || y > imageData.height) {
+    return -1;
+  }
+  return imageData.data[(y * imageData.width + x) * 4 + 3];
 }
