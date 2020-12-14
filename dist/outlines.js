@@ -109,7 +109,7 @@ export const outlines = [
         const basemessiness = 1 / basefatness;
         const pointcount = Math.max(3, Math.ceil(basemessiness * lp.r.sd(0.05, 0.1) * Math.sqrt(lp.size)));
         // @ts-ignore - We're doing it properly
-        lp.csx.lineCap = ["round", "square"][lp.f.r.hi(0, 1, "outline2 linecap")];
+        lp.csx.lineCap = ["round", "square"][lp.f.hi(0, 1, "outline2 linecap")];
         lp.csx.strokeStyle = "#fff";
         for (let npi = 1; npi < pointcount; npi++) {
             let np = points[npi];
