@@ -12,7 +12,6 @@ export class Ship {
         this.f = factionRandomizer;
         const componentChances = computeFactionComponentChances(this.f);
         const colorData = computeFactionColors(this.f);
-        const baseColor = computeBaseColor(this.f, colorData, this);
         //Base seed for this ship, without appending the faction seed
         this.baseSeed = p_seed;
         this.seed = this.f.seed + this.baseSeed;
@@ -123,6 +122,7 @@ export class Ship {
         this.extra = Math.max(1, Math.floor(this.goodcells.length *
             this.f.hd(0, 1 / this.passes, "extra component amount")));
         this.totalcomponents = this.passes * this.goodcells.length + this.extra;
+        const baseColor = computeBaseColor(this.f, colorData, this);
         let done = false;
         do {
             done = this.addcomponent(baseColor, componentChances, colorData);
