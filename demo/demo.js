@@ -1367,7 +1367,7 @@ class ship_Ship {
     addComponents(cfx, componentChances, colorData) {
         let extradone = 0, nextpass = 0, nextcell = 0;
         //Generates the next component of this ship. Returns true if the ship is finished, false if there are still more components to add.
-        while (nextpass < this.passes && extradone < this.extra) {
+        do {
             let ncell;
             if (nextpass < this.passes) {
                 if (nextcell < this.goodcells.length) {
@@ -1380,9 +1380,12 @@ class ship_Ship {
                     nextcell = 1;
                 }
             }
-            else {
+            else if (extradone < this.extra) {
                 ncell = this.goodcells[this.r.si(0, this.goodcells.length - 1)];
                 extradone++;
+            }
+            else {
+                break;
             }
             let lv = [ncell.x, ncell.y];
             for (let t = 0; t < 10; t++) {
@@ -1409,7 +1412,7 @@ class ship_Ship {
             }
             components[this.r.schoose(componentChances)](cfx, this, lv, componentChances, colorData, nextpass);
             this.totaldone++;
-        }
+        } while (nextpass < this.passes && extradone < this.extra);
     }
 }
 
