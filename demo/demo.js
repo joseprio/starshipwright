@@ -457,18 +457,15 @@ getwindowcolor(lp) {
 function frontness(lp, v) {
     return 1 - v[1] / lp.h;
 }
-function centerness(lp, v, doX, doY) {
-    let rv = 1;
-    if (doX) {
-        rv = Math.min(rv, 1 - Math.abs(v[0] - lp.hw) / lp.hw);
-    }
+function centerness(lp, v, doY) {
+    let rv = Math.min(1, 1 - Math.abs(v[0] - lp.hw) / lp.hw);
     if (doY) {
         rv = Math.min(rv, 1 - Math.abs(v[1] - lp.hh) / lp.hh);
     }
     return rv;
 }
 function bigness(lp, v) {
-    const effectCenter = centerness(lp, v, true, true);
+    const effectCenter = centerness(lp, v, true);
     const effectShipsize = 1 - 1 / ((lp.w + lp.h) / 1000 + 1);
     const effectFaction = lp.f.hd(0, 1, "master bigness") ** 0.5;
     const effectStack = 1 - lp.getpcdone();
@@ -554,7 +551,7 @@ const components = [
                     [v[0] - lcms, v[1] - lcms],
                     [v[0] + lcms, v[1] + lcms],
                 ]);
-                if (Math.min(lw[0], lw[1]) > lcms * 0.5) {
+                if (Math.min(lw[0], lw[1]) > lcms / 2) {
                     lcms *= 1.5;
                 }
                 else {
@@ -769,7 +766,7 @@ const components = [
     },
     //Elongated cylinder (calls component 0 - 2 on top of its starting point)
     function (cfx, lp, v, componentChances, colorData, nextpass) {
-        const cn = centerness(lp, v, true, false);
+        const cn = centerness(lp, v, false);
         const lightmid = lp.r.sd(0.7, 1);
         const lightedge = lp.r.sd(0, 0.2);
         const baseColor = computeBaseColor(lp.f, colorData, lp);
@@ -789,20 +786,18 @@ const components = [
             toCenter * (1 + cn),
         ]);
         let ev = null;
-        if (direction == 0) {
+        // Shorter than comparing with 0
+        if (!direction) {
             //forwards
             const hlimit = v[1] - CANVAS_SHIP_EDGE;
             const h = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.7 * lp.size * (lp.r.sd(0, 1) ** lp.f.hd(2, 6, "com4 hpower0"))));
-            const bb = [
-                [v[0] - hwi, v[1] - h],
-                [v[0] + hwi + hwe, v[1]],
-            ];
-            const grad = cfx.createLinearGradient(bb[0][0], bb[0][1], bb[1][0], bb[0][1]);
+            const bb_0_0 = v[0] - hwi, bb_0_1 = v[1] - h, bb_1_0 = v[0] + hwi + hwe, bb_1_1 = v[1];
+            const grad = cfx.createLinearGradient(bb_0_0, bb_0_1, bb_1_0, bb_1_1);
             grad.addColorStop(0, coloredge);
             grad.addColorStop(0.5, colormid);
             grad.addColorStop(1, coloredge);
             cfx.fillStyle = grad;
-            cfx.fillRect(bb[0][0], bb[0][1], w, h);
+            cfx.fillRect(bb_0_0, bb_0_1, w, h);
             ev = [v[0], v[1] - h];
         }
         else if (direction == 1) {
