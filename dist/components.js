@@ -351,16 +351,13 @@ export const components = [
             //backwards
             const hlimit = lp.h - (CANVAS_SHIP_EDGE + v[1]);
             const h = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.6 * lp.size * (lp.r.sd(0, 1) ** lp.f.hd(2, 7, "com4 hpower1"))));
-            const bb = [
-                [v[0] - hwi, v[1]],
-                [v[0] + hwi + hwe, v[1] + h],
-            ];
-            const grad = cfx.createLinearGradient(bb[0][0], bb[0][1], bb[1][0], bb[0][1]);
+            const bb_0_0 = v[0] - hwi, bb_0_1 = v[1], bb_1_0 = v[0] + hwi + hwe;
+            const grad = cfx.createLinearGradient(bb_0_0, bb_0_1, bb_1_0, bb_0_1);
             grad.addColorStop(0, coloredge);
             grad.addColorStop(0.5, colormid);
             grad.addColorStop(1, coloredge);
             cfx.fillStyle = grad;
-            cfx.fillRect(bb[0][0], bb[0][1], w, h);
+            cfx.fillRect(bb_0_0, bb_0_1, w, h);
             ev = [v[0], v[1] + h];
         }
         else if (direction == 2) {
