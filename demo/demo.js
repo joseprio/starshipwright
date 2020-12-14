@@ -685,14 +685,14 @@ const components = [
         }
     },
     //Rocket engine (or tries to call another random component if too far forward)
-    function (cfx, lp, v, componentChances, colorData) {
+    function (cfx, lp, v, componentChances, colorData, nextpass) {
         if (lp.r.sb(frontness(lp, v) - 0.3) ||
             lp.getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) > 0 ||
             lp.getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8) > 0) {
             for (let tries = 0; tries < 100; tries++) {
                 const which = lp.r.schoose(componentChances);
                 if (which != 3) {
-                    components[which](cfx, lp, v, componentChances, colorData);
+                    components[which](cfx, lp, v, componentChances, colorData, nextpass);
                     return;
                 }
             }
@@ -768,7 +768,7 @@ const components = [
         }
     },
     //Elongated cylinder (calls component 0 - 2 on top of its starting point)
-    function (cfx, lp, v, componentChances, colorData) {
+    function (cfx, lp, v, componentChances, colorData, nextpass) {
         const cn = centerness(lp, v, true, false);
         const lightmid = lp.r.sd(0.7, 1);
         const lightedge = lp.r.sd(0, 0.2);
@@ -836,17 +836,17 @@ const components = [
             0.2 * (lp.f.hd(0, 1, "com4 covercomc1") ** 2),
             (lp.f.hd(0, 1, "com4 covercomc2") ** 2),
         ];
-        components[lp.r.schoose(coverComC)](cfx, lp, v, componentChances, colorData);
+        components[lp.r.schoose(coverComC)](cfx, lp, v, componentChances, colorData, nextpass);
         if (lp.getCellPhase(ev[0], ev[1]) > 0) {
             const nev = [
                 ev[0] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
                 ev[1] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
             ];
             if (lp.getCellPhase(nev[0], nev[1]) > 0) {
-                components[lp.r.schoose(coverComC)](cfx, lp, nev, componentChances, colorData);
+                components[lp.r.schoose(coverComC)](cfx, lp, nev, componentChances, colorData, nextpass);
             }
             else {
-                components[lp.r.schoose(coverComC)](cfx, lp, ev, componentChances, colorData);
+                components[lp.r.schoose(coverComC)](cfx, lp, ev, componentChances, colorData, nextpass);
             }
         }
     },
@@ -910,9 +910,9 @@ const components = [
         }
     },
     //Forward-facing trapezoidal fin
-    function (cfx, lp, v, componentChances, colorData) {
-        if (lp.nextpass <= 0 || lp.r.sb(frontness(lp, v))) {
-            components[lp.r.schoose(componentChances.slice(0, 6))](cfx, lp, v, componentChances, colorData);
+    function (cfx, lp, v, componentChances, colorData, nextpass) {
+        if (nextpass <= 0 || lp.r.sb(frontness(lp, v))) {
+            components[lp.r.schoose(componentChances.slice(0, 6))](cfx, lp, v, componentChances, colorData, nextpass);
             return;
         }
         let lcms = COMPONENT_MAXIMUM_SIZE;
@@ -1215,9 +1215,6 @@ const outlines = [
 
 class ship_Ship {
     constructor(factionRandomizer, p_seed, size) {
-        this.extradone = 0;
-        this.nextpass = 0;
-        this.nextcell = 0;
         this.totaldone = 0;
         this.f = factionRandomizer;
         const componentChances = computeFactionComponentChances(this.f);
@@ -1332,10 +1329,7 @@ class ship_Ship {
         this.cf.width = this.w;
         this.cf.height = this.h;
         const cfx = this.cf.getContext("2d");
-        let done = false;
-        do {
-            done = this.addcomponent(cfx, componentChances, colorData);
-        } while (!done);
+        this.addComponents(cfx, componentChances, colorData);
         // Mirror
         cfx.clearRect(this.hw + (this.w % 2), 0, this.w, this.h);
         cfx.scale(-1, 1);
@@ -1370,53 +1364,52 @@ class ship_Ship {
     getpcdone() {
         return this.totaldone / this.totalcomponents;
     }
-    addcomponent(cfx, componentChances, colorData) {
+    addComponents(cfx, componentChances, colorData) {
+        let extradone = 0, nextpass = 0, nextcell = 0;
         //Generates the next component of this ship. Returns true if the ship is finished, false if there are still more components to add.
-        let ncell;
-        if (this.nextpass < this.passes) {
-            if (this.nextcell < this.goodcells.length) {
-                ncell = this.goodcells[this.nextcell];
-                this.nextcell++;
+        while (nextpass < this.passes && extradone < this.extra) {
+            let ncell;
+            if (nextpass < this.passes) {
+                if (nextcell < this.goodcells.length) {
+                    ncell = this.goodcells[nextcell];
+                    nextcell++;
+                }
+                else {
+                    nextpass++;
+                    ncell = this.goodcells[0];
+                    nextcell = 1;
+                }
             }
             else {
-                this.nextpass++;
-                ncell = this.goodcells[0];
-                this.nextcell = 1;
+                ncell = this.goodcells[this.r.si(0, this.goodcells.length - 1)];
+                extradone++;
             }
-        }
-        else if (this.extradone < this.extra) {
-            ncell = this.goodcells[this.r.si(0, this.goodcells.length - 1)];
-            this.extradone++;
-        }
-        else {
-            return true;
-        }
-        let lv = [ncell.x, ncell.y];
-        for (let t = 0; t < 10; t++) {
-            const nv = [
-                ncell.x + this.r.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
-                ncell.y + this.r.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
-            ];
-            if (nv[0] < CANVAS_SHIP_EDGE ||
-                nv[0] > this.w - CANVAS_SHIP_EDGE ||
-                nv[1] < CANVAS_SHIP_EDGE ||
-                nv[1] > this.h - CANVAS_SHIP_EDGE) {
-                continue;
+            let lv = [ncell.x, ncell.y];
+            for (let t = 0; t < 10; t++) {
+                const nv = [
+                    ncell.x + this.r.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
+                    ncell.y + this.r.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
+                ];
+                if (nv[0] < CANVAS_SHIP_EDGE ||
+                    nv[0] > this.w - CANVAS_SHIP_EDGE ||
+                    nv[1] < CANVAS_SHIP_EDGE ||
+                    nv[1] > this.h - CANVAS_SHIP_EDGE) {
+                    continue;
+                }
+                if (this.getspa(nv[0], nv[1]) <= 0) {
+                    continue;
+                }
+                lv = nv;
+                break;
             }
-            if (this.getspa(nv[0], nv[1]) <= 0) {
-                continue;
+            if (Math.abs(lv[0] - this.hw) < COMPONENT_GRID_SIZE) {
+                if (this.r.sb(this.f.hd(0, 1, "com middleness"))) {
+                    lv[0] = this.hw;
+                }
             }
-            lv = nv;
-            break;
+            components[this.r.schoose(componentChances)](cfx, this, lv, componentChances, colorData, nextpass);
+            this.totaldone++;
         }
-        if (Math.abs(lv[0] - this.hw) < COMPONENT_GRID_SIZE) {
-            if (this.r.sb(this.f.hd(0, 1, "com middleness"))) {
-                lv[0] = this.hw;
-            }
-        }
-        components[this.r.schoose(componentChances)](cfx, this, lv, componentChances, colorData);
-        this.totaldone++;
-        return false;
     }
 }
 

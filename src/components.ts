@@ -65,7 +65,7 @@ function shadowGradient(
   return grad;
 }
 
-type ComponentFunc = (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData) => void;
+type ComponentFunc = (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number) => void;
 
 // Each component function takes an argument 'lp' (for the ship) and 'v' (an integral 2-vector denoting the center of the component)
 export const components: Array<ComponentFunc>  = [
@@ -299,7 +299,7 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
   }
 },
 //Rocket engine (or tries to call another random component if too far forward)
-function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData) {
+function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number) {
   if (
     lp.r.sb(frontness(lp, v) - 0.3) ||
     lp.getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) > 0 ||
@@ -308,7 +308,7 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
     for (let tries = 0; tries < 100; tries++) {
       const which = lp.r.schoose(componentChances);
       if (which != 3) {
-        components[which](cfx, lp, v, componentChances, colorData);
+        components[which](cfx, lp, v, componentChances, colorData, nextpass);
         return;
       }
     }
@@ -400,7 +400,7 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
   }
 },
 //Elongated cylinder (calls component 0 - 2 on top of its starting point)
-function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData) {
+function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number) {
   const cn = centerness(lp, v, true, false);
   const lightmid = lp.r.sd(0.7, 1);
   const lightedge = lp.r.sd(0, 0.2);
@@ -502,16 +502,16 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
     0.2 * (lp.f.hd(0, 1, "com4 covercomc1") ** 2),
     (lp.f.hd(0, 1, "com4 covercomc2") ** 2),
   ];
-  components[lp.r.schoose(coverComC)](cfx, lp, v, componentChances, colorData);
+  components[lp.r.schoose(coverComC)](cfx, lp, v, componentChances, colorData, nextpass);
   if (lp.getCellPhase(ev[0], ev[1]) > 0) {
     const nev: Vec = [
       ev[0] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
       ev[1] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
     ];
     if (lp.getCellPhase(nev[0], nev[1]) > 0) {
-      components[lp.r.schoose(coverComC)](cfx, lp, nev, componentChances, colorData);
+      components[lp.r.schoose(coverComC)](cfx, lp, nev, componentChances, colorData, nextpass);
     } else {
-      components[lp.r.schoose(coverComC)](cfx, lp, ev, componentChances, colorData);
+      components[lp.r.schoose(coverComC)](cfx, lp, ev, componentChances, colorData, nextpass);
     }
   }
 },
@@ -582,9 +582,9 @@ function(cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Comp
   }
 },
 //Forward-facing trapezoidal fin
-function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData) {
-  if (lp.nextpass <= 0 || lp.r.sb(frontness(lp, v))) {
-    components[lp.r.schoose(componentChances.slice(0, 6))](cfx, lp, v, componentChances, colorData);
+function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number) {
+  if (nextpass <= 0 || lp.r.sb(frontness(lp, v))) {
+    components[lp.r.schoose(componentChances.slice(0, 6))](cfx, lp, v, componentChances, colorData, nextpass);
     return;
   }
   let lcms = COMPONENT_MAXIMUM_SIZE;

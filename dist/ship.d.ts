@@ -24,9 +24,6 @@ export declare class Ship {
     cf: HTMLCanvasElement;
     passes: number;
     extra: number;
-    extradone: number;
-    nextpass: number;
-    nextcell: number;
     totalcomponents: number;
     totaldone: number;
     cgrid: Array<Array<Cell>>;
@@ -37,6 +34,6 @@ export declare class Ship {
     getCellPhase(x: number, y: number): number;
     getspa(x: number, y: number): number;
     getpcdone(): number;
-    addcomponent(cfx: CanvasRenderingContext2D, componentChances: ComponentChances, colorData: ColorData): boolean;
+    addComponents(cfx: CanvasRenderingContext2D, componentChances: ComponentChances, colorData: ColorData): void;
 }
 export {};
