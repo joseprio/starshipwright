@@ -8,13 +8,13 @@ export const outlines = [
   function (lp: Ship) {
     const csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
     const csarealimit = csarea * 0.05;
-    const initialwidth = Math.ceil(
+    const initialWidth = Math.ceil(
       (lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.hd(0.1, 1, "outline0 iw") * 0.2
     );
     const blocks = [
       [
-        [lp.hw - initialwidth, CANVAS_SHIP_EDGE],
-        [lp.hw + initialwidth, lp.h - CANVAS_SHIP_EDGE],
+        [lp.hw - initialWidth, CANVAS_SHIP_EDGE],
+        [lp.hw + initialWidth, lp.h - CANVAS_SHIP_EDGE],
       ],
     ];
     const blockcount =
@@ -59,7 +59,7 @@ export const outlines = [
         [Math.ceil(v1[0]), Math.ceil(v1[1])],
       ]);
     }
-    lp.csx.fillStyle = "#FFFFFF";
+    lp.csx.fillStyle = "#fff";
     for (let i = 0; i < blocks.length; i++) {
       const lb = blocks[i];
       lp.csx.fillRect(

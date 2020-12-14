@@ -111,6 +111,14 @@ export class Randomizer {
             (max - min) +
             min);
     }
+    //Returns an integer between the specified minimum and maximum, from the stream.
+    si(min, max) {
+        return Math.floor(this.sd(min, max + 1));
+    }
+    //Returns a boolean with the specified chance of bein true (and false otherwise), from the stream
+    sb(chance) {
+        return this.sd(0, 1) < chance;
+    }
     //Returns a double between the specified minimum and maximum, by hashing this object's seed with the specified string.
     hd(min, max, seed) {
         return (((this.hr(seed) * 4294967296 + this.hr(seed + "@")) /
@@ -118,30 +126,17 @@ export class Randomizer {
             (max - min) +
             min);
     }
-    //Returns an integer between the specified minimum and maximum, from the stream.
-    si(min, max) {
-        return Math.floor(((this.sr() * 4294967296 + this.sr()) / 18446744073709551616) *
-            (max + 1 - min) +
-            min);
-    }
     //Returns an integer between the specified minimum and maximum, by hashing this object's seed with the specified string.
     hi(min, max, s) {
-        return Math.floor(((this.hr(s) * 4294967296 + this.hr(s + "@")) / 18446744073709551616) *
-            (max + 1 - min) +
-            min);
-    }
-    //Returns a boolean with the specified chance of being true (and false otherwise), from the stream
-    sb(chance) {
-        return (this.sr() * 4294967296 + this.sr()) / 18446744073709551616 < chance;
+        return Math.floor(this.hd(min, max + 1, s));
     }
     //Returns a boolean with the specified chance of being true (and false otherwise), by hashing this object's seed with the specified string.
-    hb(chance, s) {
-        return ((this.hr(s) * 4294967296 + this.hr(s + "@")) / 18446744073709551616 <
-            chance);
+    hb(chance, seed) {
+        return (this.hd(0, 1, seed) < chance);
     }
     //Returns an integer with the specified chance of being -1 (and 1 otherwise), from the stream.
     ss(chance) {
-        return (this.sr() * 4294967296 + this.sr()) / 18446744073709551616 < chance
+        return this.sb(chance)
             ? -1
             : 1;
     }
@@ -159,7 +154,7 @@ export class Randomizer {
     //Returns an integer {0,1,2,...}, starting from 0, with the specified chance of advancing to each successive integer, from the stream.
     sseq(chance, max) {
         var rv = 0;
-        while ((this.sr() * 4294967296 + this.sr()) / 18446744073709551616 < chance &&
+        while (this.sb(chance) &&
             rv < max) {
             rv++;
         }

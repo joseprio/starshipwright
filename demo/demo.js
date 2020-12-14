@@ -206,6 +206,14 @@ class Randomizer {
             (max - min) +
             min);
     }
+    //Returns an integer between the specified minimum and maximum, from the stream.
+    si(min, max) {
+        return Math.floor(this.sd(min, max + 1));
+    }
+    //Returns a boolean with the specified chance of bein true (and false otherwise), from the stream
+    sb(chance) {
+        return this.sd(0, 1) < chance;
+    }
     //Returns a double between the specified minimum and maximum, by hashing this object's seed with the specified string.
     hd(min, max, seed) {
         return (((this.hr(seed) * 4294967296 + this.hr(seed + "@")) /
@@ -213,30 +221,17 @@ class Randomizer {
             (max - min) +
             min);
     }
-    //Returns an integer between the specified minimum and maximum, from the stream.
-    si(min, max) {
-        return Math.floor(((this.sr() * 4294967296 + this.sr()) / 18446744073709551616) *
-            (max + 1 - min) +
-            min);
-    }
     //Returns an integer between the specified minimum and maximum, by hashing this object's seed with the specified string.
     hi(min, max, s) {
-        return Math.floor(((this.hr(s) * 4294967296 + this.hr(s + "@")) / 18446744073709551616) *
-            (max + 1 - min) +
-            min);
-    }
-    //Returns a boolean with the specified chance of being true (and false otherwise), from the stream
-    sb(chance) {
-        return (this.sr() * 4294967296 + this.sr()) / 18446744073709551616 < chance;
+        return Math.floor(this.hd(min, max + 1, s));
     }
     //Returns a boolean with the specified chance of being true (and false otherwise), by hashing this object's seed with the specified string.
-    hb(chance, s) {
-        return ((this.hr(s) * 4294967296 + this.hr(s + "@")) / 18446744073709551616 <
-            chance);
+    hb(chance, seed) {
+        return (this.hd(0, 1, seed) < chance);
     }
     //Returns an integer with the specified chance of being -1 (and 1 otherwise), from the stream.
     ss(chance) {
-        return (this.sr() * 4294967296 + this.sr()) / 18446744073709551616 < chance
+        return this.sb(chance)
             ? -1
             : 1;
     }
@@ -254,7 +249,7 @@ class Randomizer {
     //Returns an integer {0,1,2,...}, starting from 0, with the specified chance of advancing to each successive integer, from the stream.
     sseq(chance, max) {
         var rv = 0;
-        while ((this.sr() * 4294967296 + this.sr()) / 18446744073709551616 < chance &&
+        while (this.sb(chance) &&
             rv < max) {
             rv++;
         }
@@ -1078,11 +1073,11 @@ const outlines = [
     function (lp) {
         const csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
         const csarealimit = csarea * 0.05;
-        const initialwidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.hd(0.1, 1, "outline0 iw") * 0.2);
+        const initialWidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.hd(0.1, 1, "outline0 iw") * 0.2);
         const blocks = [
             [
-                [lp.hw - initialwidth, CANVAS_SHIP_EDGE],
-                [lp.hw + initialwidth, lp.h - CANVAS_SHIP_EDGE],
+                [lp.hw - initialWidth, CANVAS_SHIP_EDGE],
+                [lp.hw + initialWidth, lp.h - CANVAS_SHIP_EDGE],
             ],
         ];
         const blockcount = 2 +
@@ -1122,7 +1117,7 @@ const outlines = [
                 [Math.ceil(v1[0]), Math.ceil(v1[1])],
             ]);
         }
-        lp.csx.fillStyle = "#FFFFFF";
+        lp.csx.fillStyle = "#fff";
         for (let i = 0; i < blocks.length; i++) {
             const lb = blocks[i];
             lp.csx.fillRect(lb[0][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);

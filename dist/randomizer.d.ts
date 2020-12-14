@@ -11,11 +11,11 @@ export declare class Randomizer {
     sr(): number;
     hr(seed?: string): number;
     sd(min: number, max: number): number;
-    hd(min: number, max: number, seed: string): number;
     si(min: number, max: number): number;
-    hi(min: number, max: number, s: string): number;
     sb(chance: number): boolean;
-    hb(chance: number, s: string): boolean;
+    hd(min: number, max: number, seed: string): number;
+    hi(min: number, max: number, s: string): number;
+    hb(chance: number, seed: string): boolean;
     ss(chance: number): number;
     sseq(chance: number, max: number): number;
     hseq(chance: number, max: number, seed: string): number;
