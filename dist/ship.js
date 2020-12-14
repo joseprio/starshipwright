@@ -2,7 +2,7 @@ import { Randomizer } from "./randomizer";
 import { CANVAS_SHIP_EDGE, COMPONENT_GRID_SIZE } from "./constants";
 import { components } from "./components";
 import { outlines } from "./outlines";
-import { computeFactionComponentChances, computeFactionColors, computeBaseColor, } from "./faction";
+import { computeFactionComponentChances, computeFactionColors, computeBaseColor } from "./faction";
 export class Ship {
     constructor(factionRandomizer, p_seed, size) {
         this.extradone = 0;
@@ -120,9 +120,12 @@ export class Ship {
         this.extra = Math.max(1, Math.floor(this.goodcells.length *
             this.f.hd(0, 1 / this.passes, "extra component amount")));
         this.totalcomponents = this.passes * this.goodcells.length + this.extra;
+        const colorData = computeFactionColors(this.f);
+        const componentChances = computeFactionComponentChances(this.f);
+        const baseColor = computeBaseColor(this.f, colorData, this);
         let done = false;
         do {
-            done = this.addcomponent();
+            done = this.addcomponent(baseColor, componentChances, colorData);
         } while (!done);
     }
     // Returns the cell containing (X,Y), if there is one, or null otherwise
@@ -154,7 +157,7 @@ export class Ship {
     getpcdone() {
         return this.totaldone / this.totalcomponents;
     }
-    addcomponent() {
+    addcomponent(baseColor, componentChances, colorData) {
         //Generates the next component of this ship. Returns true if the ship is finished, false if there are still more components to add.
         let ncell;
         if (this.nextpass < this.passes) {
@@ -198,9 +201,6 @@ export class Ship {
                 lv[0] = this.hw;
             }
         }
-        const colorData = computeFactionColors(this.f);
-        const componentChances = computeFactionComponentChances(this.f);
-        const baseColor = computeBaseColor(this.f, colorData, this);
         components[this.r.schoose(componentChances)](this, lv, baseColor, componentChances, colorData);
         this.totaldone++;
         return false;

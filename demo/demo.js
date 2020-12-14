@@ -1327,9 +1327,12 @@ class ship_Ship {
         this.extra = Math.max(1, Math.floor(this.goodcells.length *
             this.f.hd(0, 1 / this.passes, "extra component amount")));
         this.totalcomponents = this.passes * this.goodcells.length + this.extra;
+        const colorData = computeFactionColors(this.f);
+        const componentChances = computeFactionComponentChances(this.f);
+        const baseColor = computeBaseColor(this.f, colorData, this);
         let done = false;
         do {
-            done = this.addcomponent();
+            done = this.addcomponent(baseColor, componentChances, colorData);
         } while (!done);
     }
     // Returns the cell containing (X,Y), if there is one, or null otherwise
@@ -1361,7 +1364,7 @@ class ship_Ship {
     getpcdone() {
         return this.totaldone / this.totalcomponents;
     }
-    addcomponent() {
+    addcomponent(baseColor, componentChances, colorData) {
         //Generates the next component of this ship. Returns true if the ship is finished, false if there are still more components to add.
         let ncell;
         if (this.nextpass < this.passes) {
@@ -1405,9 +1408,6 @@ class ship_Ship {
                 lv[0] = this.hw;
             }
         }
-        const colorData = computeFactionColors(this.f);
-        const componentChances = computeFactionComponentChances(this.f);
-        const baseColor = computeBaseColor(this.f, colorData, this);
         components[this.r.schoose(componentChances)](this, lv, baseColor, componentChances, colorData);
         this.totaldone++;
         return false;

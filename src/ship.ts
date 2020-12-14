@@ -6,8 +6,10 @@ import {
   computeFactionComponentChances,
   computeFactionColors,
   computeBaseColor,
+  ColorData,
+  ComponentChances
 } from "./faction";
-import type { Vec } from "./types";
+import type { RGBColor, Vec } from "./types";
 
 type Cell = {
   gx: number;
@@ -169,9 +171,13 @@ export class Ship {
     );
     this.totalcomponents = this.passes * this.goodcells.length + this.extra;
 
+    const colorData = computeFactionColors(this.f);
+    const componentChances = computeFactionComponentChances(this.f);
+    const baseColor  = computeBaseColor(this.f, colorData, this);
+
     let done = false;
     do {
-      done = this.addcomponent();
+      done = this.addcomponent(baseColor, componentChances, colorData);
     } while (!done);
   }
 
@@ -208,7 +214,7 @@ export class Ship {
     return this.totaldone / this.totalcomponents;
   }
 
-  addcomponent() {
+  addcomponent(baseColor: RGBColor, componentChances: ComponentChances, colorData: ColorData) {
     //Generates the next component of this ship. Returns true if the ship is finished, false if there are still more components to add.
     let ncell: Cell;
     if (this.nextpass < this.passes) {
@@ -251,9 +257,6 @@ export class Ship {
         lv[0] = this.hw;
       }
     }
-    const colorData = computeFactionColors(this.f);
-    const componentChances = computeFactionComponentChances(this.f);
-    const baseColor  = computeBaseColor(this.f, colorData, this);
     components[this.r.schoose(componentChances)](this, lv, baseColor, componentChances, colorData);
     this.totaldone++;
     return false;

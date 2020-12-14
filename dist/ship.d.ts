@@ -1,4 +1,6 @@
 import { Randomizer } from "./randomizer";
+import { ColorData, ComponentChances } from "./faction";
+import type { RGBColor } from "./types";
 declare type Cell = {
     gx: number;
     gy: number;
@@ -39,6 +41,6 @@ export declare class Ship {
     getCellPhase(x: number, y: number): number;
     getspa(x: number, y: number): number;
     getpcdone(): number;
-    addcomponent(): boolean;
+    addcomponent(baseColor: RGBColor, componentChances: ComponentChances, colorData: ColorData): boolean;
 }
 export {};
