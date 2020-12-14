@@ -791,8 +791,8 @@ const components = [
             //forwards
             const hlimit = v[1] - CANVAS_SHIP_EDGE;
             const h = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.7 * lp.size * (lp.r.sd(0, 1) ** lp.f.hd(2, 6, "com4 hpower0"))));
-            const bb_0_0 = v[0] - hwi, bb_0_1 = v[1] - h, bb_1_0 = v[0] + hwi + hwe, bb_1_1 = v[1];
-            const grad = cfx.createLinearGradient(bb_0_0, bb_0_1, bb_1_0, bb_1_1);
+            const bb_0_0 = v[0] - hwi, bb_0_1 = v[1] - h, bb_1_0 = v[0] + hwi + hwe;
+            const grad = cfx.createLinearGradient(bb_0_0, bb_0_1, bb_1_0, bb_0_1);
             grad.addColorStop(0, coloredge);
             grad.addColorStop(0.5, colormid);
             grad.addColorStop(1, coloredge);

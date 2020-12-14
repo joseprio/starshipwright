@@ -436,12 +436,12 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
         0.7 * lp.size * (lp.r.sd(0, 1) ** lp.f.hd(2, 6, "com4 hpower0"))
       )
     );
-    const bb_0_0 = v[0] - hwi, bb_0_1 = v[1] - h, bb_1_0 = v[0] + hwi + hwe, bb_1_1 = v[1];
+    const bb_0_0 = v[0] - hwi, bb_0_1 = v[1] - h, bb_1_0 = v[0] + hwi + hwe;
     const grad = cfx.createLinearGradient(
       bb_0_0,
       bb_0_1,
       bb_1_0,
-      bb_1_1
+      bb_0_1
     );
     grad.addColorStop(0, coloredge);
     grad.addColorStop(0.5, colormid);
