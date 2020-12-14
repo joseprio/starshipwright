@@ -91,7 +91,7 @@ export const components = [
         }
     },
     // Cylinder array
-    function (lp, v, baseColor) {
+    function (lp, v, componentChances, colorData) {
         let lcms = COMPONENT_MAXIMUM_SIZE;
         const bn = Math.pow(bigness(lp, v), 0.2);
         if (lp.r.sb(lp.f.hd(0.3, 1, "com1 bigchance") * bn)) {
@@ -114,6 +114,7 @@ export const components = [
         const cw = lp.r.si(3, Math.max(4, w));
         const count = Math.max(1, Math.round(w / cw));
         w = count * cw;
+        const baseColor = computeBaseColor(lp.f, colorData, lp);
         const ccolor = scaleColorBy(baseColor, lp.r.sd(0.5, 1));
         const darkness = lp.r.sd(0.3, 0.9);
         // true = horizontal array, false = vertical array
@@ -142,7 +143,7 @@ export const components = [
         }
     },
     // Banded cylinder
-    function (lp, v, baseColor) {
+    function (lp, v, componentChances, colorData) {
         let lcms = COMPONENT_MAXIMUM_SIZE;
         const bn = Math.pow(bigness(lp, v), 0.05);
         if (lp.r.sb(lp.f.hd(0, 1, "com2 bigchance") * bn)) {
@@ -174,6 +175,7 @@ export const components = [
         const odd = lp.r.sb(Math.pow(lp.f.hd(0, 1, "com2 oddchance"), 0.5));
         const count = clamp(Math.floor(h / hpair), 1, h);
         const htotal = count * hpair + (odd ? h2[0] : 0);
+        const baseColor = computeBaseColor(lp.f, colorData, lp);
         const scale_0 = lp.r.sd(0.6, 1);
         const scale_1 = lp.r.sd(0.6, 1);
         const color2 = [
