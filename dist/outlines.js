@@ -6,7 +6,7 @@ export const outlines = [
     function (lp) {
         const csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
         const csarealimit = csarea * 0.05;
-        const initialwidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.r.hd(0.1, 1, "outline0 iw") * 0.2);
+        const initialwidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.hd(0.1, 1, "outline0 iw") * 0.2);
         const blocks = [
             [
                 [lp.hw - initialwidth, CANVAS_SHIP_EDGE],
@@ -14,7 +14,7 @@ export const outlines = [
             ],
         ];
         const blockcount = 2 +
-            Math.floor(lp.r.sd(0.5, 1) * lp.f.r.hd(2, 8, "outline0 bc") * Math.sqrt(lp.size));
+            Math.floor(lp.r.sd(0.5, 1) * lp.f.hd(2, 8, "outline0 bc") * Math.sqrt(lp.size));
         for (let i = 1; i < blockcount; i++) {
             const base = blocks[lp.r.si(0, blocks.length - 1)];
             const v0 = [
@@ -22,7 +22,7 @@ export const outlines = [
                 base[0][1] + lp.r.sd(0, 1) * (base[1][1] - base[0][1]),
             ];
             if (v0[1] < (base[0][1] + base[1][1]) * 0.5 &&
-                lp.r.sb(lp.f.r.hd(0.5, 1.5, "outline0 frontbias"))) {
+                lp.r.sb(lp.f.hd(0.5, 1.5, "outline0 frontbias"))) {
                 v0[1] = base[1][1] - (v0[1] - base[0][1]);
             }
             const v1 = [
@@ -62,7 +62,7 @@ export const outlines = [
         const csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
         const csarealimit = csarea * 0.05;
         const csrlimit = Math.max(2, Math.sqrt(csarealimit / Math.PI));
-        const initialwidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.r.hd(0.1, 1, "outline1 iw") * 0.2);
+        const initialwidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.hd(0.1, 1, "outline1 iw") * 0.2);
         const circles = [];
         const initialcount = Math.floor((lp.h - 2 * CANVAS_SHIP_EDGE) / (initialwidth * 2));
         for (let i = 0; i < initialcount; i++) {
@@ -70,13 +70,13 @@ export const outlines = [
             circles.push({ v: lv, r: initialwidth });
         }
         const circlecount = initialcount +
-            Math.floor(lp.r.sd(0.5, 1) * lp.f.r.hd(10, 50, "outline1 cc") * Math.sqrt(lp.size));
+            Math.floor(lp.r.sd(0.5, 1) * lp.f.hd(10, 50, "outline1 cc") * Math.sqrt(lp.size));
         for (let i = initialcount; i < circlecount; i++) {
             const base = circles[Math.max(lp.r.si(0, circles.length - 1), lp.r.si(0, circles.length - 1))];
             let ncr = lp.r.sd(1, csrlimit);
             const pr = lp.r.sd(Math.max(0, base.r - ncr), base.r);
             let pa = lp.r.sd(0, 2 * Math.PI);
-            if (pa > Math.PI && lp.r.sb(lp.f.r.hd(0.5, 1.5, "outline1 frontbias"))) {
+            if (pa > Math.PI && lp.r.sb(lp.f.hd(0.5, 1.5, "outline1 frontbias"))) {
                 pa = lp.r.sd(0, Math.PI);
             }
             let lv = [base.v[0] + Math.cos(pa) * pr, base.v[1] + Math.sin(pa) * pr];
@@ -105,7 +105,7 @@ export const outlines = [
             [lp.hw, lp.r.sd(0.95, 1) * innersize[1] + CANVAS_SHIP_EDGE],
         ];
         const basefatness = COMPONENT_GRID_SIZE / lp.size +
-            lp.f.r.hd(0.03, 0.1, "outline2 basefatness");
+            lp.f.hd(0.03, 0.1, "outline2 basefatness");
         const basemessiness = 1 / basefatness;
         const pointcount = Math.max(3, Math.ceil(basemessiness * lp.r.sd(0.05, 0.1) * Math.sqrt(lp.size)));
         // @ts-ignore - We're doing it properly
@@ -116,13 +116,13 @@ export const outlines = [
             if (np == null) {
                 np = [
                     lp.r.sd(0, 1) * innersize[0] + CANVAS_SHIP_EDGE,
-                    Math.pow(lp.r.sd(0, 1), lp.f.r.hd(0.1, 1, "outline2 frontbias")) *
+                    Math.pow(lp.r.sd(0, 1), lp.f.hd(0.1, 1, "outline2 frontbias")) *
                         innersize[1] +
                         CANVAS_SHIP_EDGE,
                 ];
                 points.push(np);
             }
-            const cons = 1 + lp.r.sseq(lp.f.r.hd(0, 1, "outline2 conadjust"), 3);
+            const cons = 1 + lp.r.sseq(lp.f.hd(0, 1, "outline2 conadjust"), 3);
             for (let nci = 0; nci < cons; nci++) {
                 const pre = points[lp.r.si(0, points.length - 2)];
                 lp.csx.lineWidth = lp.r.sd(0.7, 1) * basefatness * lp.size;

@@ -1,5 +1,4 @@
 import { Randomizer } from "./randomizer";
-import type { Faction } from "./faction";
 declare type Cell = {
     gx: number;
     gy: number;
@@ -8,7 +7,7 @@ declare type Cell = {
     phase: number;
 };
 export declare class Ship {
-    f: Faction;
+    f: Randomizer;
     baseSeed: string;
     seed: string;
     r: Randomizer;
@@ -35,7 +34,7 @@ export declare class Ship {
     cgrid: Array<Array<Cell>>;
     goodcells: Array<Cell>;
     csd: ImageData;
-    constructor(p_faction: Faction, p_seed: string, size?: number);
+    constructor(factionRandomizer: Randomizer, p_seed: string, size?: number);
     getcell(x: number, y: number): Cell;
     getCellPhase(x: number, y: number): number;
     getspa(x: number, y: number): number;

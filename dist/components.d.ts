@@ -1,1 +1,6 @@
-export declare const components: any[];
+import type { Ship } from "./ship";
+import type { RGBColor, Vec } from "./types";
+import type { ComponentChances, ColorData } from "./faction";
+declare type ComponentFunc = (lp: Ship, v: Vec, baseColor: RGBColor, componentChances: ComponentChances, colorData: ColorData) => void;
+export declare const components: Array<ComponentFunc>;
+export {};

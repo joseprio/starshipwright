@@ -1,14 +1,8 @@
 import { Randomizer } from "./randomizer";
 import type { RGBColor } from "./types";
 import type { Ship } from "./ship";
-export declare class Faction {
-    seed: string;
-    r: Randomizer;
-    componentChances: Array<number>;
-    colors: Array<RGBColor>;
-    colorChances: Array<number>;
-    constructor(seed: string);
-    setupComponentChances(): void;
-    setupColors(): void;
-    getBaseColor(lp: Ship): RGBColor;
-}
+export declare type ComponentChances = Array<number>;
+export declare type ColorData = [Array<RGBColor>, Array<number>];
+export declare function computeFactionComponentChances(factionRandomizer: Randomizer): ComponentChances;
+export declare function computeFactionColors(factionRandomizer: Randomizer): ColorData;
+export declare function computeBaseColor(factionRandomizer: Randomizer, factionColorData: ColorData, lp: Ship): RGBColor;

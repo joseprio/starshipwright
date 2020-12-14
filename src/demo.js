@@ -1,4 +1,4 @@
-import { generateShip, generateFaction } from "./index";
+import { generateShip, generateFactionRandomizer } from "./index";
 
 const characters =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -25,13 +25,14 @@ function update() {
 
   const factionSeed = document.getElementById("fseed").value;
   const size = document.getElementById("size").value;
-  const faction = factionSeed.length > 1 ? generateFaction(factionSeed) : null;
+  const faction =
+    factionSeed.length > 1 ? generateFactionRandomizer(factionSeed) : null;
   for (let c = 0; c < 20; c++) {
     const shipDiv = document.createElement("div");
     shipDiv.className = "ship";
     const shipCaption = document.createElement("div");
     const factionCaption = document.createElement("div");
-    const currentFaction = faction || generateFaction(randomSeed());
+    const currentFaction = faction || generateFactionRandomizer(randomSeed());
     const ship = generateShip(currentFaction, randomSeed(), size || undefined);
     shipCaption.textContent = "Seed: " + ship.baseSeed;
     factionCaption.textContent = "Faction: " + currentFaction.seed;

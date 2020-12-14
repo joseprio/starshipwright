@@ -1,8 +1,13 @@
 import { Randomizer } from "./randomizer";
-import type { Faction } from "./faction";
 import { CANVAS_SHIP_EDGE, COMPONENT_GRID_SIZE } from "./constants";
 import { components } from "./components";
 import { outlines } from "./outlines";
+import {
+  computeFactionComponentChances,
+  computeFactionColors,
+  computeBaseColor,
+} from "./faction";
+import type { Vec } from "./types";
 
 type Cell = {
   gx: number;
@@ -13,7 +18,7 @@ type Cell = {
 };
 
 export class Ship {
-  f: Faction;
+  f: Randomizer;
   baseSeed: string;
   seed: string;
   r: Randomizer;
@@ -41,8 +46,8 @@ export class Ship {
   goodcells: Array<Cell>;
   csd: ImageData;
 
-  constructor(p_faction: Faction, p_seed: string, size?: number) {
-    this.f = p_faction;
+  constructor(factionRandomizer: Randomizer, p_seed: string, size?: number) {
+    this.f = factionRandomizer;
     //Base seed for this ship, without appending the faction seed
     this.baseSeed = p_seed;
     this.seed = this.f.seed + this.baseSeed;
@@ -51,17 +56,17 @@ export class Ship {
     this.size =
       size == null
         ? this.r.sd(
-            this.f.r.hd(2.5, 3.5, "size min"),
-            this.f.r.hd(5, 7, "size max")
+            this.f.hd(2.5, 3.5, "size min"),
+            this.f.hd(5, 7, "size max")
           ) ** 3
         : size;
     const wratio = this.r.sd(
-      this.f.r.hd(0.5, 1, "wratio min"),
-      this.f.r.hd(1, 1.3, "wratio max")
+      this.f.hd(0.5, 1, "wratio min"),
+      this.f.hd(1, 1.3, "wratio max")
     );
     const hratio = this.r.sd(
-      this.f.r.hd(0.7, 1, "hratio min"),
-      this.f.r.hd(1.1, 1.7, "hratio max")
+      this.f.hd(0.7, 1, "hratio min"),
+      this.f.hd(1.1, 1.7, "hratio max")
     );
     this.w = Math.floor(this.size * wratio) + 2 * CANVAS_SHIP_EDGE; // Maximum width of this ship, in pixels
     this.hw = Math.floor(this.w / 2);
@@ -79,7 +84,7 @@ export class Ship {
     this.cf.setAttribute("width", String(this.w));
     this.cf.setAttribute("height", String(this.h));
     this.cfx = this.cf.getContext("2d");
-    outlines[this.f.r.hchoose([1, 1, 1], "outline type")](this);
+    outlines[this.f.hchoose([1, 1, 1], "outline type")](this);
     this.csd = this.csx.getImageData(0, 0, this.w, this.h);
     this.cgrid = [];
     for (let gx = 0; gx < this.gw; gx++) {
@@ -154,12 +159,12 @@ export class Ship {
         this.goodcells.push(ocell);
       }
     }
-    this.passes = this.f.r.hi(1, 2, "base component passes");
+    this.passes = this.f.hi(1, 2, "base component passes");
     this.extra = Math.max(
       1,
       Math.floor(
         this.goodcells.length *
-          this.f.r.hd(0, 1 / this.passes, "extra component amount")
+          this.f.hd(0, 1 / this.passes, "extra component amount")
       )
     );
     this.totalcomponents = this.passes * this.goodcells.length + this.extra;
@@ -221,9 +226,9 @@ export class Ship {
     } else {
       return true;
     }
-    let lv = [ncell.x, ncell.y];
+    let lv: Vec = [ncell.x, ncell.y];
     for (let t = 0; t < 10; t++) {
-      const nv = [
+      const nv: Vec = [
         ncell.x + this.r.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
         ncell.y + this.r.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
       ];
@@ -242,11 +247,14 @@ export class Ship {
       break;
     }
     if (Math.abs(lv[0] - this.hw) < COMPONENT_GRID_SIZE) {
-      if (this.r.sb(this.f.r.hd(0, 1, "com middleness"))) {
+      if (this.r.sb(this.f.hd(0, 1, "com middleness"))) {
         lv[0] = this.hw;
       }
     }
-    components[this.r.schoose(this.f.componentChances)](this, lv);
+    const colorData = computeFactionColors(this.f);
+    const componentChances = computeFactionComponentChances(this.f);
+    const baseColor  = computeBaseColor(this.f, colorData, this);
+    components[this.r.schoose(componentChances)](this, lv, baseColor, componentChances, colorData);
     this.totaldone++;
     return false;
   }
