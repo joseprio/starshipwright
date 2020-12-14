@@ -152,7 +152,7 @@ export const outlines: Array<OutlineFunc> = [
       if (np == null) {
         np = [
           lp.r.sd(0, 1) * innersize[0] + CANVAS_SHIP_EDGE,
-          Math.pow(lp.r.sd(0, 1), lp.f.hd(0.1, 1, "outline2 frontbias")) *
+          (lp.r.sd(0, 1) ** lp.f.hd(0.1, 1, "outline2 frontbias")) *
             innersize[1] +
             CANVAS_SHIP_EDGE,
         ];

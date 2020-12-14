@@ -27,7 +27,7 @@ function centerness(lp: Ship, v: Vec, doX: boolean, doY: boolean): number {
 function bigness(lp: Ship, v: Vec): number {
   const effectCenter = centerness(lp, v, true, true);
   const effectShipsize = 1 - 1 / ((lp.w + lp.h) / 1000 + 1);
-  const effectFaction = Math.pow(lp.f.hd(0, 1, "master bigness"), 0.5);
+  const effectFaction = lp.f.hd(0, 1, "master bigness") ** 0.5;
   const effectStack = 1 - lp.getpcdone();
   return effectCenter * effectShipsize * effectFaction * effectStack;
 }
@@ -73,7 +73,7 @@ export const components: Array<ComponentFunc>  = [
 // Bordered block
 function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = Math.pow(bigness(lp, v), 0.3);
+  const bn = bigness(lp, v) ** 0.3;
   if (lp.r.sb(lp.f.hd(0, 0.9, "com0 bigchance") * bn)) {
     const chance = lp.f.hd(0, 0.5, "com0 bigincchance");
     while (lp.r.sb(chance * bn)) {
@@ -148,7 +148,7 @@ function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: Color
 // Cylinder array
 function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = Math.pow(bigness(lp, v), 0.2);
+  const bn = bigness(lp, v) ** 0.2;
   if (lp.r.sb(lp.f.hd(0.3, 1, "com1 bigchance") * bn)) {
     const chance = lp.f.hd(0, 0.6, "com1 bigincchance");
     while (lp.r.sb(chance * bn)) {
@@ -210,7 +210,7 @@ function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: Color
 // Banded cylinder
 function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = Math.pow(bigness(lp, v), 0.05);
+  const bn = bigness(lp, v) ** 0.05;
   if (lp.r.sb(lp.f.hd(0, 1, "com2 bigchance") * bn)) {
     const chance = lp.f.hd(0, 0.9, "com2 bigincchance");
     while (lp.r.sb(chance * bn)) {
@@ -236,7 +236,7 @@ function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: Color
     Math.floor(clamp(w * lp.r.sd(0.1, 0.3), 1, h)),
   ];
   const hpair = h2[0] + h2[1];
-  const odd = lp.r.sb(Math.pow(lp.f.hd(0, 1, "com2 oddchance"), 0.5));
+  const odd = lp.r.sb(lp.f.hd(0, 1, "com2 oddchance") ** 0.5);
   const count = clamp(Math.floor(h / hpair), 1, h);
   const htotal = count * hpair + (odd ? h2[0] : 0);
   const baseColor = computeBaseColor(lp.f, colorData, lp);
@@ -252,7 +252,7 @@ function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: Color
     scaleColorBy(baseColor, lightness * scale_1),
   ];
   const orientation = lp.r.sb(
-    Math.pow(lp.f.hd(0, 1, "com2 verticalchance"), 0.1)
+    lp.f.hd(0, 1, "com2 verticalchance") ** 0.1
   );
   if (orientation) {
     const grad2_0 = lp.cfx.createLinearGradient(v[0] - wh2[0], v[1], v[0] + wh2[0], v[1]);
@@ -314,7 +314,7 @@ function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: Color
     }
   }
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = Math.pow(bigness(lp, v), 0.1);
+  const bn = bigness(lp, v) ** 0.1;
   if (lp.r.sb(lp.f.hd(0.6, 1, "com3 bigchance") * bn)) {
     const chance = lp.f.hd(0.3, 0.8, "com3 bigincchance");
     while (lp.r.sb(chance * bn)) {
@@ -411,15 +411,15 @@ function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: Color
     3,
     Math.ceil(
       lp.size *
-        Math.pow(lp.r.sd(0.4, 1), 2) *
+        (lp.r.sd(0.4, 1) ** 2) *
         lp.f.hd(0.02, 0.1, "com4 maxwidth")
     )
   );
   const hwi = Math.floor(w / 2);
   const hwe = w % 2;
-  const forwards = 1 * Math.pow(lp.f.hd(0, 1, "com4 directionc0"), 4);
-  const backwards = 0.1 * Math.pow(lp.f.hd(0, 1, "com4 directionc1"), 4);
-  const toCenter = 0.2 * Math.pow(lp.f.hd(0, 1, "com4 directionc2"), 4);
+  const forwards = 1 * (lp.f.hd(0, 1, "com4 directionc0") ** 4);
+  const backwards = 0.1 * (lp.f.hd(0, 1, "com4 directionc1") ** 4);
+  const toCenter = 0.2 * (lp.f.hd(0, 1, "com4 directionc2") ** 4);
   const direction = lp.r.schoose([
     forwards * (2 - cn),
     backwards,
@@ -435,7 +435,7 @@ function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: Color
         hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)
       ),
       Math.floor(
-        0.7 * lp.size * Math.pow(lp.r.sd(0, 1), lp.f.hd(2, 6, "com4 hpower0"))
+        0.7 * lp.size * (lp.r.sd(0, 1) ** lp.f.hd(2, 6, "com4 hpower0"))
       )
     );
     const bb = [
@@ -463,7 +463,7 @@ function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: Color
         hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)
       ),
       Math.floor(
-        0.6 * lp.size * Math.pow(lp.r.sd(0, 1), lp.f.hd(2, 7, "com4 hpower1"))
+        0.6 * lp.size * (lp.r.sd(0, 1) ** lp.f.hd(2, 7, "com4 hpower1"))
       )
     );
     const bb = [
@@ -498,9 +498,9 @@ function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: Color
     ev = [lp.hw, v[1]];
   }
   const coverComC = [
-    0.6 * Math.pow(lp.f.hd(0, 1, "com4 covercomc0"), 2),
-    0.2 * Math.pow(lp.f.hd(0, 1, "com4 covercomc1"), 2),
-    Math.pow(lp.f.hd(0, 1, "com4 covercomc2"), 2),
+    0.6 * (lp.f.hd(0, 1, "com4 covercomc0") ** 2),
+    0.2 * (lp.f.hd(0, 1, "com4 covercomc1") ** 2),
+    (lp.f.hd(0, 1, "com4 covercomc2") ** 2),
   ];
   components[lp.r.schoose(coverComC)](lp, v, componentChances, colorData);
   if (lp.getCellPhase(ev[0], ev[1]) > 0) {
@@ -518,7 +518,7 @@ function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: Color
 //Ball
 function(lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = Math.pow(bigness(lp, v), 0.1);
+  const bn = bigness(lp, v) ** 0.1;
   if (lp.r.sb(lp.f.hd(0, 0.9, "com5 bigchance") * bn)) {
     const chance = lp.f.hd(0, 0.8, "com5 bigincchance");
     while (lp.r.sb(chance * bn)) {
@@ -542,13 +542,13 @@ function(lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorD
     1 +
     lp.r.sseq(
       lp.f.hd(0, 1, "com5 multxc"),
-      Math.floor(1.2 * Math.pow(lcms / COMPONENT_MAXIMUM_SIZE, 0.6))
+      Math.floor(1.2 * ((lcms / COMPONENT_MAXIMUM_SIZE) ** 0.6))
     );
   const county =
     1 +
     lp.r.sseq(
       lp.f.hd(0, 1, "com5 multyc"),
-      Math.floor(1.2 * Math.pow(lcms / COMPONENT_MAXIMUM_SIZE, 0.6))
+      Math.floor(1.2 * ((lcms / COMPONENT_MAXIMUM_SIZE) ** 0.6))
     );
   const smallr = (lp.r.sd(0.5, 1) * lcms) / Math.max(countx, county);
   const drawr = smallr + 0.5;
@@ -588,7 +588,7 @@ function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: Color
     return;
   }
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = Math.pow(bigness(lp, v), 0.05);
+  const bn = bigness(lp, v) ** 0.05;
   if (lp.r.sb(lp.f.hd(0, 0.9, "com6 bigchance") * bn)) {
     const chance = lp.f.hd(0, 0.8, "com6 bigincchance");
     while (lp.r.sb(chance * bn)) {
@@ -609,8 +609,8 @@ function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: Color
   //Outer height, shorter
   const h1 =
     h0 *
-    Math.pow(
-      lp.r.sd(Math.pow(lp.f.hd(0, 0.8, "com6 h1min"), 0.5), 0.9),
+    (
+      lp.r.sd(lp.f.hd(0, 0.8, "com6 h1min") ** 0.5, 0.9) **
       lp.f.hd(0.5, 1.5, "com6 h1power")
     );
   const hh1i = Math.floor(h1 / 2);
@@ -624,7 +624,7 @@ function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: Color
             : lp.f.hd(-0.2, -0.05, "com6 backness#neg"))
   );
   const w = Math.ceil(
-    lcms * lp.r.sd(0.7, 1) * Math.pow(lp.f.hd(0.1, 3.5, "com6 width"), 0.5)
+    lcms * lp.r.sd(0.7, 1) * (lp.f.hd(0.1, 3.5, "com6 width") ** 0.5)
   );
   const hwi = Math.floor(w / 2);
   const hwe = w % 2;

@@ -3,19 +3,19 @@ export function computeFactionComponentChances(factionRandomizer) {
     const componentChances = [];
     const dp = 8; // Default maximum power
     componentChances[0] =
-        0.8 * factionRandomizer.sd(0.001, 1) * Math.pow(2, factionRandomizer.sd(0, dp));
+        0.8 * factionRandomizer.sd(0.001, 1) * (2 ** factionRandomizer.sd(0, dp));
     componentChances[1] =
-        0.9 * factionRandomizer.sd(0.01, 1) * Math.pow(2, factionRandomizer.sd(0, dp));
+        0.9 * factionRandomizer.sd(0.01, 1) * (2 ** factionRandomizer.sd(0, dp));
     componentChances[2] =
-        1 * factionRandomizer.sd(0.001, 1) * Math.pow(2, factionRandomizer.sd(0, dp));
+        1 * factionRandomizer.sd(0.001, 1) * (2 ** factionRandomizer.sd(0, dp));
     componentChances[3] =
-        3 * factionRandomizer.sd(0, 1) * Math.pow(2, factionRandomizer.sd(0, dp));
+        3 * factionRandomizer.sd(0, 1) * (2 ** factionRandomizer.sd(0, dp));
     componentChances[4] =
-        0.5 * factionRandomizer.sd(0, 1) * Math.pow(2, factionRandomizer.sd(0, dp));
+        0.5 * factionRandomizer.sd(0, 1) * (2 ** factionRandomizer.sd(0, dp));
     componentChances[5] =
-        0.05 * factionRandomizer.sd(0, 1) * Math.pow(2, factionRandomizer.sd(0, dp));
+        0.05 * factionRandomizer.sd(0, 1) * (2 ** factionRandomizer.sd(0, dp));
     componentChances[6] =
-        0.5 * factionRandomizer.sd(0, 1) * Math.pow(2, factionRandomizer.sd(0, dp));
+        0.5 * factionRandomizer.sd(0, 1) * (2 ** factionRandomizer.sd(0, dp));
     return componentChances;
 }
 export function computeFactionColors(factionRandomizer) {
@@ -28,29 +28,29 @@ export function computeFactionColors(factionRandomizer) {
     for (let i = 0; i < baseColorCount; i++) {
         const ls = "base color" + i;
         colors.push(hsvToRgb([
-            Math.pow(factionRandomizer.hd(0, 1, ls + "hue"), 2),
-            clamp(factionRandomizer.hd(-0.2, 1, ls + "saturation"), 0, Math.pow(factionRandomizer.hd(0, 1, ls + "saturation bound"), 4)),
+            (factionRandomizer.hd(0, 1, ls + "hue") ** 2),
+            clamp(factionRandomizer.hd(-0.2, 1, ls + "saturation"), 0, (factionRandomizer.hd(0, 1, ls + "saturation bound") ** 4)),
             clamp(factionRandomizer.hd(0.7, 1.1, ls + "value"), 0, 1),
         ]));
-        colorChances.push(Math.pow(2, factionRandomizer.hd(0, dp, ls + "chances")));
+        colorChances.push((2 ** factionRandomizer.hd(0, dp, ls + "chances")));
     }
     return [colors, colorChances];
 }
 export function computeBaseColor(factionRandomizer, factionColorData, lp) {
     const [colors, colorChances] = factionColorData;
     let rv = colors[lp.r.schoose(colorChances)];
-    if (lp.r.sb(Math.pow(factionRandomizer.hd(0, 0.5, "base color shift chance"), 2))) {
+    if (lp.r.sb(factionRandomizer.hd(0, 0.5, "base color shift chance") ** 2)) {
         rv = [rv[0], rv[1], rv[2]];
         rv[0] = clamp(rv[0] +
-            Math.pow(factionRandomizer.hd(0, 0.6, "base color shift range red"), 2) *
+            (factionRandomizer.hd(0, 0.6, "base color shift range red") ** 2) *
                 clamp(lp.r.sd(-1, 1.2), 0, 1) *
                 clamp(lp.r.ss(0.7) + lp.r.ss(0.7), -1, 1), 0, 1);
         rv[1] = clamp(rv[1] +
-            Math.pow(factionRandomizer.hd(0, 0.6, "base color shift range green"), 2) *
+            (factionRandomizer.hd(0, 0.6, "base color shift range green") ** 2) *
                 clamp(lp.r.sd(-1, 1.2), 0, 1) *
                 clamp(lp.r.ss(0.7) + lp.r.ss(0.7), -1, 1), 0, 1);
         rv[2] = clamp(rv[2] +
-            Math.pow(factionRandomizer.hd(0, 0.6, "base color shift range blue"), 2) *
+            (factionRandomizer.hd(0, 0.6, "base color shift range blue") ** 2) *
                 clamp(lp.r.sd(-1, 1.2), 0, 1) *
                 clamp(lp.r.ss(0.7) + lp.r.ss(0.7), -1, 1), 0, 1);
     }

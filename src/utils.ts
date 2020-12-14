@@ -14,12 +14,10 @@ function colorChannelToHex(n: number): string {
 }
 
 export function colorToHex(color: RGBColor): string {
-  return (
-    "#" +
+  return "#" +
     colorChannelToHex(color[0]) +
     colorChannelToHex(color[1]) +
-    colorChannelToHex(color[2])
-  );
+    colorChannelToHex(color[2]);
 }
 
 // Take a color and multiplies it with a factor. factor = 0 produces black.
