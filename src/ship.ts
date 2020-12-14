@@ -20,8 +20,6 @@ type Cell = {
 
 export class Ship {
   f: Randomizer;
-  baseSeed: string;
-  seed: string;
   r: Randomizer;
   size: number;
   w: number;
@@ -44,10 +42,7 @@ export class Ship {
     this.f = factionRandomizer;
     const componentChances = computeFactionComponentChances(this.f);
     const colorData = computeFactionColors(this.f);
-    //Base seed for this ship, without appending the faction seed
-    this.baseSeed = p_seed;
-    this.seed = this.f.seed + this.baseSeed;
-    this.r = new Randomizer(this.seed);
+    this.r = new Randomizer(factionRandomizer.seed + p_seed);
     //The initial overall size of this ship, in pixels
     this.size =
       size == null
@@ -174,23 +169,14 @@ export class Ship {
     cfx.drawImage(this.cf, 0 - this.w, 0);
   }
 
-  // Returns the cell containing (X,Y), if there is one, or null otherwise
-  getcell(x: number, y: number) {
+  //Returns the phase of the cell containing (X,Y), or 0 if there is no such cell
+  getCellPhase(x: number, y: number): number {
     const gx = Math.floor((x - this.gwextra) / COMPONENT_GRID_SIZE);
     const gy = Math.floor((y - this.ghextra) / COMPONENT_GRID_SIZE);
     if (gx < 0 || gx >= this.gw || gy < 0 || gy >= this.gh) {
-      return null;
-    }
-    return this.cgrid[gx][gy];
-  }
-
-  //Returns the phase of the cell containing (X,Y), or 0 if there is no such cell
-  getCellPhase(x: number, y: number): number {
-    const lcell = this.getcell(x, y);
-    if (lcell == null) {
       return 0;
     }
-    return lcell.phase;
+    return this.cgrid[gx][gy].phase;
   }
 
   //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or -1 if (X,Y) is out of bounds.

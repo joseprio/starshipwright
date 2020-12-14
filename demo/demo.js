@@ -1211,10 +1211,7 @@ class ship_Ship {
         this.f = factionRandomizer;
         const componentChances = computeFactionComponentChances(this.f);
         const colorData = computeFactionColors(this.f);
-        //Base seed for this ship, without appending the faction seed
-        this.baseSeed = p_seed;
-        this.seed = this.f.seed + this.baseSeed;
-        this.r = new Randomizer(this.seed);
+        this.r = new Randomizer(factionRandomizer.seed + p_seed);
         //The initial overall size of this ship, in pixels
         this.size =
             size == null
@@ -1327,22 +1324,14 @@ class ship_Ship {
         cfx.scale(-1, 1);
         cfx.drawImage(this.cf, 0 - this.w, 0);
     }
-    // Returns the cell containing (X,Y), if there is one, or null otherwise
-    getcell(x, y) {
+    //Returns the phase of the cell containing (X,Y), or 0 if there is no such cell
+    getCellPhase(x, y) {
         const gx = Math.floor((x - this.gwextra) / COMPONENT_GRID_SIZE);
         const gy = Math.floor((y - this.ghextra) / COMPONENT_GRID_SIZE);
         if (gx < 0 || gx >= this.gw || gy < 0 || gy >= this.gh) {
-            return null;
-        }
-        return this.cgrid[gx][gy];
-    }
-    //Returns the phase of the cell containing (X,Y), or 0 if there is no such cell
-    getCellPhase(x, y) {
-        const lcell = this.getcell(x, y);
-        if (lcell == null) {
             return 0;
         }
-        return lcell.phase;
+        return this.cgrid[gx][gy].phase;
     }
     //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or -1 if (X,Y) is out of bounds.
     getspa(x, y) {
@@ -1458,10 +1447,14 @@ function update() {
     shipDiv.className = "ship";
     const shipCaption = document.createElement("div");
     const factionCaption = document.createElement("div");
-    const currentFaction = faction || generateFactionRandomizer(randomSeed());
-    const ship = generateShip(currentFaction, randomSeed(), size || undefined);
-    shipCaption.textContent = "Seed: " + ship.baseSeed;
-    factionCaption.textContent = "Faction: " + currentFaction.seed;
+    const iterationFactionSeed = randomSeed();
+    const currentFaction =
+      faction || generateFactionRandomizer(iterationFactionSeed);
+    const shipSeed = randomSeed();
+    const ship = generateShip(currentFaction, shipSeed, size || undefined);
+    shipCaption.textContent = "Seed: " + shipSeed;
+    factionCaption.textContent =
+       true ? factionSeed : undefined;
     shipDiv.appendChild(ship.cf);
     shipDiv.appendChild(shipCaption);
     shipDiv.appendChild(factionCaption);

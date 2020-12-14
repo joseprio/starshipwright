@@ -9,8 +9,6 @@ declare type Cell = {
 };
 export declare class Ship {
     f: Randomizer;
-    baseSeed: string;
-    seed: string;
     r: Randomizer;
     size: number;
     w: number;
@@ -29,7 +27,6 @@ export declare class Ship {
     cgrid: Array<Array<Cell>>;
     csd: ImageData;
     constructor(factionRandomizer: Randomizer, p_seed: string, size?: number);
-    getcell(x: number, y: number): Cell;
     getCellPhase(x: number, y: number): number;
     getspa(x: number, y: number): number;
     getpcdone(): number;

@@ -25,10 +25,13 @@ function update() {
         shipDiv.className = "ship";
         const shipCaption = document.createElement("div");
         const factionCaption = document.createElement("div");
-        const currentFaction = faction || generateFactionRandomizer(randomSeed());
-        const ship = generateShip(currentFaction, randomSeed(), size || undefined);
-        shipCaption.textContent = "Seed: " + ship.baseSeed;
-        factionCaption.textContent = "Faction: " + currentFaction.seed;
+        const iterationFactionSeed = randomSeed();
+        const currentFaction = faction || generateFactionRandomizer(iterationFactionSeed);
+        const shipSeed = randomSeed();
+        const ship = generateShip(currentFaction, shipSeed, size || undefined);
+        shipCaption.textContent = "Seed: " + shipSeed;
+        factionCaption.textContent =
+            "Faction: " + faction ? factionSeed : iterationFactionSeed;
         shipDiv.appendChild(ship.cf);
         shipDiv.appendChild(shipCaption);
         shipDiv.appendChild(factionCaption);
