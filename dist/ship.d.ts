@@ -21,8 +21,6 @@ export declare class Ship {
     hh: number;
     gh: number;
     ghextra: number;
-    cs: HTMLCanvasElement;
-    csx: CanvasRenderingContext2D;
     cf: HTMLCanvasElement;
     cfx: CanvasRenderingContext2D;
     passes: number;

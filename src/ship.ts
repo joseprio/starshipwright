@@ -32,8 +32,6 @@ export class Ship {
   hh: number;
   gh: number;
   ghextra: number;
-  cs: HTMLCanvasElement;
-  csx: CanvasRenderingContext2D;
   cf: HTMLCanvasElement;
   cfx: CanvasRenderingContext2D;
   passes: number;
@@ -82,13 +80,13 @@ export class Ship {
     const cs = document.createElement("canvas"); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
     cs.width = this.w;
     cs.height = this.h;
-    this.csx = cs.getContext("2d");
+    const csx = cs.getContext("2d");
     this.cf = document.createElement("canvas"); // Canvas on which the actual ship components are drawn. Ships face upwards, with front towards Y=0
     this.cf.setAttribute("width", String(this.w));
     this.cf.setAttribute("height", String(this.h));
     this.cfx = this.cf.getContext("2d");
-    outlines[this.f.hchoose([1, 1, 1], "outline type")](this);
-    this.csd = this.csx.getImageData(0, 0, this.w, this.h);
+    outlines[this.f.hchoose([1, 1, 1], "outline type")](this, csx);
+    this.csd = csx.getImageData(0, 0, this.w, this.h);
     this.cgrid = [];
     for (let gx = 0; gx < this.gw; gx++) {
       this.cgrid[gx] = [];

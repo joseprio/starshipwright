@@ -3,7 +3,7 @@ import { clamp } from "./utils";
 //Each outline function takes a single argument 'lp' denoting the ship to draw the outline for.
 export const outlines = [
     // 0: Joined rectangles.
-    function (lp) {
+    function (lp, csx) {
         const csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
         const csarealimit = csarea * 0.05;
         const initialWidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.hd(0.1, 1, "outline0 iw") * 0.2);
@@ -50,15 +50,15 @@ export const outlines = [
                 [Math.ceil(v1[0]), Math.ceil(v1[1])],
             ]);
         }
-        lp.csx.fillStyle = "#fff";
+        csx.fillStyle = "#fff";
         for (let i = 0; i < blocks.length; i++) {
             const lb = blocks[i];
-            lp.csx.fillRect(lb[0][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
-            lp.csx.fillRect(lp.w - lb[1][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
+            csx.fillRect(lb[0][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
+            csx.fillRect(lp.w - lb[1][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
         }
     },
     // 1: Joined circles
-    function (lp) {
+    function (lp, csx) {
         const csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
         const csarealimit = csarea * 0.05;
         const csrlimit = Math.max(2, Math.sqrt(csarealimit / Math.PI));
@@ -86,19 +86,19 @@ export const outlines = [
             ncr = Math.min(ncr, lp.h - CANVAS_SHIP_EDGE - lv[1]);
             circles.push({ v: lv, r: ncr });
         }
-        lp.csx.fillStyle = "#fff";
+        csx.fillStyle = "#fff";
         for (let i = 0; i < circles.length; i++) {
             const lc = circles[i];
-            lp.csx.beginPath();
-            lp.csx.arc(lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
-            lp.csx.fill();
-            lp.csx.beginPath();
-            lp.csx.arc(lp.w - lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
-            lp.csx.fill();
+            csx.beginPath();
+            csx.arc(lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
+            csx.fill();
+            csx.beginPath();
+            csx.arc(lp.w - lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
+            csx.fill();
         }
     },
     // 2: Mess of lines
-    function (lp) {
+    function (lp, csx) {
         const innersize = [lp.w - 2 * CANVAS_SHIP_EDGE, lp.h - 2 * CANVAS_SHIP_EDGE];
         const points = [
             [lp.hw, lp.r.sd(0, 0.05) * innersize[1] + CANVAS_SHIP_EDGE],
@@ -109,8 +109,8 @@ export const outlines = [
         const basemessiness = 1 / basefatness;
         const pointcount = Math.max(3, Math.ceil(basemessiness * lp.r.sd(0.05, 0.1) * Math.sqrt(lp.size)));
         // @ts-ignore - We're doing it properly
-        lp.csx.lineCap = ["round", "square"][lp.f.hi(0, 1, "outline2 linecap")];
-        lp.csx.strokeStyle = "#fff";
+        csx.lineCap = ["round", "square"][lp.f.hi(0, 1, "outline2 linecap")];
+        csx.strokeStyle = "#fff";
         for (let npi = 1; npi < pointcount; npi++) {
             let np = points[npi];
             if (np == null) {
@@ -125,15 +125,15 @@ export const outlines = [
             const cons = 1 + lp.r.sseq(lp.f.hd(0, 1, "outline2 conadjust"), 3);
             for (let nci = 0; nci < cons; nci++) {
                 const pre = points[lp.r.si(0, points.length - 2)];
-                lp.csx.lineWidth = lp.r.sd(0.7, 1) * basefatness * lp.size;
-                lp.csx.beginPath();
-                lp.csx.moveTo(pre[0], pre[1]);
-                lp.csx.lineTo(np[0], np[1]);
-                lp.csx.stroke();
-                lp.csx.beginPath();
-                lp.csx.moveTo(lp.w - pre[0], pre[1]);
-                lp.csx.lineTo(lp.w - np[0], np[1]);
-                lp.csx.stroke();
+                csx.lineWidth = lp.r.sd(0.7, 1) * basefatness * lp.size;
+                csx.beginPath();
+                csx.moveTo(pre[0], pre[1]);
+                csx.lineTo(np[0], np[1]);
+                csx.stroke();
+                csx.beginPath();
+                csx.moveTo(lp.w - pre[0], pre[1]);
+                csx.lineTo(lp.w - np[0], np[1]);
+                csx.stroke();
             }
         }
     }

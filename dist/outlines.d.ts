@@ -1,2 +1,4 @@
 import { Ship } from "./ship";
-export declare const outlines: ((lp: Ship) => void)[];
+declare type OutlineFunc = (lp: Ship, csx: CanvasRenderingContext2D) => void;
+export declare const outlines: Array<OutlineFunc>;
+export {};
