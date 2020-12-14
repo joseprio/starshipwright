@@ -5,7 +5,7 @@ import {
 } from "./constants";
 import { clamp, colorToHex, scaleColorBy } from "./utils";
 import type { Ship } from "./ship";
-import type { RGBColor, Vec } from "./types";
+import type { Vec } from "./types";
 import {computeBaseColor} from "./faction";
 import type { ComponentChances, ColorData } from "./faction";
 

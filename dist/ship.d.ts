@@ -27,13 +27,12 @@ export declare class Ship {
     totalcomponents: number;
     totaldone: number;
     cgrid: Array<Array<Cell>>;
-    goodcells: Array<Cell>;
     csd: ImageData;
     constructor(factionRandomizer: Randomizer, p_seed: string, size?: number);
     getcell(x: number, y: number): Cell;
     getCellPhase(x: number, y: number): number;
     getspa(x: number, y: number): number;
     getpcdone(): number;
-    addComponents(cfx: CanvasRenderingContext2D, componentChances: ComponentChances, colorData: ColorData): void;
+    addComponents(cfx: CanvasRenderingContext2D, componentChances: ComponentChances, colorData: ColorData, goodcells: Array<Cell>): void;
 }
 export {};

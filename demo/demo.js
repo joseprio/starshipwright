@@ -1249,18 +1249,18 @@ class ship_Ship {
                 }; // Phase is 0 for unchecked, 1 for checked and good, and -1 for checked and bad
             }
         }
-        this.goodcells = [
+        const goodcells = [
             this.cgrid[Math.floor(this.gw / 2)][Math.floor(this.gh / 2)],
         ];
         let nextcheck = 0;
-        while (nextcheck < this.goodcells.length) {
-            const lcell = this.goodcells[nextcheck];
+        while (nextcheck < goodcells.length) {
+            const lcell = goodcells[nextcheck];
             if (lcell.gx > 0) {
                 const ncell = this.cgrid[lcell.gx - 1][lcell.gy];
                 if (ncell.phase == 0) {
                     if (this.getspa(ncell.x, ncell.y) > 0) {
                         ncell.phase = 1;
-                        this.goodcells.push(ncell);
+                        goodcells.push(ncell);
                     }
                     else {
                         ncell.phase = -1;
@@ -1272,7 +1272,7 @@ class ship_Ship {
                 if (ncell.phase == 0) {
                     if (this.getspa(ncell.x, ncell.y) > 0) {
                         ncell.phase = 1;
-                        this.goodcells.push(ncell);
+                        goodcells.push(ncell);
                     }
                     else {
                         ncell.phase = -1;
@@ -1284,7 +1284,7 @@ class ship_Ship {
                 if (ncell.phase == 0) {
                     if (this.getspa(ncell.x, ncell.y) > 0) {
                         ncell.phase = 1;
-                        this.goodcells.push(ncell);
+                        goodcells.push(ncell);
                     }
                     else {
                         ncell.phase = -1;
@@ -1296,7 +1296,7 @@ class ship_Ship {
                 if (ncell.phase == 0) {
                     if (this.getspa(ncell.x, ncell.y) > 0) {
                         ncell.phase = 1;
-                        this.goodcells.push(ncell);
+                        goodcells.push(ncell);
                     }
                     else {
                         ncell.phase = -1;
@@ -1305,23 +1305,23 @@ class ship_Ship {
             }
             nextcheck++;
         }
-        for (let i = 0; i < this.goodcells.length; i++) {
-            const lcell = this.goodcells[i];
+        for (let i = 0; i < goodcells.length; i++) {
+            const lcell = goodcells[i];
             const ocell = this.cgrid[this.gw - 1 - lcell.gx][lcell.gy];
             if (ocell.phase != 1) {
                 ocell.phase = 1;
-                this.goodcells.push(ocell);
+                goodcells.push(ocell);
             }
         }
         this.passes = this.f.hi(1, 2, "base component passes");
-        this.extra = Math.max(1, Math.floor(this.goodcells.length *
+        this.extra = Math.max(1, Math.floor(goodcells.length *
             this.f.hd(0, 1 / this.passes, "extra component amount")));
-        this.totalcomponents = this.passes * this.goodcells.length + this.extra;
+        this.totalcomponents = this.passes * goodcells.length + this.extra;
         this.cf = document.createElement("canvas"); // Canvas on which the actual ship components are drawn. Ships face upwards, with front towards Y=0
         this.cf.width = this.w;
         this.cf.height = this.h;
         const cfx = this.cf.getContext("2d");
-        this.addComponents(cfx, componentChances, colorData);
+        this.addComponents(cfx, componentChances, colorData, goodcells);
         // Mirror
         cfx.clearRect(this.hw + (this.w % 2), 0, this.w, this.h);
         cfx.scale(-1, 1);
@@ -1356,23 +1356,23 @@ class ship_Ship {
     getpcdone() {
         return this.totaldone / this.totalcomponents;
     }
-    addComponents(cfx, componentChances, colorData) {
+    addComponents(cfx, componentChances, colorData, goodcells) {
         let extradone = 0, nextpass = 0, nextcell = 0;
         while (true) {
             let ncell;
             if (nextpass < this.passes) {
-                if (nextcell < this.goodcells.length) {
-                    ncell = this.goodcells[nextcell];
+                if (nextcell < goodcells.length) {
+                    ncell = goodcells[nextcell];
                     nextcell++;
                 }
                 else {
                     nextpass++;
-                    ncell = this.goodcells[0];
+                    ncell = goodcells[0];
                     nextcell = 1;
                 }
             }
             else if (extradone < this.extra) {
-                ncell = this.goodcells[this.r.si(0, this.goodcells.length - 1)];
+                ncell = goodcells[this.r.si(0, goodcells.length - 1)];
                 extradone++;
             }
             else {
