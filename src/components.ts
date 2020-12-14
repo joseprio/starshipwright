@@ -6,6 +6,7 @@ import {
 import { clamp, colorToHex, scaleColorBy } from "./utils";
 import type { Ship } from "./ship";
 import type { RGBColor, Vec } from "./types";
+import {computeBaseColor} from "./faction";
 import type { ComponentChances, ColorData } from "./faction";
 
 function frontness(lp: Ship, v: Vec): number {
@@ -64,13 +65,13 @@ function shadowGradient(
   return grad;
 }
 
-type ComponentFunc = (lp: Ship, v: Vec, baseColor: RGBColor, componentChances: ComponentChances, colorData: ColorData) => void;
+type ComponentFunc = (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData) => void;
 
 // Each component function takes an argument 'lp' (for the ship) and 'v' (an integral 2-vector denoting the center of the component)
 export const components: Array<ComponentFunc>  = [
 
 // Bordered block
-function (lp: Ship, v: Vec, baseColor: RGBColor) {
+function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
   const bn = Math.pow(bigness(lp, v), 0.3);
   if (lp.r.sb(lp.f.hd(0, 0.9, "com0 bigchance") * bn)) {
@@ -100,6 +101,7 @@ function (lp: Ship, v: Vec, baseColor: RGBColor) {
     Math.round((counts[1] * dho[1]) / 2),
   ];
   const pcdone = lp.getpcdone();
+  const baseColor = computeBaseColor(lp.f, colorData, lp);
   const icolorh = scaleColorBy(baseColor, lp.r.sd(0.4, 1));
   const ocolorh = scaleColorBy(baseColor, lp.r.sd(0.4, 1));
   lp.cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
@@ -295,7 +297,7 @@ function (lp: Ship, v: Vec, baseColor: RGBColor) {
   }
 },
 //Rocket engine (or tries to call another random component if too far forward)
-function (lp: Ship, v: Vec, baseColor: RGBColor, componentChances: ComponentChances, colorData: ColorData) {
+function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData) {
   if (
     lp.r.sb(frontness(lp, v) - 0.3) ||
     lp.getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) > 0 ||
@@ -304,7 +306,7 @@ function (lp: Ship, v: Vec, baseColor: RGBColor, componentChances: ComponentChan
     for (let tries = 0; tries < 100; tries++) {
       const which = lp.r.schoose(componentChances);
       if (which != 3) {
-        components[which](lp, v, baseColor, componentChances, colorData);
+        components[which](lp, v, componentChances, colorData);
         return;
       }
     }
@@ -396,10 +398,11 @@ function (lp: Ship, v: Vec, baseColor: RGBColor, componentChances: ComponentChan
   }
 },
 //Elongated cylinder (calls component 0 - 2 on top of its starting point)
-function (lp: Ship, v: Vec, baseColor: RGBColor, componentChances: ComponentChances, colorData: ColorData) {
+function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData) {
   const cn = centerness(lp, v, true, false);
   const lightmid = lp.r.sd(0.7, 1);
   const lightedge = lp.r.sd(0, 0.2);
+  const baseColor = computeBaseColor(lp.f, colorData, lp);
   const colormid = scaleColorBy(baseColor, lightmid);
   const coloredge = scaleColorBy(baseColor, lightedge);
   const w = Math.max(
@@ -497,21 +500,21 @@ function (lp: Ship, v: Vec, baseColor: RGBColor, componentChances: ComponentChan
     0.2 * Math.pow(lp.f.hd(0, 1, "com4 covercomc1"), 2),
     Math.pow(lp.f.hd(0, 1, "com4 covercomc2"), 2),
   ];
-  components[lp.r.schoose(coverComC)](lp, v, baseColor, componentChances, colorData);
+  components[lp.r.schoose(coverComC)](lp, v, componentChances, colorData);
   if (lp.getCellPhase(ev[0], ev[1]) > 0) {
     const nev: Vec = [
       ev[0] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
       ev[1] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
     ];
     if (lp.getCellPhase(nev[0], nev[1]) > 0) {
-      components[lp.r.schoose(coverComC)](lp, nev, baseColor, componentChances, colorData);
+      components[lp.r.schoose(coverComC)](lp, nev, componentChances, colorData);
     } else {
-      components[lp.r.schoose(coverComC)](lp, ev, baseColor, componentChances, colorData);
+      components[lp.r.schoose(coverComC)](lp, ev, componentChances, colorData);
     }
   }
 },
 //Ball
-function(lp: Ship, v: Vec, baseColor: RGBColor) {
+function(lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
   const bn = Math.pow(bigness(lp, v), 0.1);
   if (lp.r.sb(lp.f.hd(0, 0.9, "com5 bigchance") * bn)) {
@@ -530,6 +533,7 @@ function(lp: Ship, v: Vec, baseColor: RGBColor) {
   }
   const lightmid = lp.r.sd(0.75, 1);
   const lightedge = lp.r.sd(0, 0.25);
+  const baseColor = computeBaseColor(lp.f, colorData, lp);
   const colormid = scaleColorBy(baseColor, lightmid);
   const coloredge = scaleColorBy(baseColor, lightedge);
   const countx =
@@ -576,9 +580,9 @@ function(lp: Ship, v: Vec, baseColor: RGBColor) {
   }
 },
 //Forward-facing trapezoidal fin
-function (lp: Ship, v: Vec, baseColor: RGBColor, componentChances: ComponentChances, colorData: ColorData) {
+function (lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData) {
   if (lp.nextpass <= 0 || lp.r.sb(frontness(lp, v))) {
-    components[lp.r.schoose(componentChances.slice(0, 6))](lp, v, baseColor, componentChances, colorData);
+    components[lp.r.schoose(componentChances.slice(0, 6))](lp, v, componentChances, colorData);
     return;
   }
   let lcms = COMPONENT_MAXIMUM_SIZE;
@@ -628,6 +632,7 @@ function (lp: Ship, v: Vec, baseColor: RGBColor, componentChances: ComponentChan
     [v[0] + hwi + hwe, v[1] + hh0i + hh0e],
     [v[0] - hwi, v[1] + backamount + hh1i + hh1e],
   ];
+  const baseColor = computeBaseColor(lp.f, colorData, lp);
   lp.cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.2) + ")";
   lp.cfx.beginPath();
   lp.cfx.moveTo(quad[0][0] - 1, quad[0][1]);

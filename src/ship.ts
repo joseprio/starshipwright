@@ -5,7 +5,6 @@ import { outlines } from "./outlines";
 import {
   computeFactionComponentChances,
   computeFactionColors,
-  computeBaseColor,
   ColorData,
   ComponentChances
 } from "./faction";
@@ -172,11 +171,10 @@ export class Ship {
       )
     );
     this.totalcomponents = this.passes * this.goodcells.length + this.extra;
-    const baseColor  = computeBaseColor(this.f, colorData, this);
 
     let done = false;
     do {
-      done = this.addcomponent(baseColor, componentChances, colorData);
+      done = this.addcomponent(componentChances, colorData);
     } while (!done);
   }
 
@@ -213,7 +211,7 @@ export class Ship {
     return this.totaldone / this.totalcomponents;
   }
 
-  addcomponent(baseColor: RGBColor, componentChances: ComponentChances, colorData: ColorData) {
+  addcomponent(componentChances: ComponentChances, colorData: ColorData) {
     //Generates the next component of this ship. Returns true if the ship is finished, false if there are still more components to add.
     let ncell: Cell;
     if (this.nextpass < this.passes) {
@@ -256,7 +254,7 @@ export class Ship {
         lv[0] = this.hw;
       }
     }
-    components[this.r.schoose(componentChances)](this, lv, baseColor, componentChances, colorData);
+    components[this.r.schoose(componentChances)](this, lv, componentChances, colorData);
     this.totaldone++;
     return false;
   }
