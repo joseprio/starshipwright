@@ -50,6 +50,9 @@ export class Ship {
 
   constructor(factionRandomizer: Randomizer, p_seed: string, size?: number) {
     this.f = factionRandomizer;
+    const componentChances = computeFactionComponentChances(this.f);
+    const colorData = computeFactionColors(this.f);
+    const baseColor  = computeBaseColor(this.f, colorData, this);
     //Base seed for this ship, without appending the faction seed
     this.baseSeed = p_seed;
     this.seed = this.f.seed + this.baseSeed;
@@ -170,10 +173,6 @@ export class Ship {
       )
     );
     this.totalcomponents = this.passes * this.goodcells.length + this.extra;
-
-    const colorData = computeFactionColors(this.f);
-    const componentChances = computeFactionComponentChances(this.f);
-    const baseColor  = computeBaseColor(this.f, colorData, this);
 
     let done = false;
     do {
