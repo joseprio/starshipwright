@@ -311,9 +311,7 @@ function clamp(n, min, max) {
     return Math.max(min, Math.min(max, n));
 }
 function colorChannelToHex(n) {
-    //For integer n and length l.
-    const s = Math.floor(clamp(n, 0, 1) * 255).toString(16);
-    return (s.length < 2) ? "0" + s : s;
+    return Math.floor(clamp(n, 0, 1) * 255).toString(16).padStart(2, "0");
 }
 function colorToHex(color) {
     return "#" +
