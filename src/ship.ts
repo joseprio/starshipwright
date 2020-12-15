@@ -344,11 +344,11 @@ function getCellPhase(x: number, y: number): number {
   return cgrid[gx][gy].phase;
 }
 
-function frontness(h: number, v: Vec): number {
+function frontness(v: Vec): number {
   return 1 - v[1] / h;
 }
 
-function centerness(hw: number, hh: number, v: Vec, doY: boolean): number {
+function centerness(v: Vec, doY: boolean): number {
   let rv = Math.min(1, 1 - Math.abs(v[0] - hw) / hw);
   if (doY) {
     rv = Math.min(rv, 1 - Math.abs(v[1] - hh) / hh);
@@ -356,15 +356,15 @@ function centerness(hw: number, hh: number, v: Vec, doY: boolean): number {
   return rv;
 }
 
-function bigness(factionRandomizer: Randomizer, w: number, h: number, hw: number, hh: number, v: Vec, pcdone: number): number {
-  const effectCenter = centerness(hw, hh, v, true);
+function bigness(v: Vec): number {
+  const effectCenter = centerness(v, true);
   const effectShipsize = 1 - 1 / ((w + h) / 1000 + 1);
   const effectFaction = factionRandomizer.hd(0, 1, "master bigness") ** 0.5;
-  const effectStack = 1 - pcdone;
+  const effectStack = 1 - totaldone / totalcomponents;
   return effectCenter * effectShipsize * effectFaction * effectStack;
 }
 
-function leeway(w: number, h: number, boundingBox: [Vec, Vec]): Vec {
+function leeway(boundingBox: [Vec, Vec]): Vec {
   return [
     Math.min(
       boundingBox[0][0] - CANVAS_SHIP_EDGE,
@@ -379,12 +379,11 @@ function leeway(w: number, h: number, boundingBox: [Vec, Vec]): Vec {
 
 //lp is the ship. amount is the amount of shadow at the edges, 0 - 1 (the middle is always 0). middlep and edgep should be vectors at the middle and edge of the gradient.
 function shadowGradient(
-  ctx: CanvasRenderingContext2D,
   middlePoint: Vec,
   edgePoint: Vec,
   amount: number
 ): CanvasGradient {
-  const grad = ctx.createLinearGradient(
+  const grad = cfx.createLinearGradient(
     edgePoint[0],
     edgePoint[1],
     middlePoint[0] * 2 - edgePoint[0],
@@ -402,11 +401,11 @@ const components: Array<ComponentFunc>  = [
 // Bordered block
 function (v) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = bigness(factionRandomizer, w, h, hw, hh, v, totaldone / totalcomponents) ** 0.3;
+  const bn = bigness(v) ** 0.3;
   if (shipRandomizer.sb(factionRandomizer.hd(0, 0.9, "com0 bigchance") * bn)) {
     const chance = factionRandomizer.hd(0, 0.5, "com0 bigincchance");
     while (shipRandomizer.sb(chance * bn)) {
-      const lw = leeway(w, h, [
+      const lw = leeway([
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
       ]);
@@ -460,7 +459,6 @@ function (v) {
     )
   ) {
     cfx.fillStyle = shadowGradient(
-      cfx,
       v,
       [v[0] + trv[0], v[1]],
       shipRandomizer.sd(0, 0.9)
@@ -476,11 +474,11 @@ function (v) {
 // Cylinder array
 function (v) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = bigness(factionRandomizer, w, h, hw, hh, v, totaldone / totalcomponents) ** 0.2;
+  const bn = bigness(v) ** 0.2;
   if (shipRandomizer.sb(factionRandomizer.hd(0.3, 1, "com1 bigchance") * bn)) {
     const chance = factionRandomizer.hd(0, 0.6, "com1 bigincchance");
     while (shipRandomizer.sb(chance * bn)) {
-      const lw = leeway(w, h, [
+      const lw = leeway([
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
       ]);
@@ -511,7 +509,6 @@ function (v) {
     cfx.fillRect(bv[0], bv[1], componentWidth, componentHeight);
     for (let i = 0; i < count; i++) {
       cfx.fillStyle = shadowGradient(
-        cfx,
         [bv[0] + (i + 0.5) * cw, v[1]],
         [bv[0] + i * cw, v[1]],
         darkness
@@ -526,7 +523,6 @@ function (v) {
     cfx.fillRect(bv[0], bv[1], componentHeight, componentWidth);
     for (let i = 0; i < count; i++) {
       cfx.fillStyle = shadowGradient(
-        cfx,
         [v[0], bv[1] + (i + 0.5) * cw],
         [v[0], bv[1] + i * cw],
         darkness
@@ -538,11 +534,11 @@ function (v) {
 // Banded cylinder
 function (v) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = bigness(factionRandomizer, w, h, hw, hh, v, totaldone / totalcomponents) ** 0.05;
+  const bn = bigness(v) ** 0.05;
   if (shipRandomizer.sb(factionRandomizer.hd(0, 1, "com2 bigchance") * bn)) {
     const chance = factionRandomizer.hd(0, 0.9, "com2 bigincchance");
     while (shipRandomizer.sb(chance * bn)) {
-      const lw = leeway(w, h, [
+      const lw = leeway([
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
       ]);
@@ -629,7 +625,7 @@ function (v) {
 //Rocket engine (or tries to call another random component if too far forward)
 function (v) {
   if (
-    shipRandomizer.sb(frontness(h, v) - 0.3) ||
+    shipRandomizer.sb(frontness(v) - 0.3) ||
     getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) > 0 ||
     getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8) > 0
   ) {
@@ -642,11 +638,11 @@ function (v) {
     }
   }
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = bigness(factionRandomizer, w, h, hw, hh, v, totaldone / totalcomponents) ** 0.1;
+  const bn = bigness(v) ** 0.1;
   if (shipRandomizer.sb(factionRandomizer.hd(0.6, 1, "com3 bigchance") * bn)) {
     const chance = factionRandomizer.hd(0.3, 0.8, "com3 bigincchance");
     while (shipRandomizer.sb(chance * bn)) {
-      const lw = leeway(w, h, [
+      const lw = leeway([
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
       ]);
@@ -729,7 +725,7 @@ function (v) {
 },
 //Elongated cylinder (calls component 0 - 2 on top of its starting point)
 function (v) {
-  const cn = centerness(hw, hh, v, false);
+  const cn = centerness(v, false);
   const lightmid = shipRandomizer.sd(0.7, 1);
   const lightedge = shipRandomizer.sd(0, 0.2);
   const baseColor = computeBaseColor(factionRandomizer, colorData, shipRandomizer);
@@ -842,11 +838,11 @@ function (v) {
 //Ball
 function (v) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = bigness(factionRandomizer, w, h, hw, hh, v, totaldone / totalcomponents) ** 0.1;
+  const bn = bigness(v) ** 0.1;
   if (shipRandomizer.sb(factionRandomizer.hd(0, 0.9, "com5 bigchance") * bn)) {
     const chance = factionRandomizer.hd(0, 0.8, "com5 bigincchance");
     while (shipRandomizer.sb(chance * bn)) {
-      const lw = leeway(w, h, [
+      const lw = leeway([
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
       ]);
@@ -907,16 +903,16 @@ function (v) {
 },
 //Forward-facing trapezoidal fin
 function (v) {
-  if (nextpass <= 0 || shipRandomizer.sb(frontness(h, v))) {
+  if (nextpass <= 0 || shipRandomizer.sb(frontness(v))) {
     components[shipRandomizer.schoose(componentChances.slice(0, 6))](v);
    return;
   }
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = bigness(factionRandomizer, w, h, hw, hh, v, totaldone / totalcomponents) ** 0.05;
+  const bn = bigness(v) ** 0.05;
   if (shipRandomizer.sb(factionRandomizer.hd(0, 0.9, "com6 bigchance") * bn)) {
     const chance = factionRandomizer.hd(0, 0.8, "com6 bigincchance");
     while (shipRandomizer.sb(chance * bn)) {
-      const lw = leeway(w, h, [
+      const lw = leeway([
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
       ]);
