@@ -6,11 +6,8 @@ export function clamp(n: number, min: number, max: number): number {
 
 function colorChannelToHex(n: number): string {
   //For integer n and length l.
-  var s = Math.floor(clamp(n, 0, 1) * 255).toString(16);
-  if (s.length < 2) {
-    s = "0" + s;
-  }
-  return s;
+  const s = Math.floor(clamp(n, 0, 1) * 255).toString(16);
+  return (s.length < 2) ? "0" + s : s;
 }
 
 export function colorToHex(color: RGBColor): string {
@@ -27,12 +24,12 @@ export function scaleColorBy(color: RGBColor, factor: number): string {
 
 // Takes a triplet [H,S,V] and returns a triplet [R,G,B], representing the same color. All components are 0 - 1.
 export function hsvToRgb(hsv: HSVColor): RGBColor {
-  var c = hsv[1] * hsv[2];
-  var m = hsv[2] - c;
-  var h = ((hsv[0] % 1) + 1) % 1;
-  var hrel = 6 * h;
-  var hseg = Math.floor(hrel);
-  var x = c * (1 - Math.abs((hrel % 2) - 1));
+  const c = hsv[1] * hsv[2];
+  const m = hsv[2] - c;
+  const h = ((hsv[0] % 1) + 1) % 1;
+  const hrel = 6 * h;
+  const hseg = Math.floor(hrel);
+  const x = c * (1 - Math.abs((hrel % 2) - 1));
   switch (hseg) {
     case 0:
       return [c + m, x + m, m];

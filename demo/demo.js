@@ -116,8 +116,8 @@ class Randomizer {
             1593177610,
         ];
         this.current = 3234042090;
-        for (var i = this.seed.length - 1; i >= 0; i--) {
-            var c = this.seed.charCodeAt(i);
+        for (let i = this.seed.length - 1; i >= 0; i--) {
+            const c = this.seed.charCodeAt(i);
             this.current =
                 (((this.current << 5) + this.current) ^
                     c ^
@@ -130,8 +130,8 @@ class Randomizer {
     }
     //Returns a raw unsigned 32-bit integer from the stream.
     sr() {
-        var c = this.seed.charCodeAt(this.seedPosition);
-        var lsa = this.stateArray[this.arrayPosition];
+        const c = this.seed.charCodeAt(this.seedPosition);
+        const lsa = this.stateArray[this.arrayPosition];
         this.current =
             (((this.current << 5) + this.current + lsa) ^
                 c ^
@@ -175,7 +175,7 @@ class Randomizer {
         if (this.hrCache.hasOwnProperty(seed)) {
             return this.hrCache[seed];
         }
-        for (var x = seed.length - 1; x >= 0; x--) {
+        for (let x = seed.length - 1; x >= 0; x--) {
             const c = seed.charCodeAt(x);
             let t = state[0] ^ c;
             t = (t ^ (t << 11)) >>> 0;
@@ -186,7 +186,7 @@ class Randomizer {
             state[3] = (state[3] ^ (state[3] >> 19) ^ t) >>> 0;
             rv = ((rv ^ (c << 24)) * 3427) ^ state[3];
         }
-        for (var y = this.seed.length - 1; y >= 0; y--) {
+        for (let y = this.seed.length - 1; y >= 0; y--) {
             const c = this.seed.charCodeAt(y);
             let t = state[0] ^ c;
             t = (t ^ (t << 11)) >>> 0;
@@ -248,7 +248,7 @@ class Randomizer {
     */
     //Returns an integer {0,1,2,...}, starting from 0, with the specified chance of advancing to each successive integer, from the stream.
     sseq(chance, max) {
-        var rv = 0;
+        let rv = 0;
         while (this.sb(chance) &&
             rv < max) {
             rv++;
@@ -257,7 +257,7 @@ class Randomizer {
     }
     //Returns an integer {0,1,2,...}, starting from 0, with the specified chance of advancing to each successive integer, by hashing this object's seed with the specified string.
     hseq(chance, max, seed) {
-        var rv = 0;
+        let rv = 0;
         while ((this.hr(seed + rv) * 4294967296 + this.hr(seed + "@" + rv)) /
             18446744073709551616 <
             chance &&
@@ -312,11 +312,8 @@ function clamp(n, min, max) {
 }
 function colorChannelToHex(n) {
     //For integer n and length l.
-    var s = Math.floor(clamp(n, 0, 1) * 255).toString(16);
-    if (s.length < 2) {
-        s = "0" + s;
-    }
-    return s;
+    const s = Math.floor(clamp(n, 0, 1) * 255).toString(16);
+    return (s.length < 2) ? "0" + s : s;
 }
 function colorToHex(color) {
     return "#" +
@@ -330,12 +327,12 @@ function scaleColorBy(color, factor) {
 }
 // Takes a triplet [H,S,V] and returns a triplet [R,G,B], representing the same color. All components are 0 - 1.
 function hsvToRgb(hsv) {
-    var c = hsv[1] * hsv[2];
-    var m = hsv[2] - c;
-    var h = ((hsv[0] % 1) + 1) % 1;
-    var hrel = 6 * h;
-    var hseg = Math.floor(hrel);
-    var x = c * (1 - Math.abs((hrel % 2) - 1));
+    const c = hsv[1] * hsv[2];
+    const m = hsv[2] - c;
+    const h = ((hsv[0] % 1) + 1) % 1;
+    const hrel = 6 * h;
+    const hseg = Math.floor(hrel);
+    const x = c * (1 - Math.abs((hrel % 2) - 1));
     switch (hseg) {
         case 0:
             return [c + m, x + m, m];
@@ -397,15 +394,15 @@ function computeFactionColors(factionRandomizer) {
 /*
 getwindowcolor(lp) {
   if (this.cache["window colors"] == null) {
-    var dp = 5; //Default maximum power.
+    const dp = 5; //Default maximum power.
     this.cache["window color count"] =
       1 + (this.r.hb(0.3, "window color +1") ? 1 : 0);
     this.cache["window colors"] = new Array(this.cache["window color count"]);
     this.cache["window color chances"] = new Array(
       this.cache["window color count"]
     );
-    for (var i = 0; i < this.cache["window color count"]; i++) {
-      var ls = "window color" + i;
+    for (let i = 0; i < this.cache["window color count"]; i++) {
+      const ls = "window color" + i;
       this.cache["window colors"][i] = hsvToRgb([
         this.r.hb(0.6, "window color blues only")
           ? this.r.hd(1 / 3, 3 / 4, "window color blue hue")
@@ -425,7 +422,7 @@ getwindowcolor(lp) {
       );
     }
   }
-  var rv = this.cache["window colors"][
+  const rv = this.cache["window colors"][
     lp.r.schoose(this.cache["window color chances"])
   ];
   return rv;
@@ -1309,8 +1306,8 @@ function randomIntFromInterval(min, max) {
 }
 
 function randomSeed() {
-  var s = "";
-  for (var c = 0; c < DEFAULT_SEED_LENGTH; c++) {
+  let s = "";
+  for (let c = 0; c < DEFAULT_SEED_LENGTH; c++) {
     s = s + characters[randomIntFromInterval(0, characters.length - 1)];
   }
   return s;

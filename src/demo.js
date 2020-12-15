@@ -11,8 +11,8 @@ function randomIntFromInterval(min, max) {
 }
 
 function randomSeed() {
-  var s = "";
-  for (var c = 0; c < DEFAULT_SEED_LENGTH; c++) {
+  let s = "";
+  for (let c = 0; c < DEFAULT_SEED_LENGTH; c++) {
     s = s + characters[randomIntFromInterval(0, characters.length - 1)];
   }
   return s;

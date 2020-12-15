@@ -42,15 +42,15 @@ export function computeFactionColors(factionRandomizer) {
 /*
 getwindowcolor(lp) {
   if (this.cache["window colors"] == null) {
-    var dp = 5; //Default maximum power.
+    const dp = 5; //Default maximum power.
     this.cache["window color count"] =
       1 + (this.r.hb(0.3, "window color +1") ? 1 : 0);
     this.cache["window colors"] = new Array(this.cache["window color count"]);
     this.cache["window color chances"] = new Array(
       this.cache["window color count"]
     );
-    for (var i = 0; i < this.cache["window color count"]; i++) {
-      var ls = "window color" + i;
+    for (let i = 0; i < this.cache["window color count"]; i++) {
+      const ls = "window color" + i;
       this.cache["window colors"][i] = hsvToRgb([
         this.r.hb(0.6, "window color blues only")
           ? this.r.hd(1 / 3, 3 / 4, "window color blue hue")
@@ -70,7 +70,7 @@ getwindowcolor(lp) {
       );
     }
   }
-  var rv = this.cache["window colors"][
+  const rv = this.cache["window colors"][
     lp.r.schoose(this.cache["window color chances"])
   ];
   return rv;

@@ -25,8 +25,8 @@ export class Randomizer {
       1593177610,
     ];
     this.current = 3234042090;
-    for (var i = this.seed.length - 1; i >= 0; i--) {
-      var c = this.seed.charCodeAt(i);
+    for (let i = this.seed.length - 1; i >= 0; i--) {
+      const c = this.seed.charCodeAt(i);
       this.current =
         (((this.current << 5) + this.current) ^
           c ^
@@ -40,8 +40,8 @@ export class Randomizer {
 
   //Returns a raw unsigned 32-bit integer from the stream.
   sr() {
-    var c = this.seed.charCodeAt(this.seedPosition);
-    var lsa = this.stateArray[this.arrayPosition];
+    const c = this.seed.charCodeAt(this.seedPosition);
+    const lsa = this.stateArray[this.arrayPosition];
     this.current =
       (((this.current << 5) + this.current + lsa) ^
         c ^
@@ -87,7 +87,7 @@ export class Randomizer {
     if (this.hrCache.hasOwnProperty(seed)) {
       return this.hrCache[seed];
     }
-    for (var x = seed.length - 1; x >= 0; x--) {
+    for (let x = seed.length - 1; x >= 0; x--) {
       const c = seed.charCodeAt(x);
       let t = state[0] ^ c;
       t = (t ^ (t << 11)) >>> 0;
@@ -98,7 +98,7 @@ export class Randomizer {
       state[3] = (state[3] ^ (state[3] >> 19) ^ t) >>> 0;
       rv = ((rv ^ (c << 24)) * 3427) ^ state[3];
     }
-    for (var y = this.seed.length - 1; y >= 0; y--) {
+    for (let y = this.seed.length - 1; y >= 0; y--) {
       const c = this.seed.charCodeAt(y);
       let t = state[0] ^ c;
       t = (t ^ (t << 11)) >>> 0;
@@ -173,7 +173,7 @@ export class Randomizer {
 
   //Returns an integer {0,1,2,...}, starting from 0, with the specified chance of advancing to each successive integer, from the stream.
   sseq(chance: number, max: number): number {
-    var rv = 0;
+    let rv = 0;
     while (
       this.sb(chance) &&
       rv < max
@@ -185,7 +185,7 @@ export class Randomizer {
 
   //Returns an integer {0,1,2,...}, starting from 0, with the specified chance of advancing to each successive integer, by hashing this object's seed with the specified string.
   hseq(chance: number, max: number, seed: string): number {
-    var rv = 0;
+    let rv = 0;
     while (
       (this.hr(seed + rv) * 4294967296 + this.hr(seed + "@" + rv)) /
         18446744073709551616 <
