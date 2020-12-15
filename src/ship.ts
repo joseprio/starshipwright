@@ -822,7 +822,7 @@ function (v) {
     grad.addColorStop(0.5, colormid);
     grad.addColorStop(1, coloredge);
     cfx.fillStyle = grad;
-    cfx.fillRect(bb_0_0, bb_0_1, w, componentHeight);
+    cfx.fillRect(bb_0_0, bb_0_1, componentWidth, componentHeight);
     ev = [v[0], v[1] + componentHeight];
   } else if (direction == 2) {
     //to center
@@ -836,7 +836,7 @@ function (v) {
     grad.addColorStop(0.5, colormid);
     grad.addColorStop(1, coloredge);
     cfx.fillStyle = grad;
-    cfx.fillRect(v[0], v[1] - hwi, Math.ceil(hw - v[0]) + 1, w);
+    cfx.fillRect(v[0], v[1] - hwi, Math.ceil(hw - v[0]) + 1, componentWidth);
     ev = [hw, v[1]];
   }
   const coverComC = [
