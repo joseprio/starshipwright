@@ -182,6 +182,13 @@ export function buildShip(factionRandomizer, p_seed, size) {
     // ------ End define outlines -----------------------------------
     outlines[factionRandomizer.hchoose([1, 1, 1], "outline type")]();
     const outline = csx.getImageData(0, 0, w, h);
+    //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or -1 if (X,Y) is out of bounds.
+    function getOutlineAlpha(x, y) {
+        if (x < 0 || x > w || y < 0 || y > h) {
+            return -1;
+        }
+        return outline.data[(y * w + x) * 4 + 3];
+    }
     const cgrid = [];
     for (let gx = 0; gx < gw; gx++) {
         cgrid[gx] = [];
@@ -204,7 +211,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
         if (lcell.gx > 0) {
             const ncell = cgrid[lcell.gx - 1][lcell.gy];
             if (ncell.phase == 0) {
-                if (getAlpha(outline, ncell.x, ncell.y) > 0) {
+                if (getOutlineAlpha(ncell.x, ncell.y) > 0) {
                     ncell.phase = 1;
                     goodcells.push(ncell);
                 }
@@ -216,7 +223,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
         if (lcell.gx < gw - 1) {
             const ncell = cgrid[lcell.gx + 1][lcell.gy];
             if (ncell.phase == 0) {
-                if (getAlpha(outline, ncell.x, ncell.y) > 0) {
+                if (getOutlineAlpha(ncell.x, ncell.y) > 0) {
                     ncell.phase = 1;
                     goodcells.push(ncell);
                 }
@@ -228,7 +235,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
         if (lcell.gy > 0) {
             const ncell = cgrid[lcell.gx][lcell.gy - 1];
             if (ncell.phase == 0) {
-                if (getAlpha(outline, ncell.x, ncell.y) > 0) {
+                if (getOutlineAlpha(ncell.x, ncell.y) > 0) {
                     ncell.phase = 1;
                     goodcells.push(ncell);
                 }
@@ -240,7 +247,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
         if (lcell.gy < gh - 1) {
             const ncell = cgrid[lcell.gx][lcell.gy + 1];
             if (ncell.phase == 0) {
-                if (getAlpha(outline, ncell.x, ncell.y) > 0) {
+                if (getOutlineAlpha(ncell.x, ncell.y) > 0) {
                     ncell.phase = 1;
                     goodcells.push(ncell);
                 }
@@ -820,7 +827,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
                 nv[1] > h - CANVAS_SHIP_EDGE) {
                 continue;
             }
-            if (getAlpha(outline, nv[0], nv[1]) <= 0) {
+            if (getOutlineAlpha(nv[0], nv[1]) <= 0) {
                 continue;
             }
             lv = nv;
@@ -839,11 +846,4 @@ export function buildShip(factionRandomizer, p_seed, size) {
     cfx.scale(-1, 1);
     cfx.drawImage(cf, 0 - w, 0);
     return cf;
-}
-//Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or -1 if (X,Y) is out of bounds.
-function getAlpha(imageData, x, y) {
-    if (x < 0 || x > imageData.width || y < 0 || y > imageData.height) {
-        return -1;
-    }
-    return imageData.data[(y * imageData.width + x) * 4 + 3];
 }
