@@ -1004,7 +1004,7 @@ function (v) {
 }];
 
 
-  // ------ End define outlines -----------------------------------
+  // ------ End define components -----------------------------------
 
   // Add components
   let extradone = 0, nextpass = 0, nextcell = 0, totaldone = 0;
