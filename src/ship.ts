@@ -8,7 +8,7 @@ import {
   computeFactionComponentChances,
   computeFactionColors,
 } from "./faction";
-import type { Vec } from "./types";
+import type { Vec, RGBColor } from "./types";
 import { clamp, colorToHex, scaleColorBy } from "./utils";
 
 type Cell = {
@@ -18,26 +18,49 @@ type Cell = {
   y: number;
   phase: number;
 };
-import {computeBaseColor} from "./faction";
-import type { ComponentChances, ColorData } from "./faction";
-
-/*
-You're almost there!!
-
-Your master plan is so smart; add all the used fields to outlines/components functions as arguments with the same name: h, w, hh, hw.
-Then, move the functions inside the closure of the constructor, and conver the constructor to a simple function.
-Finally, remove all the arguments except for the vector, and done!
-Feel free to start with outlines, it's smaller.
-getCellState is a function inside the constructor, also passed to components.
-*/
 
 type OutlineFunc = () => void;
 type ComponentFunc = (v: Vec) => void;
 
 export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: number): HTMLCanvasElement {
   const componentChances = computeFactionComponentChances(factionRandomizer);
-  const colorData = computeFactionColors(factionRandomizer);
+  const [colors, colorChances] = computeFactionColors(factionRandomizer);
   const shipRandomizer = new Randomizer(factionRandomizer.seed + p_seed);
+
+  function computeBaseColor(): RGBColor {
+    let rv = colors[shipRandomizer.schoose(colorChances)];
+    if (
+      shipRandomizer.sb(factionRandomizer.hd(0, 0.5, "base color shift chance") ** 2)
+    ) {
+      rv = [rv[0], rv[1], rv[2]];
+      rv[0] = clamp(
+        rv[0] +
+          (factionRandomizer.hd(0, 0.6, "base color shift range red") ** 2) *
+            clamp(shipRandomizer.sd(-1, 1.2), 0, 1) *
+            clamp(shipRandomizer.ss(0.7) + shipRandomizer.ss(0.7), -1, 1),
+        0,
+        1
+      );
+      rv[1] = clamp(
+        rv[1] +
+          (factionRandomizer.hd(0, 0.6, "base color shift range green") ** 2) *
+            clamp(shipRandomizer.sd(-1, 1.2), 0, 1) *
+            clamp(shipRandomizer.ss(0.7) + shipRandomizer.ss(0.7), -1, 1),
+        0,
+        1
+      );
+      rv[2] = clamp(
+        rv[2] +
+          (factionRandomizer.hd(0, 0.6, "base color shift range blue") ** 2) *
+            clamp(shipRandomizer.sd(-1, 1.2), 0, 1) *
+            clamp(shipRandomizer.ss(0.7) + shipRandomizer.ss(0.7), -1, 1),
+        0,
+        1
+      );
+    }
+    return rv;
+  }
+
   //The initial overall size of this ship, in pixels
   size =
     size == null
@@ -428,7 +451,7 @@ function (v) {
     Math.round((counts[0] * dho[0]) / 2),
     Math.round((counts[1] * dho[1]) / 2),
   ];
-  const baseColor = computeBaseColor(factionRandomizer, colorData, shipRandomizer);
+  const baseColor = computeBaseColor();
   const icolorh = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
   const ocolorh = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
   cfx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.25) + ")";
@@ -494,7 +517,7 @@ function (v) {
   const cw = shipRandomizer.si(3, Math.max(4, componentWidth));
   const count = Math.max(1, Math.round(componentWidth / cw));
   componentWidth = count * cw;
-  const baseColor = computeBaseColor(factionRandomizer, colorData, shipRandomizer);
+  const baseColor = computeBaseColor();
   const ccolor = scaleColorBy(baseColor, shipRandomizer.sd(0.5, 1));
   const darkness = shipRandomizer.sd(0.3, 0.9);
   // true = horizontal array, false = vertical array
@@ -563,7 +586,7 @@ function (v) {
   const odd = shipRandomizer.sb(factionRandomizer.hd(0, 1, "com2 oddchance") ** 0.5);
   const count = clamp(Math.floor(componentHeight / hpair), 1, componentHeight);
   const htotal = count * hpair + (odd ? h2[0] : 0);
-  const baseColor = computeBaseColor(factionRandomizer, colorData, shipRandomizer);
+  const baseColor = computeBaseColor();
   const scale_0 = shipRandomizer.sd(0.6, 1);
   const scale_1 = shipRandomizer.sd(0.6, 1);
   const color2 = [
@@ -666,7 +689,6 @@ function (v) {
   const hpair = componentHeight2[0] + componentHeight2[1];
   const count = Math.ceil(componentHeight / hpair);
   componentHeight = count * hpair + componentHeight2[0];
-  const [colors, colorChances] = colorData;
   const basecolor =
     colors[factionRandomizer.hchoose(colorChances, "com3 basecolor")];
   const lightness0_mid = factionRandomizer.hd(0.5, 0.8, "com3 lightness0 mid");
@@ -728,7 +750,7 @@ function (v) {
   const cn = centerness(v, false);
   const lightmid = shipRandomizer.sd(0.7, 1);
   const lightedge = shipRandomizer.sd(0, 0.2);
-  const baseColor = computeBaseColor(factionRandomizer, colorData, shipRandomizer);
+  const baseColor = computeBaseColor();
   const colormid = scaleColorBy(baseColor, lightmid);
   const coloredge = scaleColorBy(baseColor, lightedge);
   const componentWidth = Math.max(
@@ -855,7 +877,7 @@ function (v) {
   }
   const lightmid = shipRandomizer.sd(0.75, 1);
   const lightedge = shipRandomizer.sd(0, 0.25);
-  const baseColor = computeBaseColor(factionRandomizer, colorData, shipRandomizer);
+  const baseColor = computeBaseColor();
   const colormid = scaleColorBy(baseColor, lightmid);
   const coloredge = scaleColorBy(baseColor, lightedge);
   const countx =
@@ -954,7 +976,7 @@ function (v) {
     [v[0] + hwi + hwe, v[1] + hh0i + hh0e],
     [v[0] - hwi, v[1] + backamount + hh1i + hh1e],
   ];
-  const baseColor = computeBaseColor(factionRandomizer, colorData, shipRandomizer);
+  const baseColor = computeBaseColor();
   cfx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.2) + ")";
   cfx.beginPath();
   cfx.moveTo(quad[0][0] - 1, quad[0][1]);

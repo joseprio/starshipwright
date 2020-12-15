@@ -53,40 +53,6 @@ export function computeFactionColors(factionRandomizer: Randomizer): ColorData {
   return [colors, colorChances];
 }
 
-export function computeBaseColor(factionRandomizer: Randomizer, factionColorData: ColorData, shipRandomizer: Randomizer): RGBColor {
-  const [colors, colorChances] = factionColorData;
-  let rv = colors[shipRandomizer.schoose(colorChances)];
-  if (
-    shipRandomizer.sb(factionRandomizer.hd(0, 0.5, "base color shift chance") ** 2)
-  ) {
-    rv = [rv[0], rv[1], rv[2]];
-    rv[0] = clamp(
-      rv[0] +
-        (factionRandomizer.hd(0, 0.6, "base color shift range red") ** 2) *
-          clamp(shipRandomizer.sd(-1, 1.2), 0, 1) *
-          clamp(shipRandomizer.ss(0.7) + shipRandomizer.ss(0.7), -1, 1),
-      0,
-      1
-    );
-    rv[1] = clamp(
-      rv[1] +
-        (factionRandomizer.hd(0, 0.6, "base color shift range green") ** 2) *
-          clamp(shipRandomizer.sd(-1, 1.2), 0, 1) *
-          clamp(shipRandomizer.ss(0.7) + shipRandomizer.ss(0.7), -1, 1),
-      0,
-      1
-    );
-    rv[2] = clamp(
-      rv[2] +
-        (factionRandomizer.hd(0, 0.6, "base color shift range blue") ** 2) *
-          clamp(shipRandomizer.sd(-1, 1.2), 0, 1) *
-          clamp(shipRandomizer.ss(0.7) + shipRandomizer.ss(0.7), -1, 1),
-      0,
-      1
-    );
-  }
-  return rv;
-}
 
   //Where lp is the ship to get the color for
   /*

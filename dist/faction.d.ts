@@ -4,4 +4,3 @@ export declare type ComponentChances = Array<number>;
 export declare type ColorData = [Array<RGBColor>, Array<number>];
 export declare function computeFactionComponentChances(factionRandomizer: Randomizer): ComponentChances;
 export declare function computeFactionColors(factionRandomizer: Randomizer): ColorData;
-export declare function computeBaseColor(factionRandomizer: Randomizer, factionColorData: ColorData, shipRandomizer: Randomizer): RGBColor;
