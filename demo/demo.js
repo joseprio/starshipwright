@@ -465,11 +465,11 @@ function buildShip(factionRandomizer, p_seed, size) {
     const w = Math.floor(size * wratio) + 2 * CANVAS_SHIP_EDGE; // Maximum width of this ship, in pixels
     const hw = Math.floor(w / 2);
     const gw = Math.floor((w - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
-    const gwextra = (w - gw * COMPONENT_GRID_SIZE) * 0.5;
+    const gwextra = (w - gw * COMPONENT_GRID_SIZE) / 2;
     const h = Math.floor(size * hratio) + 2 * CANVAS_SHIP_EDGE; // Maximum height of this ship, in pixels
     const hh = Math.floor(h / 2);
     const gh = Math.floor((h - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
-    const ghextra = (h - gh * COMPONENT_GRID_SIZE) * 0.5;
+    const ghextra = (h - gh * COMPONENT_GRID_SIZE) / 2;
     const cs = document.createElement("canvas"); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
     cs.width = w;
     cs.height = h;
@@ -479,8 +479,8 @@ function buildShip(factionRandomizer, p_seed, size) {
         // 0: Joined rectangles.
         function () {
             const csarea = (w - 2 * CANVAS_SHIP_EDGE) * (h - 2 * CANVAS_SHIP_EDGE);
-            const csarealimit = csarea * 0.05;
-            const initialWidth = Math.ceil((w - 2 * CANVAS_SHIP_EDGE) * factionRandomizer.hd(0.1, 1, "outline0 iw") * 0.2);
+            const csarealimit = csarea / 20;
+            const initialWidth = Math.ceil((w - 2 * CANVAS_SHIP_EDGE) * factionRandomizer.hd(0.1, 1, "outline0 iw") / 5);
             const blocks = [
                 [
                     [hw - initialWidth, CANVAS_SHIP_EDGE],
@@ -488,14 +488,14 @@ function buildShip(factionRandomizer, p_seed, size) {
                 ],
             ];
             const blockcount = 2 +
-                Math.floor(shipRandomizer.sd(0.5, 1) * factionRandomizer.hd(2, 8, "outline0 bc") * Math.sqrt(size));
+                Math.floor(shipRandomizer.sd(0.5, 1) * factionRandomizer.hd(2, 8, "outline0 bc") * size ** 0.5);
             for (let i = 1; i < blockcount; i++) {
                 const base = blocks[shipRandomizer.si(0, blocks.length - 1)];
                 const v0 = [
                     base[0][0] + shipRandomizer.sd(0, 1) * (base[1][0] - base[0][0]),
                     base[0][1] + shipRandomizer.sd(0, 1) * (base[1][1] - base[0][1]),
                 ];
-                if (v0[1] < (base[0][1] + base[1][1]) * 0.5 &&
+                if (v0[1] < (base[0][1] + base[1][1]) / 2 &&
                     shipRandomizer.sb(factionRandomizer.hd(0.5, 1.5, "outline0 frontbias"))) {
                     v0[1] = base[1][1] - (v0[1] - base[0][1]);
                 }
@@ -534,9 +534,9 @@ function buildShip(factionRandomizer, p_seed, size) {
         // 1: Joined circles
         function () {
             const csarea = (w - 2 * CANVAS_SHIP_EDGE) * (h - 2 * CANVAS_SHIP_EDGE);
-            const csarealimit = csarea * 0.05;
-            const csrlimit = Math.max(2, Math.sqrt(csarealimit / Math.PI));
-            const initialwidth = Math.ceil((w - 2 * CANVAS_SHIP_EDGE) * factionRandomizer.hd(0.1, 1, "outline1 iw") * 0.2);
+            const csarealimit = csarea / 20;
+            const csrlimit = Math.max(2, (csarealimit / Math.PI) ** 0.5);
+            const initialwidth = Math.ceil((w - 2 * CANVAS_SHIP_EDGE) * factionRandomizer.hd(0.1, 1, "outline1 iw") / 5);
             const circles = [];
             const initialcount = Math.floor((h - 2 * CANVAS_SHIP_EDGE) / (initialwidth * 2));
             for (let i = 0; i < initialcount; i++) {
@@ -544,7 +544,7 @@ function buildShip(factionRandomizer, p_seed, size) {
                 circles.push({ v: lv, r: initialwidth });
             }
             const circlecount = initialcount +
-                Math.floor(shipRandomizer.sd(0.5, 1) * factionRandomizer.hd(10, 50, "outline1 cc") * Math.sqrt(size));
+                Math.floor(shipRandomizer.sd(0.5, 1) * factionRandomizer.hd(10, 50, "outline1 cc") * size ** 0.5);
             for (let i = initialcount; i < circlecount; i++) {
                 const base = circles[Math.max(shipRandomizer.si(0, circles.length - 1), shipRandomizer.si(0, circles.length - 1))];
                 let ncr = shipRandomizer.sd(1, csrlimit);
@@ -578,7 +578,7 @@ function buildShip(factionRandomizer, p_seed, size) {
             const basefatness = COMPONENT_GRID_SIZE / size +
                 factionRandomizer.hd(0.03, 0.1, "outline2 basefatness");
             const basemessiness = 1 / basefatness;
-            const pointcount = Math.max(3, Math.ceil(basemessiness * shipRandomizer.sd(0.05, 0.1) * Math.sqrt(size)));
+            const pointcount = Math.max(3, Math.ceil(basemessiness * shipRandomizer.sd(0.05, 0.1) * size ** 0.5));
             // @ts-ignore - We're doing it properly
             csx.lineCap = ["round", "square"][factionRandomizer.hi(0, 1, "outline2 linecap")];
             csx.strokeStyle = "#fff";
@@ -756,7 +756,7 @@ function buildShip(factionRandomizer, p_seed, size) {
                 const chance = factionRandomizer.hd(0, 0.5, "com0 bigincchance");
                 while (shipRandomizer.sb(chance * bn)) {
                     const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
-                    if (Math.min(lw[0], lw[1]) > lcms * 0.5) {
+                    if (Math.min(lw[0], lw[1]) > lcms / 2) {
                         lcms *= 1.5;
                     }
                     else {
@@ -766,8 +766,8 @@ function buildShip(factionRandomizer, p_seed, size) {
             }
             const lcms2 = lcms * 2;
             const dhi = [
-                Math.ceil(shipRandomizer.sd(1, Math.max(2, 0.5 * lcms))),
-                Math.ceil(shipRandomizer.sd(1, Math.max(2, 0.5 * lcms))),
+                Math.ceil(shipRandomizer.sd(1, Math.max(2, lcms / 2))),
+                Math.ceil(shipRandomizer.sd(1, Math.max(2, lcms / 2))),
             ];
             const borderwidth = Math.min(dhi[0], dhi[1]) * shipRandomizer.sd(0.1, 1.2);
             const dho = [dhi[0] + borderwidth * 2, dhi[1] + borderwidth * 2];
@@ -853,7 +853,7 @@ function buildShip(factionRandomizer, p_seed, size) {
                 const chance = factionRandomizer.hd(0, 0.9, "com2 bigincchance");
                 while (shipRandomizer.sb(chance * bn)) {
                     const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
-                    if (Math.min(lw[0], lw[1]) > lcms * 0.5) {
+                    if (Math.min(lw[0], lw[1]) > lcms / 2) {
                         lcms *= 1.5;
                     }
                     else {
@@ -950,7 +950,7 @@ function buildShip(factionRandomizer, p_seed, size) {
                 const chance = factionRandomizer.hd(0.3, 0.8, "com3 bigincchance");
                 while (shipRandomizer.sb(chance * bn)) {
                     const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
-                    if (Math.min(lw[0], lw[1]) > lcms * 0.5) {
+                    if (Math.min(lw[0], lw[1]) > lcms / 2) {
                         lcms *= 1.5;
                     }
                     else {
@@ -1096,7 +1096,7 @@ function buildShip(factionRandomizer, p_seed, size) {
                 const chance = factionRandomizer.hd(0, 0.8, "com5 bigincchance");
                 while (shipRandomizer.sb(chance * bn)) {
                     const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
-                    if (Math.min(lw[0], lw[1]) > lcms * 0.5) {
+                    if (Math.min(lw[0], lw[1]) > lcms / 2) {
                         lcms *= 1.5;
                     }
                     else {
@@ -1116,7 +1116,7 @@ function buildShip(factionRandomizer, p_seed, size) {
             const smallr = (shipRandomizer.sd(0.5, 1) * lcms) / Math.max(countx, county);
             const drawr = smallr + 0.5;
             const shadowr = smallr + 1;
-            const centerr = smallr * 0.2;
+            const centerr = smallr / 5;
             const componentHw = smallr * countx;
             const componentHh = smallr * county;
             const bv = [v[0] - componentHw, v[1] - componentHh];
@@ -1156,7 +1156,7 @@ function buildShip(factionRandomizer, p_seed, size) {
                 const chance = factionRandomizer.hd(0, 0.8, "com6 bigincchance");
                 while (shipRandomizer.sb(chance * bn)) {
                     const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
-                    if (Math.min(lw[0], lw[1]) > lcms * 0.5) {
+                    if (Math.min(lw[0], lw[1]) > lcms / 2) {
                         lcms *= 1.5;
                     }
                     else {
@@ -1204,7 +1204,7 @@ function buildShip(factionRandomizer, p_seed, size) {
             cfx.fill();
         }
     ];
-    // ------ End define outlines -----------------------------------
+    // ------ End define components -----------------------------------
     // Add components
     let extradone = 0, nextpass = 0, nextcell = 0, totaldone = 0;
     for (;;) {
