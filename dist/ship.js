@@ -28,23 +28,23 @@ export class Ship {
         const hratio = this.r.sd(this.f.hd(0.7, 1, "hratio min"), this.f.hd(1.1, 1.7, "hratio max"));
         this.w = Math.floor(this.size * wratio) + 2 * CANVAS_SHIP_EDGE; // Maximum width of this ship, in pixels
         this.hw = Math.floor(this.w / 2);
-        this.gw = Math.floor((this.w - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
-        this.gwextra = (this.w - this.gw * COMPONENT_GRID_SIZE) * 0.5;
+        const gw = Math.floor((this.w - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
+        this.gwextra = (this.w - gw * COMPONENT_GRID_SIZE) * 0.5;
         this.h = Math.floor(this.size * hratio) + 2 * CANVAS_SHIP_EDGE; // Maximum height of this ship, in pixels
         this.hh = Math.floor(this.h / 2);
-        this.gh = Math.floor((this.h - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
-        this.ghextra = (this.h - this.gh * COMPONENT_GRID_SIZE) * 0.5;
+        const gh = Math.floor((this.h - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
+        this.ghextra = (this.h - gh * COMPONENT_GRID_SIZE) * 0.5;
         const cs = document.createElement("canvas"); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
         cs.width = this.w;
         cs.height = this.h;
         const csx = cs.getContext("2d");
         outlines[this.f.hchoose([1, 1, 1], "outline type")](shipRandomizer, factionRandomizer, this.w, this.h, this.hw, this.size, csx);
         const outline = csx.getImageData(0, 0, this.w, this.h);
-        this.cgrid = [];
-        for (let gx = 0; gx < this.gw; gx++) {
-            this.cgrid[gx] = [];
-            for (let gy = 0; gy < this.gh; gy++) {
-                this.cgrid[gx][gy] = {
+        const cgrid = [];
+        for (let gx = 0; gx < gw; gx++) {
+            cgrid[gx] = [];
+            for (let gy = 0; gy < gh; gy++) {
+                cgrid[gx][gy] = {
                     gx: gx,
                     gy: gy,
                     x: Math.floor(this.gwextra + (gx + 0.5) * COMPONENT_GRID_SIZE),
@@ -54,13 +54,13 @@ export class Ship {
             }
         }
         const goodcells = [
-            this.cgrid[Math.floor(this.gw / 2)][Math.floor(this.gh / 2)],
+            cgrid[Math.floor(gw / 2)][Math.floor(gh / 2)],
         ];
         let nextcheck = 0;
         while (nextcheck < goodcells.length) {
             const lcell = goodcells[nextcheck];
             if (lcell.gx > 0) {
-                const ncell = this.cgrid[lcell.gx - 1][lcell.gy];
+                const ncell = cgrid[lcell.gx - 1][lcell.gy];
                 if (ncell.phase == 0) {
                     if (getAlpha(outline, ncell.x, ncell.y) > 0) {
                         ncell.phase = 1;
@@ -71,8 +71,8 @@ export class Ship {
                     }
                 }
             }
-            if (lcell.gx < this.gw - 1) {
-                const ncell = this.cgrid[lcell.gx + 1][lcell.gy];
+            if (lcell.gx < gw - 1) {
+                const ncell = cgrid[lcell.gx + 1][lcell.gy];
                 if (ncell.phase == 0) {
                     if (getAlpha(outline, ncell.x, ncell.y) > 0) {
                         ncell.phase = 1;
@@ -84,7 +84,7 @@ export class Ship {
                 }
             }
             if (lcell.gy > 0) {
-                const ncell = this.cgrid[lcell.gx][lcell.gy - 1];
+                const ncell = cgrid[lcell.gx][lcell.gy - 1];
                 if (ncell.phase == 0) {
                     if (getAlpha(outline, ncell.x, ncell.y) > 0) {
                         ncell.phase = 1;
@@ -95,8 +95,8 @@ export class Ship {
                     }
                 }
             }
-            if (lcell.gy < this.gh - 1) {
-                const ncell = this.cgrid[lcell.gx][lcell.gy + 1];
+            if (lcell.gy < gh - 1) {
+                const ncell = cgrid[lcell.gx][lcell.gy + 1];
                 if (ncell.phase == 0) {
                     if (getAlpha(outline, ncell.x, ncell.y) > 0) {
                         ncell.phase = 1;
@@ -111,7 +111,7 @@ export class Ship {
         }
         for (let i = 0; i < goodcells.length; i++) {
             const lcell = goodcells[i];
-            const ocell = this.cgrid[this.gw - 1 - lcell.gx][lcell.gy];
+            const ocell = cgrid[gw - 1 - lcell.gx][lcell.gy];
             if (ocell.phase != 1) {
                 ocell.phase = 1;
                 goodcells.push(ocell);
@@ -125,6 +125,15 @@ export class Ship {
         this.cf.width = this.w;
         this.cf.height = this.h;
         const cfx = this.cf.getContext("2d");
+        //Returns the phase of the cell containing (X,Y), or 0 if there is no such cell
+        function getCellPhase(x, y) {
+            const gx = Math.floor((x - this.gwextra) / COMPONENT_GRID_SIZE);
+            const gy = Math.floor((y - this.ghextra) / COMPONENT_GRID_SIZE);
+            if (gx < 0 || gx >= this.gw || gy < 0 || gy >= this.gh) {
+                return 0;
+            }
+            return cgrid[gx][gy].phase;
+        }
         // Add components
         let extradone = 0, nextpass = 0, nextcell = 0, totaldone = 0;
         for (;;) {
@@ -170,22 +179,13 @@ export class Ship {
                     lv[0] = this.hw;
                 }
             }
-            components[this.r.schoose(componentChances)](cfx, this, lv, componentChances, colorData, nextpass, totaldone / totalcomponents);
+            components[this.r.schoose(componentChances)](cfx, shipRandomizer, factionRandomizer, this.w, this.h, this.hw, this.hh, this.size, lv, componentChances, colorData, nextpass, totaldone, totalcomponents, getCellPhase);
             totaldone++;
         }
         // Mirror
         cfx.clearRect(this.hw + (this.w % 2), 0, this.w, this.h);
         cfx.scale(-1, 1);
         cfx.drawImage(this.cf, 0 - this.w, 0);
-    }
-    //Returns the phase of the cell containing (X,Y), or 0 if there is no such cell
-    getCellPhase(x, y) {
-        const gx = Math.floor((x - this.gwextra) / COMPONENT_GRID_SIZE);
-        const gy = Math.floor((y - this.ghextra) / COMPONENT_GRID_SIZE);
-        if (gx < 0 || gx >= this.gw || gy < 0 || gy >= this.gh) {
-            return 0;
-        }
-        return this.cgrid[gx][gy].phase;
     }
 }
 //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or -1 if (X,Y) is out of bounds.

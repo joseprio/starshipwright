@@ -8,36 +8,37 @@ import type { Ship } from "./ship";
 import type { Vec } from "./types";
 import {computeBaseColor} from "./faction";
 import type { ComponentChances, ColorData } from "./faction";
+import { Randomizer } from "./randomizer";
 
-function frontness(lp: Ship, v: Vec): number {
-  return 1 - v[1] / lp.h;
+function frontness(h: number, v: Vec): number {
+  return 1 - v[1] / h;
 }
 
-function centerness(lp: Ship, v: Vec, doY: boolean): number {
-  let rv = Math.min(1, 1 - Math.abs(v[0] - lp.hw) / lp.hw);
+function centerness(hw: number, hh: number, v: Vec, doY: boolean): number {
+  let rv = Math.min(1, 1 - Math.abs(v[0] - hw) / hw);
   if (doY) {
-    rv = Math.min(rv, 1 - Math.abs(v[1] - lp.hh) / lp.hh);
+    rv = Math.min(rv, 1 - Math.abs(v[1] - hh) / hh);
   }
   return rv;
 }
 
-function bigness(lp: Ship, v: Vec, pcdone: number): number {
-  const effectCenter = centerness(lp, v, true);
-  const effectShipsize = 1 - 1 / ((lp.w + lp.h) / 1000 + 1);
-  const effectFaction = lp.f.hd(0, 1, "master bigness") ** 0.5;
+function bigness(factionRandomizer: Randomizer, w: number, h: number, hw: number, hh: number, v: Vec, pcdone: number): number {
+  const effectCenter = centerness(hw, hh, v, true);
+  const effectShipsize = 1 - 1 / ((w + h) / 1000 + 1);
+  const effectFaction = factionRandomizer.hd(0, 1, "master bigness") ** 0.5;
   const effectStack = 1 - pcdone;
   return effectCenter * effectShipsize * effectFaction * effectStack;
 }
 
-function leeway(lp: Ship, boundingBox: [Vec, Vec]): Vec {
+function leeway(w: number, h: number, boundingBox: [Vec, Vec]): Vec {
   return [
     Math.min(
       boundingBox[0][0] - CANVAS_SHIP_EDGE,
-      lp.w - CANVAS_SHIP_EDGE - boundingBox[1][0]
+      w - CANVAS_SHIP_EDGE - boundingBox[1][0]
     ),
     Math.min(
       boundingBox[0][1] - CANVAS_SHIP_EDGE,
-      lp.h - CANVAS_SHIP_EDGE - boundingBox[1][1]
+      h - CANVAS_SHIP_EDGE - boundingBox[1][1]
     ),
   ];
 }
@@ -62,18 +63,18 @@ function shadowGradient(
   return grad;
 }
 
-type ComponentFunc = (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, pcdone: number) => void;
+type ComponentFunc = (cfx: CanvasRenderingContext2D, shipRandomizer: Randomizer, factionRandomizer: Randomizer, w: number, h: number, hw: number, hh: number, size: number, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, totaldone: number, totalcomponents: number, getCellPhase: (x: number, y: number) => number) => void;
 
 // Each component function takes an argument 'lp' (for the ship) and 'v' (an integral 2-vector denoting the center of the component)
 export const components: Array<ComponentFunc>  = [
 // Bordered block
-function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, pcdone: number) {
+function (cfx: CanvasRenderingContext2D, shipRandomizer: Randomizer, factionRandomizer: Randomizer, w: number, h: number, hw: number, hh: number, size: number, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, totaldone: number, totalcomponents: number) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = bigness(lp, v, pcdone) ** 0.3;
-  if (lp.r.sb(lp.f.hd(0, 0.9, "com0 bigchance") * bn)) {
-    const chance = lp.f.hd(0, 0.5, "com0 bigincchance");
-    while (lp.r.sb(chance * bn)) {
-      const lw = leeway(lp, [
+  const bn = bigness(factionRandomizer, w, h, hw, hh, v, totaldone / totalcomponents) ** 0.3;
+  if (shipRandomizer.sb(factionRandomizer.hd(0, 0.9, "com0 bigchance") * bn)) {
+    const chance = factionRandomizer.hd(0, 0.5, "com0 bigincchance");
+    while (shipRandomizer.sb(chance * bn)) {
+      const lw = leeway(w, h, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
       ]);
@@ -86,20 +87,20 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
   }
   const lcms2 = lcms * 2;
   const dhi = [
-    Math.ceil(lp.r.sd(1, Math.max(2, 0.5 * lcms))),
-    Math.ceil(lp.r.sd(1, Math.max(2, 0.5 * lcms))),
+    Math.ceil(shipRandomizer.sd(1, Math.max(2, 0.5 * lcms))),
+    Math.ceil(shipRandomizer.sd(1, Math.max(2, 0.5 * lcms))),
   ];
-  const borderwidth = Math.min(dhi[0], dhi[1]) * lp.r.sd(0.1, 1.2);
+  const borderwidth = Math.min(dhi[0], dhi[1]) * shipRandomizer.sd(0.1, 1.2);
   const dho = [dhi[0] + borderwidth * 2, dhi[1] + borderwidth * 2];
   const counts = [Math.ceil(lcms2 / dho[0]), Math.ceil(lcms2 / dho[1])];
   const trv = [
     Math.round((counts[0] * dho[0]) / 2),
     Math.round((counts[1] * dho[1]) / 2),
   ];
-  const baseColor = computeBaseColor(lp.f, colorData, lp);
-  const icolorh = scaleColorBy(baseColor, lp.r.sd(0.4, 1));
-  const ocolorh = scaleColorBy(baseColor, lp.r.sd(0.4, 1));
-  cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
+  const baseColor = computeBaseColor(factionRandomizer, colorData, shipRandomizer);
+  const icolorh = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
+  const ocolorh = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
+  cfx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.25) + ")";
   cfx.fillRect(
     v[0] - trv[0] - 1,
     v[1] - trv[1] - 1,
@@ -122,15 +123,15 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
     }
   }
   if (
-    lp.r.sb(
-      clamp((pcdone * 0.6 + 0.3) * (lcms / COMPONENT_MAXIMUM_SIZE), 0, 0.98)
+    shipRandomizer.sb(
+      clamp((totaldone * 0.6 / totalcomponents + 0.3) * (lcms / COMPONENT_MAXIMUM_SIZE), 0, 0.98)
     )
   ) {
     cfx.fillStyle = shadowGradient(
       cfx,
       v,
       [v[0] + trv[0], v[1]],
-      lp.r.sd(0, 0.9)
+      shipRandomizer.sd(0, 0.9)
     );
     cfx.fillRect(
       v[0] - trv[0],
@@ -141,13 +142,13 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
   }
 },
 // Cylinder array
-function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, pcdone: number) {
+function (cfx: CanvasRenderingContext2D, shipRandomizer: Randomizer, factionRandomizer: Randomizer, w: number, h: number, hw: number, hh: number, size: number, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, totaldone: number, totalcomponents: number) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = bigness(lp, v, pcdone) ** 0.2;
-  if (lp.r.sb(lp.f.hd(0.3, 1, "com1 bigchance") * bn)) {
-    const chance = lp.f.hd(0, 0.6, "com1 bigincchance");
-    while (lp.r.sb(chance * bn)) {
-      const lw = leeway(lp, [
+  const bn = bigness(factionRandomizer, w, h, hw, hh, v, totaldone / totalcomponents) ** 0.2;
+  if (shipRandomizer.sb(factionRandomizer.hd(0.3, 1, "com1 bigchance") * bn)) {
+    const chance = factionRandomizer.hd(0, 0.6, "com1 bigincchance");
+    while (shipRandomizer.sb(chance * bn)) {
+      const lw = leeway(w, h, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
       ]);
@@ -158,21 +159,21 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
       }
     }
   }
-  let componentWidth = Math.ceil(lp.r.sd(0.8, 2) * lcms);
-  const componentHeight = Math.ceil(lp.r.sd(0.8, 2) * lcms);
-  const cw = lp.r.si(3, Math.max(4, componentWidth));
+  let componentWidth = Math.ceil(shipRandomizer.sd(0.8, 2) * lcms);
+  const componentHeight = Math.ceil(shipRandomizer.sd(0.8, 2) * lcms);
+  const cw = shipRandomizer.si(3, Math.max(4, componentWidth));
   const count = Math.max(1, Math.round(componentWidth / cw));
   componentWidth = count * cw;
-  const baseColor = computeBaseColor(lp.f, colorData, lp);
-  const ccolor = scaleColorBy(baseColor, lp.r.sd(0.5, 1));
-  const darkness = lp.r.sd(0.3, 0.9);
+  const baseColor = computeBaseColor(factionRandomizer, colorData, shipRandomizer);
+  const ccolor = scaleColorBy(baseColor, shipRandomizer.sd(0.5, 1));
+  const darkness = shipRandomizer.sd(0.3, 0.9);
   // true = horizontal array, false = vertical array
-  const orientation = lp.r.sb(
-    clamp(lp.f.hd(-0.2, 1.2, "com1 hchance"), 0, 1)
+  const orientation = shipRandomizer.sb(
+    clamp(factionRandomizer.hd(-0.2, 1.2, "com1 hchance"), 0, 1)
   );
   if (orientation) {
     const bv = [v[0] - Math.floor(componentWidth / 2), v[1] - Math.floor(componentHeight / 2)];
-    cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
+    cfx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.25) + ")";
     cfx.fillRect(bv[0] - 1, bv[1] - 1, componentWidth + 2, componentHeight + 2);
     cfx.fillStyle = ccolor;
     cfx.fillRect(bv[0], bv[1], componentWidth, componentHeight);
@@ -187,7 +188,7 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
     }
   } else {
     const bv = [v[0] - Math.floor(componentHeight / 2), v[1] - Math.floor(componentWidth / 2)];
-    cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
+    cfx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.25) + ")";
     cfx.fillRect(bv[0] - 1, bv[1] - 1, componentHeight + 2, componentWidth + 2);
     cfx.fillStyle = ccolor;
     cfx.fillRect(bv[0], bv[1], componentHeight, componentWidth);
@@ -203,13 +204,13 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
   }
 },
 // Banded cylinder
-function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, pcdone: number) {
+function (cfx: CanvasRenderingContext2D, shipRandomizer: Randomizer, factionRandomizer: Randomizer, w: number, h: number, hw: number, hh: number, size: number, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, totaldone: number, totalcomponents: number) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = bigness(lp, v, pcdone) ** 0.05;
-  if (lp.r.sb(lp.f.hd(0, 1, "com2 bigchance") * bn)) {
-    const chance = lp.f.hd(0, 0.9, "com2 bigincchance");
-    while (lp.r.sb(chance * bn)) {
-      const lw = leeway(lp, [
+  const bn = bigness(factionRandomizer, w, h, hw, hh, v, totaldone / totalcomponents) ** 0.05;
+  if (shipRandomizer.sb(factionRandomizer.hd(0, 1, "com2 bigchance") * bn)) {
+    const chance = factionRandomizer.hd(0, 0.9, "com2 bigincchance");
+    while (shipRandomizer.sb(chance * bn)) {
+      const lw = leeway(w, h, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
       ]);
@@ -220,34 +221,34 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
       }
     }
   }
-  const componentWidth = Math.ceil(lp.r.sd(0.6, 1.4) * lcms);
-  const componentHeight = Math.ceil(lp.r.sd(1, 2) * lcms);
+  const componentWidth = Math.ceil(shipRandomizer.sd(0.6, 1.4) * lcms);
+  const componentHeight = Math.ceil(shipRandomizer.sd(1, 2) * lcms);
   const wh2 = [
-    Math.ceil(clamp((componentWidth * lp.r.sd(0.7, 1)) / 2, 1, componentWidth)),
-    Math.ceil(clamp((componentWidth * lp.r.sd(0.8, 1)) / 2, 1, componentWidth)),
+    Math.ceil(clamp((componentWidth * shipRandomizer.sd(0.7, 1)) / 2, 1, componentWidth)),
+    Math.ceil(clamp((componentWidth * shipRandomizer.sd(0.8, 1)) / 2, 1, componentWidth)),
   ];
   const h2 = [
-    Math.floor(clamp(componentWidth * lp.r.sd(0.05, 0.25), 1, componentHeight)),
-    Math.floor(clamp(componentWidth * lp.r.sd(0.1, 0.3), 1, componentHeight)),
+    Math.floor(clamp(componentWidth * shipRandomizer.sd(0.05, 0.25), 1, componentHeight)),
+    Math.floor(clamp(componentWidth * shipRandomizer.sd(0.1, 0.3), 1, componentHeight)),
   ];
   const hpair = h2[0] + h2[1];
-  const odd = lp.r.sb(lp.f.hd(0, 1, "com2 oddchance") ** 0.5);
+  const odd = shipRandomizer.sb(factionRandomizer.hd(0, 1, "com2 oddchance") ** 0.5);
   const count = clamp(Math.floor(componentHeight / hpair), 1, componentHeight);
   const htotal = count * hpair + (odd ? h2[0] : 0);
-  const baseColor = computeBaseColor(lp.f, colorData, lp);
-  const scale_0 = lp.r.sd(0.6, 1);
-  const scale_1 = lp.r.sd(0.6, 1);
+  const baseColor = computeBaseColor(factionRandomizer, colorData, shipRandomizer);
+  const scale_0 = shipRandomizer.sd(0.6, 1);
+  const scale_1 = shipRandomizer.sd(0.6, 1);
   const color2 = [
     scaleColorBy(baseColor, scale_0),
     scaleColorBy(baseColor, scale_1),
   ];
-  const lightness = 1 - lp.r.sd(0.5, 0.95);
+  const lightness = 1 - shipRandomizer.sd(0.5, 0.95);
   const colord2 = [
     scaleColorBy(baseColor, lightness * scale_0),
     scaleColorBy(baseColor, lightness * scale_1),
   ];
-  const orientation = lp.r.sb(
-    lp.f.hd(0, 1, "com2 verticalchance") ** 0.1
+  const orientation = shipRandomizer.sb(
+    factionRandomizer.hd(0, 1, "com2 verticalchance") ** 0.1
   );
   if (orientation) {
     const grad2_0 = cfx.createLinearGradient(v[0] - wh2[0], v[1], v[0] + wh2[0], v[1]);
@@ -294,26 +295,26 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
   }
 },
 //Rocket engine (or tries to call another random component if too far forward)
-function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, pcdone: number) {
+function (cfx: CanvasRenderingContext2D, shipRandomizer: Randomizer, factionRandomizer: Randomizer, w: number, h: number, hw: number, hh: number, size: number, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, totaldone: number, totalcomponents: number, getCellPhase) {
   if (
-    lp.r.sb(frontness(lp, v) - 0.3) ||
-    lp.getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) > 0 ||
-    lp.getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8) > 0
+    shipRandomizer.sb(frontness(h, v) - 0.3) ||
+    getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) > 0 ||
+    getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8) > 0
   ) {
     for (let tries = 0; tries < 100; tries++) {
-      const which = lp.r.schoose(componentChances);
+      const which = shipRandomizer.schoose(componentChances);
       if (which != 3) {
-        components[which](cfx, lp, v, componentChances, colorData, nextpass, pcdone);
+        components[which](cfx, shipRandomizer, factionRandomizer, w, h, hw, hh, size, v, componentChances, colorData, nextpass, totaldone, totalcomponents, getCellPhase);
         return;
       }
     }
   }
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = bigness(lp, v, pcdone) ** 0.1;
-  if (lp.r.sb(lp.f.hd(0.6, 1, "com3 bigchance") * bn)) {
-    const chance = lp.f.hd(0.3, 0.8, "com3 bigincchance");
-    while (lp.r.sb(chance * bn)) {
-      const lw = leeway(lp, [
+  const bn = bigness(factionRandomizer, w, h, hw, hh, v, totaldone / totalcomponents) ** 0.1;
+  if (shipRandomizer.sb(factionRandomizer.hd(0.6, 1, "com3 bigchance") * bn)) {
+    const chance = factionRandomizer.hd(0.3, 0.8, "com3 bigincchance");
+    while (shipRandomizer.sb(chance * bn)) {
+      const lw = leeway(w, h, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
       ]);
@@ -324,26 +325,26 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
       }
     }
   }
-  const componentWidth = lp.r.sd(1, 2) * lcms;
-  let componentHeight = Math.ceil(lp.r.sd(0.3, 1) * lcms);
-  const nratio = lp.r.sd(0.25, 0.6);
+  const componentWidth = shipRandomizer.sd(1, 2) * lcms;
+  let componentHeight = Math.ceil(shipRandomizer.sd(0.3, 1) * lcms);
+  const nratio = shipRandomizer.sd(0.25, 0.6);
   const nw = componentWidth * nratio;
   const midw = (componentWidth + nw) / 2;
   const midwh = midw / 2;
   const componentHeight2 = [
-    Math.max(1, Math.ceil(componentHeight * lp.r.sd(0.08, 0.25))),
-    Math.max(1, Math.ceil(componentHeight * lp.r.sd(0.03, 0.15))),
+    Math.max(1, Math.ceil(componentHeight * shipRandomizer.sd(0.08, 0.25))),
+    Math.max(1, Math.ceil(componentHeight * shipRandomizer.sd(0.03, 0.15))),
   ];
   const hpair = componentHeight2[0] + componentHeight2[1];
   const count = Math.ceil(componentHeight / hpair);
   componentHeight = count * hpair + componentHeight2[0];
   const [colors, colorChances] = colorData;
   const basecolor =
-    colors[lp.f.hchoose(colorChances, "com3 basecolor")];
-  const lightness0_mid = lp.f.hd(0.5, 0.8, "com3 lightness0 mid");
+    colors[factionRandomizer.hchoose(colorChances, "com3 basecolor")];
+  const lightness0_mid = factionRandomizer.hd(0.5, 0.8, "com3 lightness0 mid");
   const lightness0_edge =
-    lightness0_mid - lp.f.hd(0.2, 0.4, "com3 lightness0 edge");
-  const lightness1_edge = lp.f.hd(0, 0.2, "com3 lightness1 edge");
+    lightness0_mid - factionRandomizer.hd(0.2, 0.4, "com3 lightness0 edge");
+  const lightness1_edge = factionRandomizer.hd(0, 0.2, "com3 lightness1 edge");
   const grad2 = [
     cfx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
     cfx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
@@ -395,27 +396,27 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
   }
 },
 //Elongated cylinder (calls component 0 - 2 on top of its starting point)
-function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, pcdone: number) {
-  const cn = centerness(lp, v, false);
-  const lightmid = lp.r.sd(0.7, 1);
-  const lightedge = lp.r.sd(0, 0.2);
-  const baseColor = computeBaseColor(lp.f, colorData, lp);
+function (cfx: CanvasRenderingContext2D, shipRandomizer: Randomizer, factionRandomizer: Randomizer, w: number, h: number, hw: number, hh: number, size: number, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, totaldone: number, totalcomponents: number, getCellPhase) {
+  const cn = centerness(hw, hh, v, false);
+  const lightmid = shipRandomizer.sd(0.7, 1);
+  const lightedge = shipRandomizer.sd(0, 0.2);
+  const baseColor = computeBaseColor(factionRandomizer, colorData, shipRandomizer);
   const colormid = scaleColorBy(baseColor, lightmid);
   const coloredge = scaleColorBy(baseColor, lightedge);
-  const w = Math.max(
+  const componentWidth = Math.max(
     3,
     Math.ceil(
-      lp.size *
-        (lp.r.sd(0.4, 1) ** 2) *
-        lp.f.hd(0.02, 0.1, "com4 maxwidth")
+      size *
+        (shipRandomizer.sd(0.4, 1) ** 2) *
+        factionRandomizer.hd(0.02, 0.1, "com4 maxwidth")
     )
   );
-  const hwi = Math.floor(w / 2);
-  const hwe = w % 2;
-  const forwards = 1 * (lp.f.hd(0, 1, "com4 directionc0") ** 4);
-  const backwards = 0.1 * (lp.f.hd(0, 1, "com4 directionc1") ** 4);
-  const toCenter = 0.2 * (lp.f.hd(0, 1, "com4 directionc2") ** 4);
-  const direction = lp.r.schoose([
+  const hwi = Math.floor(componentWidth / 2);
+  const hwe = componentWidth % 2;
+  const forwards = 1 * (factionRandomizer.hd(0, 1, "com4 directionc0") ** 4);
+  const backwards = 0.1 * (factionRandomizer.hd(0, 1, "com4 directionc1") ** 4);
+  const toCenter = 0.2 * (factionRandomizer.hd(0, 1, "com4 directionc2") ** 4);
+  const direction = shipRandomizer.schoose([
     forwards * (2 - cn),
     backwards,
     toCenter * (1 + cn),
@@ -428,10 +429,10 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
     const componentHeight = Math.min(
       Math.max(
         COMPONENT_MAXIMUM_SIZE,
-        hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)
+        hlimit - shipRandomizer.si(0, COMPONENT_MAXIMUM_SIZE * 2)
       ),
       Math.floor(
-        0.7 * lp.size * (lp.r.sd(0, 1) ** lp.f.hd(2, 6, "com4 hpower0"))
+        0.7 * size * (shipRandomizer.sd(0, 1) ** factionRandomizer.hd(2, 6, "com4 hpower0"))
       )
     );
     const bb_0_0 = v[0] - hwi, bb_0_1 = v[1] - componentHeight, bb_1_0 = v[0] + hwi + hwe;
@@ -445,18 +446,18 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
     grad.addColorStop(0.5, colormid);
     grad.addColorStop(1, coloredge);
     cfx.fillStyle = grad;
-    cfx.fillRect(bb_0_0, bb_0_1, w, componentHeight);
+    cfx.fillRect(bb_0_0, bb_0_1, componentWidth, componentHeight);
     ev = [v[0], v[1] - componentHeight];
   } else if (direction == 1) {
     //backwards
-    const hlimit = lp.h - (CANVAS_SHIP_EDGE + v[1]);
+    const hlimit = h - (CANVAS_SHIP_EDGE + v[1]);
     const componentHeight = Math.min(
       Math.max(
         COMPONENT_MAXIMUM_SIZE,
-        hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)
+        hlimit - shipRandomizer.si(0, COMPONENT_MAXIMUM_SIZE * 2)
       ),
       Math.floor(
-        0.6 * lp.size * (lp.r.sd(0, 1) ** lp.f.hd(2, 7, "com4 hpower1"))
+        0.6 * size * (shipRandomizer.sd(0, 1) ** factionRandomizer.hd(2, 7, "com4 hpower1"))
       )
     );
     const bb_0_0 = v[0] - hwi, bb_0_1 = v[1], bb_1_0 = v[0] + hwi + hwe;
@@ -485,35 +486,35 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
     grad.addColorStop(0.5, colormid);
     grad.addColorStop(1, coloredge);
     cfx.fillStyle = grad;
-    cfx.fillRect(v[0], v[1] - hwi, Math.ceil(lp.hw - v[0]) + 1, w);
-    ev = [lp.hw, v[1]];
+    cfx.fillRect(v[0], v[1] - hwi, Math.ceil(hw - v[0]) + 1, w);
+    ev = [hw, v[1]];
   }
   const coverComC = [
-    0.6 * (lp.f.hd(0, 1, "com4 covercomc0") ** 2),
-    0.2 * (lp.f.hd(0, 1, "com4 covercomc1") ** 2),
-    (lp.f.hd(0, 1, "com4 covercomc2") ** 2),
+    0.6 * (factionRandomizer.hd(0, 1, "com4 covercomc0") ** 2),
+    0.2 * (factionRandomizer.hd(0, 1, "com4 covercomc1") ** 2),
+    (factionRandomizer.hd(0, 1, "com4 covercomc2") ** 2),
   ];
-  components[lp.r.schoose(coverComC)](cfx, lp, v, componentChances, colorData, nextpass, pcdone);
-  if (lp.getCellPhase(ev[0], ev[1]) > 0) {
+  components[shipRandomizer.schoose(coverComC)](cfx, shipRandomizer, factionRandomizer, w, h, hw, hh, size, v, componentChances, colorData, nextpass, totaldone, totalcomponents, getCellPhase);
+  if (getCellPhase(ev[0], ev[1]) > 0) {
     const nev: Vec = [
-      ev[0] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
-      ev[1] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
+      ev[0] + Math.round(shipRandomizer.sd(-1, 1) * COMPONENT_GRID_SIZE),
+      ev[1] + Math.round(shipRandomizer.sd(-1, 1) * COMPONENT_GRID_SIZE),
     ];
-    if (lp.getCellPhase(nev[0], nev[1]) > 0) {
-      components[lp.r.schoose(coverComC)](cfx, lp, nev, componentChances, colorData, nextpass, pcdone);
+    if (getCellPhase(nev[0], nev[1]) > 0) {
+      components[shipRandomizer.schoose(coverComC)](cfx, shipRandomizer, factionRandomizer, w, h, hw, hh, size, nev, componentChances, colorData, nextpass, totaldone, totalcomponents, getCellPhase);
     } else {
-      components[lp.r.schoose(coverComC)](cfx, lp, ev, componentChances, colorData, nextpass, pcdone);
+      components[shipRandomizer.schoose(coverComC)](cfx, shipRandomizer, factionRandomizer, w, h, hw, hh, size, ev, componentChances, colorData, nextpass, totaldone, totalcomponents, getCellPhase);
     }
   }
 },
 //Ball
-function(cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, pcdone: number) {
+function (cfx: CanvasRenderingContext2D, shipRandomizer: Randomizer, factionRandomizer: Randomizer, w: number, h: number, hw: number, hh: number, size: number, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, totaldone: number, totalcomponents: number) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = bigness(lp, v, pcdone) ** 0.1;
-  if (lp.r.sb(lp.f.hd(0, 0.9, "com5 bigchance") * bn)) {
-    const chance = lp.f.hd(0, 0.8, "com5 bigincchance");
-    while (lp.r.sb(chance * bn)) {
-      const lw = leeway(lp, [
+  const bn = bigness(factionRandomizer, w, h, hw, hh, v, totaldone / totalcomponents) ** 0.1;
+  if (shipRandomizer.sb(factionRandomizer.hd(0, 0.9, "com5 bigchance") * bn)) {
+    const chance = factionRandomizer.hd(0, 0.8, "com5 bigincchance");
+    while (shipRandomizer.sb(chance * bn)) {
+      const lw = leeway(w, h, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
       ]);
@@ -524,31 +525,31 @@ function(cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Comp
       }
     }
   }
-  const lightmid = lp.r.sd(0.75, 1);
-  const lightedge = lp.r.sd(0, 0.25);
-  const baseColor = computeBaseColor(lp.f, colorData, lp);
+  const lightmid = shipRandomizer.sd(0.75, 1);
+  const lightedge = shipRandomizer.sd(0, 0.25);
+  const baseColor = computeBaseColor(factionRandomizer, colorData, shipRandomizer);
   const colormid = scaleColorBy(baseColor, lightmid);
   const coloredge = scaleColorBy(baseColor, lightedge);
   const countx =
     1 +
-    lp.r.sseq(
-      lp.f.hd(0, 1, "com5 multxc"),
+    shipRandomizer.sseq(
+      factionRandomizer.hd(0, 1, "com5 multxc"),
       Math.floor(1.2 * ((lcms / COMPONENT_MAXIMUM_SIZE) ** 0.6))
     );
   const county =
     1 +
-    lp.r.sseq(
-      lp.f.hd(0, 1, "com5 multyc"),
+    shipRandomizer.sseq(
+      factionRandomizer.hd(0, 1, "com5 multyc"),
       Math.floor(1.2 * ((lcms / COMPONENT_MAXIMUM_SIZE) ** 0.6))
     );
-  const smallr = (lp.r.sd(0.5, 1) * lcms) / Math.max(countx, county);
+  const smallr = (shipRandomizer.sd(0.5, 1) * lcms) / Math.max(countx, county);
   const drawr = smallr + 0.5;
   const shadowr = smallr + 1;
   const centerr = smallr * 0.2;
   const componentHw = smallr * countx;
   const componentHh = smallr * county;
   const bv = [v[0] - componentHw, v[1] - componentHh];
-  cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.2) + ")";
+  cfx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.2) + ")";
   for (let ax = 0; ax < countx; ax++) {
     const px = bv[0] + (ax * 2 + 1) * smallr;
     for (let ay = 0; ay < county; ay++) {
@@ -573,17 +574,17 @@ function(cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Comp
   }
 },
 //Forward-facing trapezoidal fin
-function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, pcdone: number) {
-  if (nextpass <= 0 || lp.r.sb(frontness(lp, v))) {
-    components[lp.r.schoose(componentChances.slice(0, 6))](cfx, lp, v, componentChances, colorData, nextpass, pcdone);
-    return;
+function (cfx: CanvasRenderingContext2D, shipRandomizer: Randomizer, factionRandomizer: Randomizer, w: number, h: number, hw: number, hh: number, size: number, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, totaldone: number, totalcomponents: number, getCellPhase) {
+  if (nextpass <= 0 || shipRandomizer.sb(frontness(h, v))) {
+    components[shipRandomizer.schoose(componentChances.slice(0, 6))](cfx, shipRandomizer, factionRandomizer, w, h, hw, hh, size, v, componentChances, colorData, nextpass, totaldone, totalcomponents, getCellPhase);
+   return;
   }
   let lcms = COMPONENT_MAXIMUM_SIZE;
-  const bn = bigness(lp, v, pcdone) ** 0.05;
-  if (lp.r.sb(lp.f.hd(0, 0.9, "com6 bigchance") * bn)) {
-    const chance = lp.f.hd(0, 0.8, "com6 bigincchance");
-    while (lp.r.sb(chance * bn)) {
-      const lw = leeway(lp, [
+  const bn = bigness(factionRandomizer, w, h, hw, hh, v, totaldone / totalcomponents) ** 0.05;
+  if (shipRandomizer.sb(factionRandomizer.hd(0, 0.9, "com6 bigchance") * bn)) {
+    const chance = factionRandomizer.hd(0, 0.8, "com6 bigincchance");
+    while (shipRandomizer.sb(chance * bn)) {
+      const lw = leeway(w, h, [
         [v[0] - lcms, v[1] - lcms],
         [v[0] + lcms, v[1] + lcms],
       ]);
@@ -594,46 +595,46 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
       }
     }
   }
-  const h0 = Math.ceil(lcms * 2 * lp.r.sd(0.6, 1)); //Inner height, longer.
+  const h0 = Math.ceil(lcms * 2 * shipRandomizer.sd(0.6, 1)); //Inner height, longer.
   const hh0i = Math.floor(h0 / 2);
   const hh0e = h0 % 2;
   //Outer height, shorter
   const h1 =
     h0 *
     (
-      lp.r.sd(lp.f.hd(0, 0.8, "com6 h1min") ** 0.5, 0.9) **
-      lp.f.hd(0.5, 1.5, "com6 h1power")
+      shipRandomizer.sd(factionRandomizer.hd(0, 0.8, "com6 h1min") ** 0.5, 0.9) **
+      factionRandomizer.hd(0.5, 1.5, "com6 h1power")
     );
   const hh1i = Math.floor(h1 / 2);
   const hh1e = h0 % 2;
   const backamount = Math.max(
     0 - (h0 - h1) / 2,
     h0 *
-      (lp.r.sd(0, 0.45) + lp.r.sd(0, 0.45)) *
-      (lp.f.hb(0.8, "com6 backnesstype")
-            ? lp.f.hd(0.2, 0.9, "com6 backness#pos")
-            : lp.f.hd(-0.2, -0.05, "com6 backness#neg"))
+      (shipRandomizer.sd(0, 0.45) + shipRandomizer.sd(0, 0.45)) *
+      (factionRandomizer.hb(0.8, "com6 backnesstype")
+            ? factionRandomizer.hd(0.2, 0.9, "com6 backness#pos")
+            : factionRandomizer.hd(-0.2, -0.05, "com6 backness#neg"))
   );
-  const w = Math.ceil(
-    lcms * lp.r.sd(0.7, 1) * (lp.f.hd(0.1, 3.5, "com6 width") ** 0.5)
+  const componentWidth = Math.ceil(
+    lcms * shipRandomizer.sd(0.7, 1) * (factionRandomizer.hd(0.1, 3.5, "com6 width") ** 0.5)
   );
-  const hwi = Math.floor(w / 2);
-  const hwe = w % 2;
+  const hwi = Math.floor(componentWidth / 2);
+  const hwe = componentWidth % 2;
   const quad = [
     [v[0] - hwi, v[1] + backamount - hh1i],
     [v[0] + hwi + hwe, v[1] - hh0i],
     [v[0] + hwi + hwe, v[1] + hh0i + hh0e],
     [v[0] - hwi, v[1] + backamount + hh1i + hh1e],
   ];
-  const baseColor = computeBaseColor(lp.f, colorData, lp);
-  cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.2) + ")";
+  const baseColor = computeBaseColor(factionRandomizer, colorData, shipRandomizer);
+  cfx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.2) + ")";
   cfx.beginPath();
   cfx.moveTo(quad[0][0] - 1, quad[0][1]);
   cfx.lineTo(quad[1][0] - 1, quad[1][1]);
   cfx.lineTo(quad[2][0] - 1, quad[2][1]);
   cfx.lineTo(quad[3][0] - 1, quad[3][1]);
   cfx.fill();
-  cfx.fillStyle = scaleColorBy(baseColor, lp.r.sd(0.7, 1));
+  cfx.fillStyle = scaleColorBy(baseColor, shipRandomizer.sd(0.7, 1));
   cfx.beginPath();
   cfx.moveTo(quad[0][0], quad[0][1]);
   cfx.lineTo(quad[1][0], quad[1][1]);
@@ -641,97 +642,3 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
   cfx.lineTo(quad[3][0], quad[3][1]);
   cfx.fill();
 }];
-
-/*
-components["cabin !UNUSED"] = function (
-  lp,
-  v //Cabin
-) {
-  if (lp.nextpass <= 0 || lp.r.sb(backness(lp, v))) {
-    components[lp.r.schoose(lp.f.componentChances.slice(0, 6))](lp, v);
-    return;
-  }
-  var lcms = cms;
-  var bn = Math.pow(bigness(lp, v), 0.1);
-  if (
-    lp.r.sb(
-      (lp.f.cache["com7 bigchance"] == null
-        ? (lp.f.cache["com7 bigchance"] = lp.f.r.hd(0, 0.9, "com7 bigchance"))
-        : lp.f.cache["com7 bigchance"]) * bn
-    )
-  ) {
-    while (
-      lp.r.sb(
-        (lp.f.cache["com7 bigincchance"] == null
-          ? (lp.f.cache["com7 bigincchance"] = lp.f.r.hd(
-              0,
-              0.9,
-              "com7 bigincchance"
-            ))
-          : lp.f.cache["com7 bigincchance"]) * bn
-      )
-    ) {
-      var lw = leeway(lp, [
-        [v[0] - lcms, v[1] - lcms],
-        [v[0] + lcms, v[1] + lcms],
-      ]);
-      if (Math.min(lw[0], lw[1]) > lcms * 0.5) {
-        lcms *= 1.5;
-      } else {
-        break;
-      }
-    }
-  }
-  var h =
-    lcms *
-    lp.r.sd(1, 2) *
-    (lp.f.cache["com7 height"] == null
-      ? (lp.f.cache["com7 height"] = lp.f.r.hd(0.5, 1, "com7 height"))
-      : lp.f.cache["com7 height"]);
-  var hh = h / 2;
-  var w =
-    1 +
-    h *
-      (lp.f.cache["com7 width"] == null
-        ? (lp.f.cache["com7 width"] = lp.f.r.hd(0.3, 0.8, "com7 width"))
-        : lp.f.cache["com7 width"]);
-  var hw = w / 2;
-  var windowcolor = lp.f.getwindowcolor(lp);
-  var lightness0 = lp.r.sd(0.7, 0.9);
-  var lightness1 = lp.r.sd(0.4, 0.6);
-  var color0 = scaleColorBy(windowcolor, lightness0);
-  var color1 = scaleColorBy(windowcolor, lightness1);
-  var transparency =
-    lp.f.cache["com7 transparency"] == null
-      ? (lp.f.cache["com7 transparency"] = lp.f.r.hd(0.3, 0.5, "com7 transparency"))
-      : lp.f.cache["com7 transparency"];
-  var grad = cfx.createRadialGradient(0, 0, w / 20, 0, 0, w / 2);
-  grad.addColorStop(0, "rgba(255,255,255,1)");
-  grad.addColorStop(
-    0.3,
-    "rgba(" +
-      clamp(Math.round(color0[0] * 255), 0, 255) +
-      ("," + clamp(Math.round(color0[1] * 255), 0, 255)) +
-      ("," +
-        clamp(Math.round(color0[2] * 255), 0, 255) +
-        ("," + (1 - transparency) + ")"))
-  );
-  grad.addColorStop(
-    1,
-    "rgba(" +
-      clamp(Math.round(color1[0] * 255), 0, 255) +
-      ("," + clamp(Math.round(color1[1] * 255), 0, 255)) +
-      ("," +
-        clamp(Math.round(color1[2] * 255), 0, 255) +
-        ("," + (1 - transparency / 2) + ")"))
-  );
-  cfx.setTransform(1, 0, 0, h / w, v[0], v[1]);
-  cfx.fillStyle = grad;
-  cfx.beginPath();
-  cfx.arc(0, 0, w / 2, 0, pi2);
-  cfx.fill();
-  cfx.setTransform(1, 0, 0, 1, 0, 0);
-};
-*/
-
-//END COMPONENTS
