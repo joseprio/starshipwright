@@ -7,8 +7,8 @@ export class Ship {
     constructor(factionRandomizer, p_seed, size) {
         this.totaldone = 0;
         this.f = factionRandomizer;
-        const componentChances = computeFactionComponentChances(this.f);
-        const colorData = computeFactionColors(this.f);
+        const componentChances = computeFactionComponentChances(factionRandomizer);
+        const colorData = computeFactionColors(factionRandomizer);
         this.r = new Randomizer(factionRandomizer.seed + p_seed);
         //The initial overall size of this ship, in pixels
         this.size =
@@ -108,37 +108,19 @@ export class Ship {
                 goodcells.push(ocell);
             }
         }
-        this.passes = this.f.hi(1, 2, "base component passes");
-        this.extra = Math.max(1, Math.floor(goodcells.length *
-            this.f.hd(0, 1 / this.passes, "extra component amount")));
-        this.totalcomponents = this.passes * goodcells.length + this.extra;
+        const passes = this.f.hi(1, 2, "base component passes");
+        const extra = Math.max(1, Math.floor(goodcells.length *
+            this.f.hd(0, 1 / passes, "extra component amount")));
+        this.totalcomponents = passes * goodcells.length + extra;
         this.cf = document.createElement("canvas"); // Canvas on which the actual ship components are drawn. Ships face upwards, with front towards Y=0
         this.cf.width = this.w;
         this.cf.height = this.h;
         const cfx = this.cf.getContext("2d");
-        this.addComponents(cfx, componentChances, colorData, goodcells, outline);
-        // Mirror
-        cfx.clearRect(this.hw + (this.w % 2), 0, this.w, this.h);
-        cfx.scale(-1, 1);
-        cfx.drawImage(this.cf, 0 - this.w, 0);
-    }
-    //Returns the phase of the cell containing (X,Y), or 0 if there is no such cell
-    getCellPhase(x, y) {
-        const gx = Math.floor((x - this.gwextra) / COMPONENT_GRID_SIZE);
-        const gy = Math.floor((y - this.ghextra) / COMPONENT_GRID_SIZE);
-        if (gx < 0 || gx >= this.gw || gy < 0 || gy >= this.gh) {
-            return 0;
-        }
-        return this.cgrid[gx][gy].phase;
-    }
-    getpcdone() {
-        return this.totaldone / this.totalcomponents;
-    }
-    addComponents(cfx, componentChances, colorData, goodcells, outline) {
+        // Add components
         let extradone = 0, nextpass = 0, nextcell = 0;
         while (true) {
             let ncell;
-            if (nextpass < this.passes) {
+            if (nextpass < passes) {
                 if (nextcell < goodcells.length) {
                     ncell = goodcells[nextcell];
                     nextcell++;
@@ -149,7 +131,7 @@ export class Ship {
                     nextcell = 1;
                 }
             }
-            else if (extradone < this.extra) {
+            else if (extradone < extra) {
                 ncell = goodcells[this.r.si(0, goodcells.length - 1)];
                 extradone++;
             }
@@ -182,12 +164,26 @@ export class Ship {
             components[this.r.schoose(componentChances)](cfx, this, lv, componentChances, colorData, nextpass);
             this.totaldone++;
         }
+        // Mirror
+        cfx.clearRect(this.hw + (this.w % 2), 0, this.w, this.h);
+        cfx.scale(-1, 1);
+        cfx.drawImage(this.cf, 0 - this.w, 0);
+    }
+    //Returns the phase of the cell containing (X,Y), or 0 if there is no such cell
+    getCellPhase(x, y) {
+        const gx = Math.floor((x - this.gwextra) / COMPONENT_GRID_SIZE);
+        const gy = Math.floor((y - this.ghextra) / COMPONENT_GRID_SIZE);
+        if (gx < 0 || gx >= this.gw || gy < 0 || gy >= this.gh) {
+            return 0;
+        }
+        return this.cgrid[gx][gy].phase;
+    }
+    getpcdone() {
+        return this.totaldone / this.totalcomponents;
     }
 }
 //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or -1 if (X,Y) is out of bounds.
 function getAlpha(imageData, x, y) {
-    x = Math.floor(x);
-    y = Math.floor(y);
     if (x < 0 || x > imageData.width || y < 0 || y > imageData.height) {
         return -1;
     }

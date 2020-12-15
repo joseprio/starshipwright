@@ -1,5 +1,4 @@
 import { Randomizer } from "./randomizer";
-import { ColorData, ComponentChances } from "./faction";
 declare type Cell = {
     gx: number;
     gy: number;
@@ -20,7 +19,6 @@ export declare class Ship {
     gh: number;
     ghextra: number;
     cf: HTMLCanvasElement;
-    passes: number;
     extra: number;
     totalcomponents: number;
     totaldone: number;
@@ -28,6 +26,5 @@ export declare class Ship {
     constructor(factionRandomizer: Randomizer, p_seed: string, size?: number);
     getCellPhase(x: number, y: number): number;
     getpcdone(): number;
-    addComponents(cfx: CanvasRenderingContext2D, componentChances: ComponentChances, colorData: ColorData, goodcells: Array<Cell>, outline: ImageData): void;
 }
 export {};
