@@ -111,10 +111,13 @@ export const outlines: Array<OutlineFunc> = [
         pa = lp.r.sd(0, Math.PI);
       }
       let lv = [base.v[0] + Math.cos(pa) * pr, base.v[1] + Math.sin(pa) * pr];
-      ncr = Math.min(ncr, lv[0] - CANVAS_SHIP_EDGE);
-      ncr = Math.min(ncr, lp.w - CANVAS_SHIP_EDGE - lv[0]);
-      ncr = Math.min(ncr, lv[1] - CANVAS_SHIP_EDGE);
-      ncr = Math.min(ncr, lp.h - CANVAS_SHIP_EDGE - lv[1]);
+      ncr = Math.min(
+        ncr,
+        lv[0] - CANVAS_SHIP_EDGE,
+        lp.w - CANVAS_SHIP_EDGE - lv[0],
+        lv[1] - CANVAS_SHIP_EDGE,
+        lp.h - CANVAS_SHIP_EDGE - lv[1]
+      );
       circles.push({ v: lv, r: ncr });
     }
     csx.fillStyle = "#fff";

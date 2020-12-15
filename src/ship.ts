@@ -5,10 +5,8 @@ import { outlines } from "./outlines";
 import {
   computeFactionComponentChances,
   computeFactionColors,
-  ColorData,
-  ComponentChances
 } from "./faction";
-import type { RGBColor, Vec } from "./types";
+import type { Vec } from "./types";
 
 type Cell = {
   gx: number;
@@ -162,7 +160,7 @@ export class Ship {
     // Add components
     let extradone = 0, nextpass = 0, nextcell = 0;
 
-    while(true) {
+    for(;;) {
       let ncell: Cell;
       if (nextpass < passes) {
         if (nextcell < goodcells.length) {

@@ -1140,10 +1140,7 @@ const outlines = [
                 pa = lp.r.sd(0, Math.PI);
             }
             let lv = [base.v[0] + Math.cos(pa) * pr, base.v[1] + Math.sin(pa) * pr];
-            ncr = Math.min(ncr, lv[0] - CANVAS_SHIP_EDGE);
-            ncr = Math.min(ncr, lp.w - CANVAS_SHIP_EDGE - lv[0]);
-            ncr = Math.min(ncr, lv[1] - CANVAS_SHIP_EDGE);
-            ncr = Math.min(ncr, lp.h - CANVAS_SHIP_EDGE - lv[1]);
+            ncr = Math.min(ncr, lv[0] - CANVAS_SHIP_EDGE, lp.w - CANVAS_SHIP_EDGE - lv[0], lv[1] - CANVAS_SHIP_EDGE, lp.h - CANVAS_SHIP_EDGE - lv[1]);
             circles.push({ v: lv, r: ncr });
         }
         csx.fillStyle = "#fff";
@@ -1320,7 +1317,7 @@ class ship_Ship {
         const cfx = this.cf.getContext("2d");
         // Add components
         let extradone = 0, nextpass = 0, nextcell = 0;
-        while (true) {
+        for (;;) {
             let ncell;
             if (nextpass < passes) {
                 if (nextcell < goodcells.length) {

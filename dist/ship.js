@@ -2,7 +2,7 @@ import { Randomizer } from "./randomizer";
 import { CANVAS_SHIP_EDGE, COMPONENT_GRID_SIZE } from "./constants";
 import { components } from "./components";
 import { outlines } from "./outlines";
-import { computeFactionComponentChances, computeFactionColors } from "./faction";
+import { computeFactionComponentChances, computeFactionColors, } from "./faction";
 export class Ship {
     constructor(factionRandomizer, p_seed, size) {
         this.totaldone = 0;
@@ -118,7 +118,7 @@ export class Ship {
         const cfx = this.cf.getContext("2d");
         // Add components
         let extradone = 0, nextpass = 0, nextcell = 0;
-        while (true) {
+        for (;;) {
             let ncell;
             if (nextpass < passes) {
                 if (nextcell < goodcells.length) {
