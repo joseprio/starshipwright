@@ -5,10 +5,8 @@ export declare class Ship {
     size: number;
     w: number;
     hw: number;
-    gwextra: number;
     h: number;
     hh: number;
-    ghextra: number;
     cf: HTMLCanvasElement;
     constructor(factionRandomizer: Randomizer, p_seed: string, size?: number);
 }

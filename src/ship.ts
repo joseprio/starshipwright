@@ -30,10 +30,8 @@ export class Ship {
   size: number;
   w: number;
   hw: number;
-  gwextra: number;
   h: number;
   hh: number;
-  ghextra: number;
   cf: HTMLCanvasElement;
 
   constructor(factionRandomizer: Randomizer, p_seed: string, size?: number) {
@@ -61,11 +59,11 @@ export class Ship {
     this.w = Math.floor(this.size * wratio) + 2 * CANVAS_SHIP_EDGE; // Maximum width of this ship, in pixels
     this.hw = Math.floor(this.w / 2);
     const gw = Math.floor((this.w - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
-    this.gwextra = (this.w - gw * COMPONENT_GRID_SIZE) * 0.5;
+    const gwextra = (this.w - gw * COMPONENT_GRID_SIZE) * 0.5;
     this.h = Math.floor(this.size * hratio) + 2 * CANVAS_SHIP_EDGE; // Maximum height of this ship, in pixels
     this.hh = Math.floor(this.h / 2);
     const gh = Math.floor((this.h - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
-    this.ghextra = (this.h - gh * COMPONENT_GRID_SIZE) * 0.5;
+    const ghextra = (this.h - gh * COMPONENT_GRID_SIZE) * 0.5;
     const cs = document.createElement("canvas"); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
     cs.width = this.w;
     cs.height = this.h;
@@ -79,8 +77,8 @@ export class Ship {
         cgrid[gx][gy] = {
           gx: gx,
           gy: gy,
-          x: Math.floor(this.gwextra + (gx + 0.5) * COMPONENT_GRID_SIZE),
-          y: Math.floor(this.ghextra + (gy + 0.5) * COMPONENT_GRID_SIZE),
+          x: Math.floor(gwextra + (gx + 0.5) * COMPONENT_GRID_SIZE),
+          y: Math.floor(ghextra + (gy + 0.5) * COMPONENT_GRID_SIZE),
           phase: 0,
         }; // Phase is 0 for unchecked, 1 for checked and good, and -1 for checked and bad
       }
@@ -163,8 +161,8 @@ export class Ship {
 
       //Returns the phase of the cell containing (X,Y), or 0 if there is no such cell
   function getCellPhase(x: number, y: number): number {
-    const gx = Math.floor((x - this.gwextra) / COMPONENT_GRID_SIZE);
-    const gy = Math.floor((y - this.ghextra) / COMPONENT_GRID_SIZE);
+    const gx = Math.floor((x - gwextra) / COMPONENT_GRID_SIZE);
+    const gy = Math.floor((y - ghextra) / COMPONENT_GRID_SIZE);
     if (gx < 0 || gx >= this.gw || gy < 0 || gy >= this.gh) {
       return 0;
     }
