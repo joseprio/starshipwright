@@ -129,7 +129,7 @@ export class Ship {
         function getCellPhase(x, y) {
             const gx = Math.floor((x - gwextra) / COMPONENT_GRID_SIZE);
             const gy = Math.floor((y - ghextra) / COMPONENT_GRID_SIZE);
-            if (gx < 0 || gx >= this.gw || gy < 0 || gy >= this.gh) {
+            if (gx < 0 || gx >= gw || gy < 0 || gy >= gh) {
                 return 0;
             }
             return cgrid[gx][gy].phase;
