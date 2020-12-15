@@ -5,7 +5,6 @@ import { outlines } from "./outlines";
 import { computeFactionComponentChances, computeFactionColors, } from "./faction";
 export class Ship {
     constructor(factionRandomizer, p_seed, size) {
-        this.totaldone = 0;
         this.f = factionRandomizer;
         const componentChances = computeFactionComponentChances(factionRandomizer);
         const colorData = computeFactionColors(factionRandomizer);
@@ -111,13 +110,13 @@ export class Ship {
         const passes = this.f.hi(1, 2, "base component passes");
         const extra = Math.max(1, Math.floor(goodcells.length *
             this.f.hd(0, 1 / passes, "extra component amount")));
-        this.totalcomponents = passes * goodcells.length + extra;
+        const totalcomponents = passes * goodcells.length + extra;
         this.cf = document.createElement("canvas"); // Canvas on which the actual ship components are drawn. Ships face upwards, with front towards Y=0
         this.cf.width = this.w;
         this.cf.height = this.h;
         const cfx = this.cf.getContext("2d");
         // Add components
-        let extradone = 0, nextpass = 0, nextcell = 0;
+        let extradone = 0, nextpass = 0, nextcell = 0, totaldone = 0;
         for (;;) {
             let ncell;
             if (nextpass < passes) {
@@ -161,8 +160,8 @@ export class Ship {
                     lv[0] = this.hw;
                 }
             }
-            components[this.r.schoose(componentChances)](cfx, this, lv, componentChances, colorData, nextpass);
-            this.totaldone++;
+            components[this.r.schoose(componentChances)](cfx, this, lv, componentChances, colorData, nextpass, totaldone / totalcomponents);
+            totaldone++;
         }
         // Mirror
         cfx.clearRect(this.hw + (this.w % 2), 0, this.w, this.h);
@@ -177,9 +176,6 @@ export class Ship {
             return 0;
         }
         return this.cgrid[gx][gy].phase;
-    }
-    getpcdone() {
-        return this.totaldone / this.totalcomponents;
     }
 }
 //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or -1 if (X,Y) is out of bounds.

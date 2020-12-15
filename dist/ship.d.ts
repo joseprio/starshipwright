@@ -19,12 +19,8 @@ export declare class Ship {
     gh: number;
     ghextra: number;
     cf: HTMLCanvasElement;
-    extra: number;
-    totalcomponents: number;
-    totaldone: number;
     cgrid: Array<Array<Cell>>;
     constructor(factionRandomizer: Randomizer, p_seed: string, size?: number);
     getCellPhase(x: number, y: number): number;
-    getpcdone(): number;
 }
 export {};

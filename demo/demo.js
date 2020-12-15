@@ -464,11 +464,11 @@ function centerness(lp, v, doY) {
     }
     return rv;
 }
-function bigness(lp, v) {
+function bigness(lp, v, pcdone) {
     const effectCenter = centerness(lp, v, true);
     const effectShipsize = 1 - 1 / ((lp.w + lp.h) / 1000 + 1);
     const effectFaction = lp.f.hd(0, 1, "master bigness") ** 0.5;
-    const effectStack = 1 - lp.getpcdone();
+    const effectStack = 1 - pcdone;
     return effectCenter * effectShipsize * effectFaction * effectStack;
 }
 function leeway(lp, boundingBox) {
@@ -489,9 +489,9 @@ function shadowGradient(ctx, middlePoint, edgePoint, amount) {
 // Each component function takes an argument 'lp' (for the ship) and 'v' (an integral 2-vector denoting the center of the component)
 const components = [
     // Bordered block
-    function (cfx, lp, v, componentChances, colorData) {
+    function (cfx, lp, v, componentChances, colorData, nextpass, pcdone) {
         let lcms = COMPONENT_MAXIMUM_SIZE;
-        const bn = bigness(lp, v) ** 0.3;
+        const bn = bigness(lp, v, pcdone) ** 0.3;
         if (lp.r.sb(lp.f.hd(0, 0.9, "com0 bigchance") * bn)) {
             const chance = lp.f.hd(0, 0.5, "com0 bigincchance");
             while (lp.r.sb(chance * bn)) {
@@ -519,7 +519,6 @@ const components = [
             Math.round((counts[0] * dho[0]) / 2),
             Math.round((counts[1] * dho[1]) / 2),
         ];
-        const pcdone = lp.getpcdone();
         const baseColor = computeBaseColor(lp.f, colorData, lp);
         const icolorh = scaleColorBy(baseColor, lp.r.sd(0.4, 1));
         const ocolorh = scaleColorBy(baseColor, lp.r.sd(0.4, 1));
@@ -541,9 +540,9 @@ const components = [
         }
     },
     // Cylinder array
-    function (cfx, lp, v, componentChances, colorData) {
+    function (cfx, lp, v, componentChances, colorData, nextpass, pcdone) {
         let lcms = COMPONENT_MAXIMUM_SIZE;
-        const bn = bigness(lp, v) ** 0.2;
+        const bn = bigness(lp, v, pcdone) ** 0.2;
         if (lp.r.sb(lp.f.hd(0.3, 1, "com1 bigchance") * bn)) {
             const chance = lp.f.hd(0, 0.6, "com1 bigincchance");
             while (lp.r.sb(chance * bn)) {
@@ -593,9 +592,9 @@ const components = [
         }
     },
     // Banded cylinder
-    function (cfx, lp, v, componentChances, colorData) {
+    function (cfx, lp, v, componentChances, colorData, nextpass, pcdone) {
         let lcms = COMPONENT_MAXIMUM_SIZE;
-        const bn = bigness(lp, v) ** 0.05;
+        const bn = bigness(lp, v, pcdone) ** 0.05;
         if (lp.r.sb(lp.f.hd(0, 1, "com2 bigchance") * bn)) {
             const chance = lp.f.hd(0, 0.9, "com2 bigincchance");
             while (lp.r.sb(chance * bn)) {
@@ -682,20 +681,20 @@ const components = [
         }
     },
     //Rocket engine (or tries to call another random component if too far forward)
-    function (cfx, lp, v, componentChances, colorData, nextpass) {
+    function (cfx, lp, v, componentChances, colorData, nextpass, pcdone) {
         if (lp.r.sb(frontness(lp, v) - 0.3) ||
             lp.getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) > 0 ||
             lp.getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8) > 0) {
             for (let tries = 0; tries < 100; tries++) {
                 const which = lp.r.schoose(componentChances);
                 if (which != 3) {
-                    components[which](cfx, lp, v, componentChances, colorData, nextpass);
+                    components[which](cfx, lp, v, componentChances, colorData, nextpass, pcdone);
                     return;
                 }
             }
         }
         let lcms = COMPONENT_MAXIMUM_SIZE;
-        const bn = bigness(lp, v) ** 0.1;
+        const bn = bigness(lp, v, pcdone) ** 0.1;
         if (lp.r.sb(lp.f.hd(0.6, 1, "com3 bigchance") * bn)) {
             const chance = lp.f.hd(0.3, 0.8, "com3 bigincchance");
             while (lp.r.sb(chance * bn)) {
@@ -765,7 +764,7 @@ const components = [
         }
     },
     //Elongated cylinder (calls component 0 - 2 on top of its starting point)
-    function (cfx, lp, v, componentChances, colorData, nextpass) {
+    function (cfx, lp, v, componentChances, colorData, nextpass, pcdone) {
         const cn = centerness(lp, v, false);
         const lightmid = lp.r.sd(0.7, 1);
         const lightedge = lp.r.sd(0, 0.2);
@@ -828,24 +827,24 @@ const components = [
             0.2 * (lp.f.hd(0, 1, "com4 covercomc1") ** 2),
             (lp.f.hd(0, 1, "com4 covercomc2") ** 2),
         ];
-        components[lp.r.schoose(coverComC)](cfx, lp, v, componentChances, colorData, nextpass);
+        components[lp.r.schoose(coverComC)](cfx, lp, v, componentChances, colorData, nextpass, pcdone);
         if (lp.getCellPhase(ev[0], ev[1]) > 0) {
             const nev = [
                 ev[0] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
                 ev[1] + Math.round(lp.r.sd(-1, 1) * COMPONENT_GRID_SIZE),
             ];
             if (lp.getCellPhase(nev[0], nev[1]) > 0) {
-                components[lp.r.schoose(coverComC)](cfx, lp, nev, componentChances, colorData, nextpass);
+                components[lp.r.schoose(coverComC)](cfx, lp, nev, componentChances, colorData, nextpass, pcdone);
             }
             else {
-                components[lp.r.schoose(coverComC)](cfx, lp, ev, componentChances, colorData, nextpass);
+                components[lp.r.schoose(coverComC)](cfx, lp, ev, componentChances, colorData, nextpass, pcdone);
             }
         }
     },
     //Ball
-    function (cfx, lp, v, componentChances, colorData) {
+    function (cfx, lp, v, componentChances, colorData, nextpass, pcdone) {
         let lcms = COMPONENT_MAXIMUM_SIZE;
-        const bn = bigness(lp, v) ** 0.1;
+        const bn = bigness(lp, v, pcdone) ** 0.1;
         if (lp.r.sb(lp.f.hd(0, 0.9, "com5 bigchance") * bn)) {
             const chance = lp.f.hd(0, 0.8, "com5 bigincchance");
             while (lp.r.sb(chance * bn)) {
@@ -902,13 +901,13 @@ const components = [
         }
     },
     //Forward-facing trapezoidal fin
-    function (cfx, lp, v, componentChances, colorData, nextpass) {
+    function (cfx, lp, v, componentChances, colorData, nextpass, pcdone) {
         if (nextpass <= 0 || lp.r.sb(frontness(lp, v))) {
-            components[lp.r.schoose(componentChances.slice(0, 6))](cfx, lp, v, componentChances, colorData, nextpass);
+            components[lp.r.schoose(componentChances.slice(0, 6))](cfx, lp, v, componentChances, colorData, nextpass, pcdone);
             return;
         }
         let lcms = COMPONENT_MAXIMUM_SIZE;
-        const bn = bigness(lp, v) ** 0.05;
+        const bn = bigness(lp, v, pcdone) ** 0.05;
         if (lp.r.sb(lp.f.hd(0, 0.9, "com6 bigchance") * bn)) {
             const chance = lp.f.hd(0, 0.8, "com6 bigincchance");
             while (lp.r.sb(chance * bn)) {
@@ -1204,7 +1203,6 @@ const outlines = [
 
 class ship_Ship {
     constructor(factionRandomizer, p_seed, size) {
-        this.totaldone = 0;
         this.f = factionRandomizer;
         const componentChances = computeFactionComponentChances(factionRandomizer);
         const colorData = computeFactionColors(factionRandomizer);
@@ -1310,13 +1308,13 @@ class ship_Ship {
         const passes = this.f.hi(1, 2, "base component passes");
         const extra = Math.max(1, Math.floor(goodcells.length *
             this.f.hd(0, 1 / passes, "extra component amount")));
-        this.totalcomponents = passes * goodcells.length + extra;
+        const totalcomponents = passes * goodcells.length + extra;
         this.cf = document.createElement("canvas"); // Canvas on which the actual ship components are drawn. Ships face upwards, with front towards Y=0
         this.cf.width = this.w;
         this.cf.height = this.h;
         const cfx = this.cf.getContext("2d");
         // Add components
-        let extradone = 0, nextpass = 0, nextcell = 0;
+        let extradone = 0, nextpass = 0, nextcell = 0, totaldone = 0;
         for (;;) {
             let ncell;
             if (nextpass < passes) {
@@ -1360,8 +1358,8 @@ class ship_Ship {
                     lv[0] = this.hw;
                 }
             }
-            components[this.r.schoose(componentChances)](cfx, this, lv, componentChances, colorData, nextpass);
-            this.totaldone++;
+            components[this.r.schoose(componentChances)](cfx, this, lv, componentChances, colorData, nextpass, totaldone / totalcomponents);
+            totaldone++;
         }
         // Mirror
         cfx.clearRect(this.hw + (this.w % 2), 0, this.w, this.h);
@@ -1376,9 +1374,6 @@ class ship_Ship {
             return 0;
         }
         return this.cgrid[gx][gy].phase;
-    }
-    getpcdone() {
-        return this.totaldone / this.totalcomponents;
     }
 }
 //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or -1 if (X,Y) is out of bounds.
