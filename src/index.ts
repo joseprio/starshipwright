@@ -1,5 +1,5 @@
 //
-import { Ship } from "./ship";
+import { buildShip } from "./ship";
 
 import { Randomizer } from "./randomizer";
 
@@ -13,10 +13,6 @@ export function generateShip(
   factionRandomizer: Randomizer,
   seed: string,
   size?: number
-): Ship {
-  const newShip = new Ship(factionRandomizer, seed, size);
-  // currentship.cf has the canvas with the image
-  // currentship.width
-  // currentship.height
-  return newShip;
+): HTMLCanvasElement {
+  return buildShip(factionRandomizer, seed, size);
 }

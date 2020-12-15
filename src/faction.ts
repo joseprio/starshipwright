@@ -1,7 +1,6 @@
 import { Randomizer } from "./randomizer";
 import { clamp, hsvToRgb } from "./utils";
 import type { RGBColor } from "./types";
-import type { Ship } from "./ship";
 
 export type ComponentChances = Array<number>;
 export type ColorData = [Array<RGBColor>, Array<number>];

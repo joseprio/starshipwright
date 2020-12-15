@@ -4,7 +4,6 @@ import {
   CANVAS_SHIP_EDGE,
 } from "./constants";
 import { clamp, colorToHex, scaleColorBy } from "./utils";
-import type { Ship } from "./ship";
 import type { Vec } from "./types";
 import {computeBaseColor} from "./faction";
 import type { ComponentChances, ColorData } from "./faction";

@@ -1120,181 +1120,178 @@ Finally, remove all the arguments except for the vector, and done!
 Feel free to start with outlines, it's smaller.
 getCellState is a function inside the constructor, also passed to components.
 */
-class ship_Ship {
-    constructor(factionRandomizer, p_seed, size) {
-        this.f = factionRandomizer;
-        const componentChances = computeFactionComponentChances(factionRandomizer);
-        const colorData = computeFactionColors(factionRandomizer);
-        const shipRandomizer = new Randomizer(factionRandomizer.seed + p_seed);
-        this.r = shipRandomizer;
-        //The initial overall size of this ship, in pixels
-        this.size =
-            size == null
-                ? this.r.sd(this.f.hd(2.5, 3.5, "size min"), this.f.hd(5, 7, "size max")) ** 3
-                : size;
-        const wratio = this.r.sd(this.f.hd(0.5, 1, "wratio min"), this.f.hd(1, 1.3, "wratio max"));
-        const hratio = this.r.sd(this.f.hd(0.7, 1, "hratio min"), this.f.hd(1.1, 1.7, "hratio max"));
-        this.w = Math.floor(this.size * wratio) + 2 * CANVAS_SHIP_EDGE; // Maximum width of this ship, in pixels
-        this.hw = Math.floor(this.w / 2);
-        const gw = Math.floor((this.w - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
-        const gwextra = (this.w - gw * COMPONENT_GRID_SIZE) * 0.5;
-        this.h = Math.floor(this.size * hratio) + 2 * CANVAS_SHIP_EDGE; // Maximum height of this ship, in pixels
-        this.hh = Math.floor(this.h / 2);
-        const gh = Math.floor((this.h - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
-        const ghextra = (this.h - gh * COMPONENT_GRID_SIZE) * 0.5;
-        const cs = document.createElement("canvas"); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
-        cs.width = this.w;
-        cs.height = this.h;
-        const csx = cs.getContext("2d");
-        outlines[this.f.hchoose([1, 1, 1], "outline type")](shipRandomizer, factionRandomizer, this.w, this.h, this.hw, this.size, csx);
-        const outline = csx.getImageData(0, 0, this.w, this.h);
-        const cgrid = [];
-        for (let gx = 0; gx < gw; gx++) {
-            cgrid[gx] = [];
-            for (let gy = 0; gy < gh; gy++) {
-                cgrid[gx][gy] = {
-                    gx: gx,
-                    gy: gy,
-                    x: Math.floor(gwextra + (gx + 0.5) * COMPONENT_GRID_SIZE),
-                    y: Math.floor(ghextra + (gy + 0.5) * COMPONENT_GRID_SIZE),
-                    phase: 0,
-                }; // Phase is 0 for unchecked, 1 for checked and good, and -1 for checked and bad
-            }
+function buildShip(factionRandomizer, p_seed, size) {
+    const componentChances = computeFactionComponentChances(factionRandomizer);
+    const colorData = computeFactionColors(factionRandomizer);
+    const shipRandomizer = new Randomizer(factionRandomizer.seed + p_seed);
+    //The initial overall size of this ship, in pixels
+    size =
+        size == null
+            ? shipRandomizer.sd(factionRandomizer.hd(2.5, 3.5, "size min"), factionRandomizer.hd(5, 7, "size max")) ** 3
+            : size;
+    const wratio = shipRandomizer.sd(factionRandomizer.hd(0.5, 1, "wratio min"), factionRandomizer.hd(1, 1.3, "wratio max"));
+    const hratio = shipRandomizer.sd(factionRandomizer.hd(0.7, 1, "hratio min"), factionRandomizer.hd(1.1, 1.7, "hratio max"));
+    const w = Math.floor(size * wratio) + 2 * CANVAS_SHIP_EDGE; // Maximum width of this ship, in pixels
+    const hw = Math.floor(w / 2);
+    const gw = Math.floor((w - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
+    const gwextra = (w - gw * COMPONENT_GRID_SIZE) * 0.5;
+    const h = Math.floor(size * hratio) + 2 * CANVAS_SHIP_EDGE; // Maximum height of this ship, in pixels
+    const hh = Math.floor(h / 2);
+    const gh = Math.floor((h - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
+    const ghextra = (h - gh * COMPONENT_GRID_SIZE) * 0.5;
+    const cs = document.createElement("canvas"); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
+    cs.width = w;
+    cs.height = h;
+    const csx = cs.getContext("2d");
+    outlines[factionRandomizer.hchoose([1, 1, 1], "outline type")](shipRandomizer, factionRandomizer, w, h, hw, size, csx);
+    const outline = csx.getImageData(0, 0, w, h);
+    const cgrid = [];
+    for (let gx = 0; gx < gw; gx++) {
+        cgrid[gx] = [];
+        for (let gy = 0; gy < gh; gy++) {
+            cgrid[gx][gy] = {
+                gx: gx,
+                gy: gy,
+                x: Math.floor(gwextra + (gx + 0.5) * COMPONENT_GRID_SIZE),
+                y: Math.floor(ghextra + (gy + 0.5) * COMPONENT_GRID_SIZE),
+                phase: 0,
+            }; // Phase is 0 for unchecked, 1 for checked and good, and -1 for checked and bad
         }
-        const goodcells = [
-            cgrid[Math.floor(gw / 2)][Math.floor(gh / 2)],
-        ];
-        let nextcheck = 0;
-        while (nextcheck < goodcells.length) {
-            const lcell = goodcells[nextcheck];
-            if (lcell.gx > 0) {
-                const ncell = cgrid[lcell.gx - 1][lcell.gy];
-                if (ncell.phase == 0) {
-                    if (getAlpha(outline, ncell.x, ncell.y) > 0) {
-                        ncell.phase = 1;
-                        goodcells.push(ncell);
-                    }
-                    else {
-                        ncell.phase = -1;
-                    }
-                }
-            }
-            if (lcell.gx < gw - 1) {
-                const ncell = cgrid[lcell.gx + 1][lcell.gy];
-                if (ncell.phase == 0) {
-                    if (getAlpha(outline, ncell.x, ncell.y) > 0) {
-                        ncell.phase = 1;
-                        goodcells.push(ncell);
-                    }
-                    else {
-                        ncell.phase = -1;
-                    }
-                }
-            }
-            if (lcell.gy > 0) {
-                const ncell = cgrid[lcell.gx][lcell.gy - 1];
-                if (ncell.phase == 0) {
-                    if (getAlpha(outline, ncell.x, ncell.y) > 0) {
-                        ncell.phase = 1;
-                        goodcells.push(ncell);
-                    }
-                    else {
-                        ncell.phase = -1;
-                    }
-                }
-            }
-            if (lcell.gy < gh - 1) {
-                const ncell = cgrid[lcell.gx][lcell.gy + 1];
-                if (ncell.phase == 0) {
-                    if (getAlpha(outline, ncell.x, ncell.y) > 0) {
-                        ncell.phase = 1;
-                        goodcells.push(ncell);
-                    }
-                    else {
-                        ncell.phase = -1;
-                    }
-                }
-            }
-            nextcheck++;
-        }
-        for (let i = 0; i < goodcells.length; i++) {
-            const lcell = goodcells[i];
-            const ocell = cgrid[gw - 1 - lcell.gx][lcell.gy];
-            if (ocell.phase != 1) {
-                ocell.phase = 1;
-                goodcells.push(ocell);
-            }
-        }
-        const passes = this.f.hi(1, 2, "base component passes");
-        const extra = Math.max(1, Math.floor(goodcells.length *
-            this.f.hd(0, 1 / passes, "extra component amount")));
-        const totalcomponents = passes * goodcells.length + extra;
-        this.cf = document.createElement("canvas"); // Canvas on which the actual ship components are drawn. Ships face upwards, with front towards Y=0
-        this.cf.width = this.w;
-        this.cf.height = this.h;
-        const cfx = this.cf.getContext("2d");
-        //Returns the phase of the cell containing (X,Y), or 0 if there is no such cell
-        function getCellPhase(x, y) {
-            const gx = Math.floor((x - gwextra) / COMPONENT_GRID_SIZE);
-            const gy = Math.floor((y - ghextra) / COMPONENT_GRID_SIZE);
-            if (gx < 0 || gx >= gw || gy < 0 || gy >= gh) {
-                return 0;
-            }
-            return cgrid[gx][gy].phase;
-        }
-        // Add components
-        let extradone = 0, nextpass = 0, nextcell = 0, totaldone = 0;
-        for (;;) {
-            let ncell;
-            if (nextpass < passes) {
-                if (nextcell < goodcells.length) {
-                    ncell = goodcells[nextcell];
-                    nextcell++;
+    }
+    const goodcells = [
+        cgrid[Math.floor(gw / 2)][Math.floor(gh / 2)],
+    ];
+    let nextcheck = 0;
+    while (nextcheck < goodcells.length) {
+        const lcell = goodcells[nextcheck];
+        if (lcell.gx > 0) {
+            const ncell = cgrid[lcell.gx - 1][lcell.gy];
+            if (ncell.phase == 0) {
+                if (getAlpha(outline, ncell.x, ncell.y) > 0) {
+                    ncell.phase = 1;
+                    goodcells.push(ncell);
                 }
                 else {
-                    nextpass++;
-                    ncell = goodcells[0];
-                    nextcell = 1;
+                    ncell.phase = -1;
                 }
             }
-            else if (extradone < extra) {
-                ncell = goodcells[this.r.si(0, goodcells.length - 1)];
-                extradone++;
+        }
+        if (lcell.gx < gw - 1) {
+            const ncell = cgrid[lcell.gx + 1][lcell.gy];
+            if (ncell.phase == 0) {
+                if (getAlpha(outline, ncell.x, ncell.y) > 0) {
+                    ncell.phase = 1;
+                    goodcells.push(ncell);
+                }
+                else {
+                    ncell.phase = -1;
+                }
+            }
+        }
+        if (lcell.gy > 0) {
+            const ncell = cgrid[lcell.gx][lcell.gy - 1];
+            if (ncell.phase == 0) {
+                if (getAlpha(outline, ncell.x, ncell.y) > 0) {
+                    ncell.phase = 1;
+                    goodcells.push(ncell);
+                }
+                else {
+                    ncell.phase = -1;
+                }
+            }
+        }
+        if (lcell.gy < gh - 1) {
+            const ncell = cgrid[lcell.gx][lcell.gy + 1];
+            if (ncell.phase == 0) {
+                if (getAlpha(outline, ncell.x, ncell.y) > 0) {
+                    ncell.phase = 1;
+                    goodcells.push(ncell);
+                }
+                else {
+                    ncell.phase = -1;
+                }
+            }
+        }
+        nextcheck++;
+    }
+    for (let i = 0; i < goodcells.length; i++) {
+        const lcell = goodcells[i];
+        const ocell = cgrid[gw - 1 - lcell.gx][lcell.gy];
+        if (ocell.phase != 1) {
+            ocell.phase = 1;
+            goodcells.push(ocell);
+        }
+    }
+    const passes = factionRandomizer.hi(1, 2, "base component passes");
+    const extra = Math.max(1, Math.floor(goodcells.length *
+        factionRandomizer.hd(0, 1 / passes, "extra component amount")));
+    const totalcomponents = passes * goodcells.length + extra;
+    const cf = document.createElement("canvas"); // Canvas on which the actual ship components are drawn. Ships face upwards, with front towards Y=0
+    cf.width = w;
+    cf.height = h;
+    const cfx = cf.getContext("2d");
+    //Returns the phase of the cell containing (X,Y), or 0 if there is no such cell
+    function getCellPhase(x, y) {
+        const gx = Math.floor((x - gwextra) / COMPONENT_GRID_SIZE);
+        const gy = Math.floor((y - ghextra) / COMPONENT_GRID_SIZE);
+        if (gx < 0 || gx >= gw || gy < 0 || gy >= gh) {
+            return 0;
+        }
+        return cgrid[gx][gy].phase;
+    }
+    // Add components
+    let extradone = 0, nextpass = 0, nextcell = 0, totaldone = 0;
+    for (;;) {
+        let ncell;
+        if (nextpass < passes) {
+            if (nextcell < goodcells.length) {
+                ncell = goodcells[nextcell];
+                nextcell++;
             }
             else {
-                break;
+                nextpass++;
+                ncell = goodcells[0];
+                nextcell = 1;
             }
-            let lv = [ncell.x, ncell.y];
-            for (let t = 0; t < 10; t++) {
-                const nv = [
-                    ncell.x + this.r.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
-                    ncell.y + this.r.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
-                ];
-                if (nv[0] < CANVAS_SHIP_EDGE ||
-                    nv[0] > this.w - CANVAS_SHIP_EDGE ||
-                    nv[1] < CANVAS_SHIP_EDGE ||
-                    nv[1] > this.h - CANVAS_SHIP_EDGE) {
-                    continue;
-                }
-                if (getAlpha(outline, nv[0], nv[1]) <= 0) {
-                    continue;
-                }
-                lv = nv;
-                break;
-            }
-            if (Math.abs(lv[0] - this.hw) < COMPONENT_GRID_SIZE) {
-                if (this.r.sb(this.f.hd(0, 1, "com middleness"))) {
-                    lv[0] = this.hw;
-                }
-            }
-            components[this.r.schoose(componentChances)](cfx, shipRandomizer, factionRandomizer, this.w, this.h, this.hw, this.hh, this.size, lv, componentChances, colorData, nextpass, totaldone, totalcomponents, getCellPhase);
-            totaldone++;
         }
-        // Mirror
-        cfx.clearRect(this.hw + (this.w % 2), 0, this.w, this.h);
-        cfx.scale(-1, 1);
-        cfx.drawImage(this.cf, 0 - this.w, 0);
+        else if (extradone < extra) {
+            ncell = goodcells[shipRandomizer.si(0, goodcells.length - 1)];
+            extradone++;
+        }
+        else {
+            break;
+        }
+        let lv = [ncell.x, ncell.y];
+        for (let t = 0; t < 10; t++) {
+            const nv = [
+                ncell.x + shipRandomizer.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
+                ncell.y + shipRandomizer.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
+            ];
+            if (nv[0] < CANVAS_SHIP_EDGE ||
+                nv[0] > w - CANVAS_SHIP_EDGE ||
+                nv[1] < CANVAS_SHIP_EDGE ||
+                nv[1] > h - CANVAS_SHIP_EDGE) {
+                continue;
+            }
+            if (getAlpha(outline, nv[0], nv[1]) <= 0) {
+                continue;
+            }
+            lv = nv;
+            break;
+        }
+        if (Math.abs(lv[0] - hw) < COMPONENT_GRID_SIZE) {
+            if (shipRandomizer.sb(factionRandomizer.hd(0, 1, "com middleness"))) {
+                lv[0] = hw;
+            }
+        }
+        components[shipRandomizer.schoose(componentChances)](cfx, shipRandomizer, factionRandomizer, w, h, hw, hh, size, lv, componentChances, colorData, nextpass, totaldone, totalcomponents, getCellPhase);
+        totaldone++;
     }
+    // Mirror
+    cfx.clearRect(hw + (w % 2), 0, w, h);
+    cfx.scale(-1, 1);
+    cfx.drawImage(cf, 0 - w, 0);
+    return cf;
 }
 //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or -1 if (X,Y) is out of bounds.
 function getAlpha(imageData, x, y) {
@@ -1313,11 +1310,7 @@ function generateFactionRandomizer(seed) {
     return new Randomizer(seed);
 }
 function generateShip(factionRandomizer, seed, size) {
-    const newShip = new ship_Ship(factionRandomizer, seed, size);
-    // currentship.cf has the canvas with the image
-    // currentship.width
-    // currentship.height
-    return newShip;
+    return buildShip(factionRandomizer, seed, size);
 }
 
 // CONCATENATED MODULE: ./src/demo.js
@@ -1359,11 +1352,15 @@ function update() {
     const currentFaction =
       faction || generateFactionRandomizer(iterationFactionSeed);
     const shipSeed = randomSeed();
-    const ship = generateShip(currentFaction, shipSeed, size || undefined);
+    const shipCanvas = generateShip(
+      currentFaction,
+      shipSeed,
+      size || undefined
+    );
     shipCaption.textContent = "Seed: " + shipSeed;
     factionCaption.textContent =
        true ? factionSeed : undefined;
-    shipDiv.appendChild(ship.cf);
+    shipDiv.appendChild(shipCanvas);
     shipDiv.appendChild(shipCaption);
     shipDiv.appendChild(factionCaption);
     container.appendChild(shipDiv);

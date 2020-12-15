@@ -36,11 +36,15 @@ function update() {
     const currentFaction =
       faction || generateFactionRandomizer(iterationFactionSeed);
     const shipSeed = randomSeed();
-    const ship = generateShip(currentFaction, shipSeed, size || undefined);
+    const shipCanvas = generateShip(
+      currentFaction,
+      shipSeed,
+      size || undefined
+    );
     shipCaption.textContent = "Seed: " + shipSeed;
     factionCaption.textContent =
       "Faction: " + faction ? factionSeed : iterationFactionSeed;
-    shipDiv.appendChild(ship.cf);
+    shipDiv.appendChild(shipCanvas);
     shipDiv.appendChild(shipCaption);
     shipDiv.appendChild(factionCaption);
     container.appendChild(shipDiv);
