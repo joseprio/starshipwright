@@ -301,10 +301,10 @@ export function buildShip(factionRandomizer, p_seed, size) {
         const effectStack = 1 - totaldone / totalcomponents;
         return effectCenter * effectShipsize * effectFaction * effectStack;
     }
-    function leeway(boundingBox) {
+    function leeway(v1, v2) {
         return [
-            Math.min(boundingBox[0][0] - CANVAS_SHIP_EDGE, w - CANVAS_SHIP_EDGE - boundingBox[1][0]),
-            Math.min(boundingBox[0][1] - CANVAS_SHIP_EDGE, h - CANVAS_SHIP_EDGE - boundingBox[1][1]),
+            Math.min(v1[0] - CANVAS_SHIP_EDGE, w - CANVAS_SHIP_EDGE - v2[0]),
+            Math.min(v1[1] - CANVAS_SHIP_EDGE, h - CANVAS_SHIP_EDGE - v2[1]),
         ];
     }
     //lp is the ship. amount is the amount of shadow at the edges, 0 - 1 (the middle is always 0). middlep and edgep should be vectors at the middle and edge of the gradient.
@@ -325,10 +325,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
             if (shipRandomizer.sb(factionRandomizer.hd(0, 0.9, "com0 bigchance") * bn)) {
                 const chance = factionRandomizer.hd(0, 0.5, "com0 bigincchance");
                 while (shipRandomizer.sb(chance * bn)) {
-                    const lw = leeway([
-                        [v[0] - lcms, v[1] - lcms],
-                        [v[0] + lcms, v[1] + lcms],
-                    ]);
+                    const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
                     if (Math.min(lw[0], lw[1]) > lcms * 0.5) {
                         lcms *= 1.5;
                     }
@@ -376,10 +373,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
             if (shipRandomizer.sb(factionRandomizer.hd(0.3, 1, "com1 bigchance") * bn)) {
                 const chance = factionRandomizer.hd(0, 0.6, "com1 bigincchance");
                 while (shipRandomizer.sb(chance * bn)) {
-                    const lw = leeway([
-                        [v[0] - lcms, v[1] - lcms],
-                        [v[0] + lcms, v[1] + lcms],
-                    ]);
+                    const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
                     if (Math.min(lw[0], lw[1]) > lcms / 2) {
                         lcms *= 1.5;
                     }
@@ -428,10 +422,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
             if (shipRandomizer.sb(factionRandomizer.hd(0, 1, "com2 bigchance") * bn)) {
                 const chance = factionRandomizer.hd(0, 0.9, "com2 bigincchance");
                 while (shipRandomizer.sb(chance * bn)) {
-                    const lw = leeway([
-                        [v[0] - lcms, v[1] - lcms],
-                        [v[0] + lcms, v[1] + lcms],
-                    ]);
+                    const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
                     if (Math.min(lw[0], lw[1]) > lcms * 0.5) {
                         lcms *= 1.5;
                     }
@@ -528,10 +519,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
             if (shipRandomizer.sb(factionRandomizer.hd(0.6, 1, "com3 bigchance") * bn)) {
                 const chance = factionRandomizer.hd(0.3, 0.8, "com3 bigincchance");
                 while (shipRandomizer.sb(chance * bn)) {
-                    const lw = leeway([
-                        [v[0] - lcms, v[1] - lcms],
-                        [v[0] + lcms, v[1] + lcms],
-                    ]);
+                    const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
                     if (Math.min(lw[0], lw[1]) > lcms * 0.5) {
                         lcms *= 1.5;
                     }
@@ -677,10 +665,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
             if (shipRandomizer.sb(factionRandomizer.hd(0, 0.9, "com5 bigchance") * bn)) {
                 const chance = factionRandomizer.hd(0, 0.8, "com5 bigincchance");
                 while (shipRandomizer.sb(chance * bn)) {
-                    const lw = leeway([
-                        [v[0] - lcms, v[1] - lcms],
-                        [v[0] + lcms, v[1] + lcms],
-                    ]);
+                    const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
                     if (Math.min(lw[0], lw[1]) > lcms * 0.5) {
                         lcms *= 1.5;
                     }
@@ -740,10 +725,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
             if (shipRandomizer.sb(factionRandomizer.hd(0, 0.9, "com6 bigchance") * bn)) {
                 const chance = factionRandomizer.hd(0, 0.8, "com6 bigincchance");
                 while (shipRandomizer.sb(chance * bn)) {
-                    const lw = leeway([
-                        [v[0] - lcms, v[1] - lcms],
-                        [v[0] + lcms, v[1] + lcms],
-                    ]);
+                    const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
                     if (Math.min(lw[0], lw[1]) > lcms * 0.5) {
                         lcms *= 1.5;
                     }
