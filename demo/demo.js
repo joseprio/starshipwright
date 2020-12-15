@@ -281,7 +281,7 @@ class Randomizer {
         }
         return 0;
     }
-    //Returns an index of the array chances with the relative probability equal to that element of chances, based on a hash value with the specified seed.
+    // Returns an index of the array chances with the relative probability equal to that element of chances, based on a hash value with the specified seed.
     hchoose(chances, seed) {
         let sum = 0;
         for (let i = 0; i < chances.length; i++) {
@@ -357,6 +357,8 @@ function hsvToRgb(hsv) {
 function computeFactionComponentChances(factionRandomizer) {
     const componentChances = [];
     const dp = 8; // Default maximum power
+    // TODO: once we dont need backwards compatibility, we can probably simplify this file; the first argument of sd seems
+    // unnecessary
     componentChances[0] =
         0.8 * factionRandomizer.sd(0.001, 1) * (2 ** factionRandomizer.sd(0, dp));
     componentChances[1] =
@@ -558,36 +560,36 @@ const components = [
                 }
             }
         }
-        let w = Math.ceil(lp.r.sd(0.8, 2) * lcms);
-        const h = Math.ceil(lp.r.sd(0.8, 2) * lcms);
-        const cw = lp.r.si(3, Math.max(4, w));
-        const count = Math.max(1, Math.round(w / cw));
-        w = count * cw;
+        let componentWidth = Math.ceil(lp.r.sd(0.8, 2) * lcms);
+        const componentHeight = Math.ceil(lp.r.sd(0.8, 2) * lcms);
+        const cw = lp.r.si(3, Math.max(4, componentWidth));
+        const count = Math.max(1, Math.round(componentWidth / cw));
+        componentWidth = count * cw;
         const baseColor = computeBaseColor(lp.f, colorData, lp);
         const ccolor = scaleColorBy(baseColor, lp.r.sd(0.5, 1));
         const darkness = lp.r.sd(0.3, 0.9);
         // true = horizontal array, false = vertical array
         const orientation = lp.r.sb(clamp(lp.f.hd(-0.2, 1.2, "com1 hchance"), 0, 1));
         if (orientation) {
-            const bv = [v[0] - Math.floor(w / 2), v[1] - Math.floor(h / 2)];
+            const bv = [v[0] - Math.floor(componentWidth / 2), v[1] - Math.floor(componentHeight / 2)];
             cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
-            cfx.fillRect(bv[0] - 1, bv[1] - 1, w + 2, h + 2);
+            cfx.fillRect(bv[0] - 1, bv[1] - 1, componentWidth + 2, componentHeight + 2);
             cfx.fillStyle = ccolor;
-            cfx.fillRect(bv[0], bv[1], w, h);
+            cfx.fillRect(bv[0], bv[1], componentWidth, componentHeight);
             for (let i = 0; i < count; i++) {
                 cfx.fillStyle = shadowGradient(cfx, [bv[0] + (i + 0.5) * cw, v[1]], [bv[0] + i * cw, v[1]], darkness);
-                cfx.fillRect(bv[0] + i * cw, bv[1], cw, h);
+                cfx.fillRect(bv[0] + i * cw, bv[1], cw, componentHeight);
             }
         }
         else {
-            const bv = [v[0] - Math.floor(h / 2), v[1] - Math.floor(w / 2)];
+            const bv = [v[0] - Math.floor(componentHeight / 2), v[1] - Math.floor(componentWidth / 2)];
             cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
-            cfx.fillRect(bv[0] - 1, bv[1] - 1, h + 2, w + 2);
+            cfx.fillRect(bv[0] - 1, bv[1] - 1, componentHeight + 2, componentWidth + 2);
             cfx.fillStyle = ccolor;
-            cfx.fillRect(bv[0], bv[1], h, w);
+            cfx.fillRect(bv[0], bv[1], componentHeight, componentWidth);
             for (let i = 0; i < count; i++) {
                 cfx.fillStyle = shadowGradient(cfx, [v[0], bv[1] + (i + 0.5) * cw], [v[0], bv[1] + i * cw], darkness);
-                cfx.fillRect(bv[0], bv[1] + i * cw, w, cw);
+                cfx.fillRect(bv[0], bv[1] + i * cw, componentWidth, cw);
             }
         }
     },
@@ -610,19 +612,19 @@ const components = [
                 }
             }
         }
-        const w = Math.ceil(lp.r.sd(0.6, 1.4) * lcms);
-        const h = Math.ceil(lp.r.sd(1, 2) * lcms);
+        const componentWidth = Math.ceil(lp.r.sd(0.6, 1.4) * lcms);
+        const componentHeight = Math.ceil(lp.r.sd(1, 2) * lcms);
         const wh2 = [
-            Math.ceil(clamp((w * lp.r.sd(0.7, 1)) / 2, 1, w)),
-            Math.ceil(clamp((w * lp.r.sd(0.8, 1)) / 2, 1, w)),
+            Math.ceil(clamp((componentWidth * lp.r.sd(0.7, 1)) / 2, 1, componentWidth)),
+            Math.ceil(clamp((componentWidth * lp.r.sd(0.8, 1)) / 2, 1, componentWidth)),
         ];
         const h2 = [
-            Math.floor(clamp(w * lp.r.sd(0.05, 0.25), 1, h)),
-            Math.floor(clamp(w * lp.r.sd(0.1, 0.3), 1, h)),
+            Math.floor(clamp(componentWidth * lp.r.sd(0.05, 0.25), 1, componentHeight)),
+            Math.floor(clamp(componentWidth * lp.r.sd(0.1, 0.3), 1, componentHeight)),
         ];
         const hpair = h2[0] + h2[1];
         const odd = lp.r.sb(lp.f.hd(0, 1, "com2 oddchance") ** 0.5);
-        const count = clamp(Math.floor(h / hpair), 1, h);
+        const count = clamp(Math.floor(componentHeight / hpair), 1, componentHeight);
         const htotal = count * hpair + (odd ? h2[0] : 0);
         const baseColor = computeBaseColor(lp.f, colorData, lp);
         const scale_0 = lp.r.sd(0.6, 1);
@@ -710,19 +712,19 @@ const components = [
                 }
             }
         }
-        const w = lp.r.sd(1, 2) * lcms;
-        let h = Math.ceil(lp.r.sd(0.3, 1) * lcms);
+        const componentWidth = lp.r.sd(1, 2) * lcms;
+        let componentHeight = Math.ceil(lp.r.sd(0.3, 1) * lcms);
         const nratio = lp.r.sd(0.25, 0.6);
-        const nw = w * nratio;
-        const midw = (w + nw) / 2;
+        const nw = componentWidth * nratio;
+        const midw = (componentWidth + nw) / 2;
         const midwh = midw / 2;
-        const h2 = [
-            Math.max(1, Math.ceil(h * lp.r.sd(0.08, 0.25))),
-            Math.max(1, Math.ceil(h * lp.r.sd(0.03, 0.15))),
+        const componentHeight2 = [
+            Math.max(1, Math.ceil(componentHeight * lp.r.sd(0.08, 0.25))),
+            Math.max(1, Math.ceil(componentHeight * lp.r.sd(0.03, 0.15))),
         ];
-        const hpair = h2[0] + h2[1];
-        const count = Math.ceil(h / hpair);
-        h = count * hpair + h2[0];
+        const hpair = componentHeight2[0] + componentHeight2[1];
+        const count = Math.ceil(componentHeight / hpair);
+        componentHeight = count * hpair + componentHeight2[0];
         const [colors, colorChances] = colorData;
         const basecolor = colors[lp.f.hchoose(colorChances, "com3 basecolor")];
         const lightness0_mid = lp.f.hd(0.5, 0.8, "com3 lightness0 mid");
@@ -738,22 +740,22 @@ const components = [
         grad2[1].addColorStop(0, scaleColorBy(basecolor, lightness1_edge));
         grad2[1].addColorStop(0.5, colorToHex(basecolor));
         grad2[1].addColorStop(1, scaleColorBy(basecolor, lightness1_edge));
-        const by = Math.ceil(v[1] - h / 2);
+        const by = Math.ceil(v[1] - componentHeight / 2);
         cfx.fillStyle = grad2[0];
         cfx.beginPath();
         cfx.moveTo(v[0] - nw / 2, by);
         cfx.lineTo(v[0] + nw / 2, by);
-        cfx.lineTo(v[0] + w / 2, by + h);
-        cfx.lineTo(v[0] - w / 2, by + h);
+        cfx.lineTo(v[0] + componentWidth / 2, by + componentHeight);
+        cfx.lineTo(v[0] - componentWidth / 2, by + componentHeight);
         cfx.fill();
         cfx.fillStyle = grad2[1];
-        const byh = [by + h2[0], by + hpair];
+        const byh = [by + componentHeight2[0], by + hpair];
         for (let i = 0; i < count; i++) {
-            const lyr = [i * hpair + h2[0], (i + 1) * hpair];
+            const lyr = [i * hpair + componentHeight2[0], (i + 1) * hpair];
             const ly = [byh[0] + i * hpair, byh[1] + i * hpair];
             const lw = [
-                (nw + (w - nw) * (lyr[0] / h)) / 2,
-                (nw + (w - nw) * (lyr[1] / h)) / 2,
+                (nw + (componentWidth - nw) * (lyr[0] / componentHeight)) / 2,
+                (nw + (componentWidth - nw) * (lyr[1] / componentHeight)) / 2,
             ];
             cfx.beginPath();
             cfx.moveTo(v[0] - lw[0], ly[0]);
@@ -789,28 +791,28 @@ const components = [
         if (!direction) {
             //forwards
             const hlimit = v[1] - CANVAS_SHIP_EDGE;
-            const h = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.7 * lp.size * (lp.r.sd(0, 1) ** lp.f.hd(2, 6, "com4 hpower0"))));
-            const bb_0_0 = v[0] - hwi, bb_0_1 = v[1] - h, bb_1_0 = v[0] + hwi + hwe;
+            const componentHeight = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.7 * lp.size * (lp.r.sd(0, 1) ** lp.f.hd(2, 6, "com4 hpower0"))));
+            const bb_0_0 = v[0] - hwi, bb_0_1 = v[1] - componentHeight, bb_1_0 = v[0] + hwi + hwe;
             const grad = cfx.createLinearGradient(bb_0_0, bb_0_1, bb_1_0, bb_0_1);
             grad.addColorStop(0, coloredge);
             grad.addColorStop(0.5, colormid);
             grad.addColorStop(1, coloredge);
             cfx.fillStyle = grad;
-            cfx.fillRect(bb_0_0, bb_0_1, w, h);
-            ev = [v[0], v[1] - h];
+            cfx.fillRect(bb_0_0, bb_0_1, w, componentHeight);
+            ev = [v[0], v[1] - componentHeight];
         }
         else if (direction == 1) {
             //backwards
             const hlimit = lp.h - (CANVAS_SHIP_EDGE + v[1]);
-            const h = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.6 * lp.size * (lp.r.sd(0, 1) ** lp.f.hd(2, 7, "com4 hpower1"))));
+            const componentHeight = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.6 * lp.size * (lp.r.sd(0, 1) ** lp.f.hd(2, 7, "com4 hpower1"))));
             const bb_0_0 = v[0] - hwi, bb_0_1 = v[1], bb_1_0 = v[0] + hwi + hwe;
             const grad = cfx.createLinearGradient(bb_0_0, bb_0_1, bb_1_0, bb_0_1);
             grad.addColorStop(0, coloredge);
             grad.addColorStop(0.5, colormid);
             grad.addColorStop(1, coloredge);
             cfx.fillStyle = grad;
-            cfx.fillRect(bb_0_0, bb_0_1, w, h);
-            ev = [v[0], v[1] + h];
+            cfx.fillRect(bb_0_0, bb_0_1, w, componentHeight);
+            ev = [v[0], v[1] + componentHeight];
         }
         else if (direction == 2) {
             //to center
@@ -873,9 +875,9 @@ const components = [
         const drawr = smallr + 0.5;
         const shadowr = smallr + 1;
         const centerr = smallr * 0.2;
-        const hw = smallr * countx;
-        const hh = smallr * county;
-        const bv = [v[0] - hw, v[1] - hh];
+        const componentHw = smallr * countx;
+        const componentHh = smallr * county;
+        const bv = [v[0] - componentHw, v[1] - componentHh];
         cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.2) + ")";
         for (let ax = 0; ax < countx; ax++) {
             const px = bv[0] + (ax * 2 + 1) * smallr;
@@ -1062,31 +1064,31 @@ components["cabin !UNUSED"] = function (
 //Each outline function takes a single argument 'lp' denoting the ship to draw the outline for.
 const outlines = [
     // 0: Joined rectangles.
-    function (lp, csx) {
-        const csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
+    function (shipRandomizer, factionRandomizer, w, h, hw, size, csx) {
+        const csarea = (w - 2 * CANVAS_SHIP_EDGE) * (h - 2 * CANVAS_SHIP_EDGE);
         const csarealimit = csarea * 0.05;
-        const initialWidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.hd(0.1, 1, "outline0 iw") * 0.2);
+        const initialWidth = Math.ceil((w - 2 * CANVAS_SHIP_EDGE) * factionRandomizer.hd(0.1, 1, "outline0 iw") * 0.2);
         const blocks = [
             [
-                [lp.hw - initialWidth, CANVAS_SHIP_EDGE],
-                [lp.hw + initialWidth, lp.h - CANVAS_SHIP_EDGE],
+                [hw - initialWidth, CANVAS_SHIP_EDGE],
+                [hw + initialWidth, h - CANVAS_SHIP_EDGE],
             ],
         ];
         const blockcount = 2 +
-            Math.floor(lp.r.sd(0.5, 1) * lp.f.hd(2, 8, "outline0 bc") * Math.sqrt(lp.size));
+            Math.floor(shipRandomizer.sd(0.5, 1) * factionRandomizer.hd(2, 8, "outline0 bc") * Math.sqrt(size));
         for (let i = 1; i < blockcount; i++) {
-            const base = blocks[lp.r.si(0, blocks.length - 1)];
+            const base = blocks[shipRandomizer.si(0, blocks.length - 1)];
             const v0 = [
-                base[0][0] + lp.r.sd(0, 1) * (base[1][0] - base[0][0]),
-                base[0][1] + lp.r.sd(0, 1) * (base[1][1] - base[0][1]),
+                base[0][0] + shipRandomizer.sd(0, 1) * (base[1][0] - base[0][0]),
+                base[0][1] + shipRandomizer.sd(0, 1) * (base[1][1] - base[0][1]),
             ];
             if (v0[1] < (base[0][1] + base[1][1]) * 0.5 &&
-                lp.r.sb(lp.f.hd(0.5, 1.5, "outline0 frontbias"))) {
+                shipRandomizer.sb(factionRandomizer.hd(0.5, 1.5, "outline0 frontbias"))) {
                 v0[1] = base[1][1] - (v0[1] - base[0][1]);
             }
             const v1 = [
-                clamp(lp.r.sd(0, 1) * lp.w, CANVAS_SHIP_EDGE, lp.w - CANVAS_SHIP_EDGE),
-                clamp(lp.r.sd(0, 1) * lp.h, CANVAS_SHIP_EDGE, lp.h - CANVAS_SHIP_EDGE),
+                clamp(shipRandomizer.sd(0, 1) * w, CANVAS_SHIP_EDGE, w - CANVAS_SHIP_EDGE),
+                clamp(shipRandomizer.sd(0, 1) * h, CANVAS_SHIP_EDGE, h - CANVAS_SHIP_EDGE),
             ];
             const area = Math.abs((v1[0] - v0[0]) * (v1[1] - v0[1]));
             const ratio = csarealimit / area;
@@ -1113,33 +1115,33 @@ const outlines = [
         for (let i = 0; i < blocks.length; i++) {
             const lb = blocks[i];
             csx.fillRect(lb[0][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
-            csx.fillRect(lp.w - lb[1][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
+            csx.fillRect(w - lb[1][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
         }
     },
     // 1: Joined circles
-    function (lp, csx) {
-        const csarea = (lp.w - 2 * CANVAS_SHIP_EDGE) * (lp.h - 2 * CANVAS_SHIP_EDGE);
+    function (shipRandomizer, factionRandomizer, w, h, hw, size, csx) {
+        const csarea = (w - 2 * CANVAS_SHIP_EDGE) * (h - 2 * CANVAS_SHIP_EDGE);
         const csarealimit = csarea * 0.05;
         const csrlimit = Math.max(2, Math.sqrt(csarealimit / Math.PI));
-        const initialwidth = Math.ceil((lp.w - 2 * CANVAS_SHIP_EDGE) * lp.f.hd(0.1, 1, "outline1 iw") * 0.2);
+        const initialwidth = Math.ceil((w - 2 * CANVAS_SHIP_EDGE) * factionRandomizer.hd(0.1, 1, "outline1 iw") * 0.2);
         const circles = [];
-        const initialcount = Math.floor((lp.h - 2 * CANVAS_SHIP_EDGE) / (initialwidth * 2));
+        const initialcount = Math.floor((h - 2 * CANVAS_SHIP_EDGE) / (initialwidth * 2));
         for (let i = 0; i < initialcount; i++) {
-            let lv = [lp.hw, lp.h - (CANVAS_SHIP_EDGE + initialwidth * (i * 2 + 1))];
+            let lv = [hw, h - (CANVAS_SHIP_EDGE + initialwidth * (i * 2 + 1))];
             circles.push({ v: lv, r: initialwidth });
         }
         const circlecount = initialcount +
-            Math.floor(lp.r.sd(0.5, 1) * lp.f.hd(10, 50, "outline1 cc") * Math.sqrt(lp.size));
+            Math.floor(shipRandomizer.sd(0.5, 1) * factionRandomizer.hd(10, 50, "outline1 cc") * Math.sqrt(size));
         for (let i = initialcount; i < circlecount; i++) {
-            const base = circles[Math.max(lp.r.si(0, circles.length - 1), lp.r.si(0, circles.length - 1))];
-            let ncr = lp.r.sd(1, csrlimit);
-            const pr = lp.r.sd(Math.max(0, base.r - ncr), base.r);
-            let pa = lp.r.sd(0, 2 * Math.PI);
-            if (pa > Math.PI && lp.r.sb(lp.f.hd(0.5, 1.5, "outline1 frontbias"))) {
-                pa = lp.r.sd(0, Math.PI);
+            const base = circles[Math.max(shipRandomizer.si(0, circles.length - 1), shipRandomizer.si(0, circles.length - 1))];
+            let ncr = shipRandomizer.sd(1, csrlimit);
+            const pr = shipRandomizer.sd(Math.max(0, base.r - ncr), base.r);
+            let pa = shipRandomizer.sd(0, 2 * Math.PI);
+            if (pa > Math.PI && shipRandomizer.sb(factionRandomizer.hd(0.5, 1.5, "outline1 frontbias"))) {
+                pa = shipRandomizer.sd(0, Math.PI);
             }
             let lv = [base.v[0] + Math.cos(pa) * pr, base.v[1] + Math.sin(pa) * pr];
-            ncr = Math.min(ncr, lv[0] - CANVAS_SHIP_EDGE, lp.w - CANVAS_SHIP_EDGE - lv[0], lv[1] - CANVAS_SHIP_EDGE, lp.h - CANVAS_SHIP_EDGE - lv[1]);
+            ncr = Math.min(ncr, lv[0] - CANVAS_SHIP_EDGE, w - CANVAS_SHIP_EDGE - lv[0], lv[1] - CANVAS_SHIP_EDGE, h - CANVAS_SHIP_EDGE - lv[1]);
             circles.push({ v: lv, r: ncr });
         }
         csx.fillStyle = "#fff";
@@ -1149,46 +1151,46 @@ const outlines = [
             csx.arc(lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
             csx.fill();
             csx.beginPath();
-            csx.arc(lp.w - lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
+            csx.arc(w - lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
             csx.fill();
         }
     },
     // 2: Mess of lines
-    function (lp, csx) {
-        const innersize = [lp.w - 2 * CANVAS_SHIP_EDGE, lp.h - 2 * CANVAS_SHIP_EDGE];
+    function (shipRandomizer, factionRandomizer, w, h, hw, size, csx) {
+        const innersize = [w - 2 * CANVAS_SHIP_EDGE, h - 2 * CANVAS_SHIP_EDGE];
         const points = [
-            [lp.hw, lp.r.sd(0, 0.05) * innersize[1] + CANVAS_SHIP_EDGE],
-            [lp.hw, lp.r.sd(0.95, 1) * innersize[1] + CANVAS_SHIP_EDGE],
+            [hw, shipRandomizer.sd(0, 0.05) * innersize[1] + CANVAS_SHIP_EDGE],
+            [hw, shipRandomizer.sd(0.95, 1) * innersize[1] + CANVAS_SHIP_EDGE],
         ];
-        const basefatness = COMPONENT_GRID_SIZE / lp.size +
-            lp.f.hd(0.03, 0.1, "outline2 basefatness");
+        const basefatness = COMPONENT_GRID_SIZE / size +
+            factionRandomizer.hd(0.03, 0.1, "outline2 basefatness");
         const basemessiness = 1 / basefatness;
-        const pointcount = Math.max(3, Math.ceil(basemessiness * lp.r.sd(0.05, 0.1) * Math.sqrt(lp.size)));
+        const pointcount = Math.max(3, Math.ceil(basemessiness * shipRandomizer.sd(0.05, 0.1) * Math.sqrt(size)));
         // @ts-ignore - We're doing it properly
-        csx.lineCap = ["round", "square"][lp.f.hi(0, 1, "outline2 linecap")];
+        csx.lineCap = ["round", "square"][factionRandomizer.hi(0, 1, "outline2 linecap")];
         csx.strokeStyle = "#fff";
         for (let npi = 1; npi < pointcount; npi++) {
             let np = points[npi];
             if (np == null) {
                 np = [
-                    lp.r.sd(0, 1) * innersize[0] + CANVAS_SHIP_EDGE,
-                    (lp.r.sd(0, 1) ** lp.f.hd(0.1, 1, "outline2 frontbias")) *
+                    shipRandomizer.sd(0, 1) * innersize[0] + CANVAS_SHIP_EDGE,
+                    (shipRandomizer.sd(0, 1) ** factionRandomizer.hd(0.1, 1, "outline2 frontbias")) *
                         innersize[1] +
                         CANVAS_SHIP_EDGE,
                 ];
                 points.push(np);
             }
-            const cons = 1 + lp.r.sseq(lp.f.hd(0, 1, "outline2 conadjust"), 3);
+            const cons = 1 + shipRandomizer.sseq(factionRandomizer.hd(0, 1, "outline2 conadjust"), 3);
             for (let nci = 0; nci < cons; nci++) {
-                const pre = points[lp.r.si(0, points.length - 2)];
-                csx.lineWidth = lp.r.sd(0.7, 1) * basefatness * lp.size;
+                const pre = points[shipRandomizer.si(0, points.length - 2)];
+                csx.lineWidth = shipRandomizer.sd(0.7, 1) * basefatness * size;
                 csx.beginPath();
                 csx.moveTo(pre[0], pre[1]);
                 csx.lineTo(np[0], np[1]);
                 csx.stroke();
                 csx.beginPath();
-                csx.moveTo(lp.w - pre[0], pre[1]);
-                csx.lineTo(lp.w - np[0], np[1]);
+                csx.moveTo(w - pre[0], pre[1]);
+                csx.lineTo(w - np[0], np[1]);
                 csx.stroke();
             }
         }
@@ -1201,12 +1203,22 @@ const outlines = [
 
 
 
+/*
+You're almost there!!
+
+Your master plan is so smart; add all the used fields to outlines/components functions as arguments with the same name: h, w, hh, hw.
+Then, move the functions inside the closure of the constructor, and conver the constructor to a simple function.
+Finally, remove all the arguments except for the vector, and done!
+Feel free to start with outlines, it's smaller.
+getCellState is a function inside the constructor, also passed to components.
+*/
 class ship_Ship {
     constructor(factionRandomizer, p_seed, size) {
         this.f = factionRandomizer;
         const componentChances = computeFactionComponentChances(factionRandomizer);
         const colorData = computeFactionColors(factionRandomizer);
-        this.r = new Randomizer(factionRandomizer.seed + p_seed);
+        const shipRandomizer = new Randomizer(factionRandomizer.seed + p_seed);
+        this.r = shipRandomizer;
         //The initial overall size of this ship, in pixels
         this.size =
             size == null
@@ -1226,7 +1238,7 @@ class ship_Ship {
         cs.width = this.w;
         cs.height = this.h;
         const csx = cs.getContext("2d");
-        outlines[this.f.hchoose([1, 1, 1], "outline type")](this, csx);
+        outlines[this.f.hchoose([1, 1, 1], "outline type")](shipRandomizer, factionRandomizer, this.w, this.h, this.hw, this.size, csx);
         const outline = csx.getImageData(0, 0, this.w, this.h);
         this.cgrid = [];
         for (let gx = 0; gx < this.gw; gx++) {

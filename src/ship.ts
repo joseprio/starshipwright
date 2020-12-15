@@ -15,7 +15,15 @@ type Cell = {
   y: number;
   phase: number;
 };
+/*
+You're almost there!!
 
+Your master plan is so smart; add all the used fields to outlines/components functions as arguments with the same name: h, w, hh, hw.
+Then, move the functions inside the closure of the constructor, and conver the constructor to a simple function.
+Finally, remove all the arguments except for the vector, and done!
+Feel free to start with outlines, it's smaller.
+getCellState is a function inside the constructor, also passed to components.
+*/
 export class Ship {
   f: Randomizer;
   r: Randomizer;
@@ -35,7 +43,8 @@ export class Ship {
     this.f = factionRandomizer;
     const componentChances = computeFactionComponentChances(factionRandomizer);
     const colorData = computeFactionColors(factionRandomizer);
-    this.r = new Randomizer(factionRandomizer.seed + p_seed);
+    const shipRandomizer = new Randomizer(factionRandomizer.seed + p_seed);
+    this.r = shipRandomizer;
     //The initial overall size of this ship, in pixels
     this.size =
       size == null
@@ -64,7 +73,7 @@ export class Ship {
     cs.width = this.w;
     cs.height = this.h;
     const csx = cs.getContext("2d");
-    outlines[this.f.hchoose([1, 1, 1], "outline type")](this, csx);
+    outlines[this.f.hchoose([1, 1, 1], "outline type")](shipRandomizer, factionRandomizer, this.w, this.h, this.hw, this.size, csx);
     const outline = csx.getImageData(0, 0, this.w, this.h);
     this.cgrid = [];
     for (let gx = 0; gx < this.gw; gx++) {

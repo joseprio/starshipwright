@@ -186,7 +186,7 @@ export class Randomizer {
         }
         return 0;
     }
-    //Returns an index of the array chances with the relative probability equal to that element of chances, based on a hash value with the specified seed.
+    // Returns an index of the array chances with the relative probability equal to that element of chances, based on a hash value with the specified seed.
     hchoose(chances, seed) {
         let sum = 0;
         for (let i = 0; i < chances.length; i++) {

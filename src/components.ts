@@ -66,7 +66,6 @@ type ComponentFunc = (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, component
 
 // Each component function takes an argument 'lp' (for the ship) and 'v' (an integral 2-vector denoting the center of the component)
 export const components: Array<ComponentFunc>  = [
-
 // Bordered block
 function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: ComponentChances, colorData: ColorData, nextpass: number, pcdone: number) {
   let lcms = COMPONENT_MAXIMUM_SIZE;
@@ -159,11 +158,11 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
       }
     }
   }
-  let w = Math.ceil(lp.r.sd(0.8, 2) * lcms);
-  const h = Math.ceil(lp.r.sd(0.8, 2) * lcms);
-  const cw = lp.r.si(3, Math.max(4, w));
-  const count = Math.max(1, Math.round(w / cw));
-  w = count * cw;
+  let componentWidth = Math.ceil(lp.r.sd(0.8, 2) * lcms);
+  const componentHeight = Math.ceil(lp.r.sd(0.8, 2) * lcms);
+  const cw = lp.r.si(3, Math.max(4, componentWidth));
+  const count = Math.max(1, Math.round(componentWidth / cw));
+  componentWidth = count * cw;
   const baseColor = computeBaseColor(lp.f, colorData, lp);
   const ccolor = scaleColorBy(baseColor, lp.r.sd(0.5, 1));
   const darkness = lp.r.sd(0.3, 0.9);
@@ -172,11 +171,11 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
     clamp(lp.f.hd(-0.2, 1.2, "com1 hchance"), 0, 1)
   );
   if (orientation) {
-    const bv = [v[0] - Math.floor(w / 2), v[1] - Math.floor(h / 2)];
+    const bv = [v[0] - Math.floor(componentWidth / 2), v[1] - Math.floor(componentHeight / 2)];
     cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
-    cfx.fillRect(bv[0] - 1, bv[1] - 1, w + 2, h + 2);
+    cfx.fillRect(bv[0] - 1, bv[1] - 1, componentWidth + 2, componentHeight + 2);
     cfx.fillStyle = ccolor;
-    cfx.fillRect(bv[0], bv[1], w, h);
+    cfx.fillRect(bv[0], bv[1], componentWidth, componentHeight);
     for (let i = 0; i < count; i++) {
       cfx.fillStyle = shadowGradient(
         cfx,
@@ -184,14 +183,14 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
         [bv[0] + i * cw, v[1]],
         darkness
       );
-      cfx.fillRect(bv[0] + i * cw, bv[1], cw, h);
+      cfx.fillRect(bv[0] + i * cw, bv[1], cw, componentHeight);
     }
   } else {
-    const bv = [v[0] - Math.floor(h / 2), v[1] - Math.floor(w / 2)];
+    const bv = [v[0] - Math.floor(componentHeight / 2), v[1] - Math.floor(componentWidth / 2)];
     cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.25) + ")";
-    cfx.fillRect(bv[0] - 1, bv[1] - 1, h + 2, w + 2);
+    cfx.fillRect(bv[0] - 1, bv[1] - 1, componentHeight + 2, componentWidth + 2);
     cfx.fillStyle = ccolor;
-    cfx.fillRect(bv[0], bv[1], h, w);
+    cfx.fillRect(bv[0], bv[1], componentHeight, componentWidth);
     for (let i = 0; i < count; i++) {
       cfx.fillStyle = shadowGradient(
         cfx,
@@ -199,7 +198,7 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
         [v[0], bv[1] + i * cw],
         darkness
       );
-      cfx.fillRect(bv[0], bv[1] + i * cw, w, cw);
+      cfx.fillRect(bv[0], bv[1] + i * cw, componentWidth, cw);
     }
   }
 },
@@ -221,19 +220,19 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
       }
     }
   }
-  const w = Math.ceil(lp.r.sd(0.6, 1.4) * lcms);
-  const h = Math.ceil(lp.r.sd(1, 2) * lcms);
+  const componentWidth = Math.ceil(lp.r.sd(0.6, 1.4) * lcms);
+  const componentHeight = Math.ceil(lp.r.sd(1, 2) * lcms);
   const wh2 = [
-    Math.ceil(clamp((w * lp.r.sd(0.7, 1)) / 2, 1, w)),
-    Math.ceil(clamp((w * lp.r.sd(0.8, 1)) / 2, 1, w)),
+    Math.ceil(clamp((componentWidth * lp.r.sd(0.7, 1)) / 2, 1, componentWidth)),
+    Math.ceil(clamp((componentWidth * lp.r.sd(0.8, 1)) / 2, 1, componentWidth)),
   ];
   const h2 = [
-    Math.floor(clamp(w * lp.r.sd(0.05, 0.25), 1, h)),
-    Math.floor(clamp(w * lp.r.sd(0.1, 0.3), 1, h)),
+    Math.floor(clamp(componentWidth * lp.r.sd(0.05, 0.25), 1, componentHeight)),
+    Math.floor(clamp(componentWidth * lp.r.sd(0.1, 0.3), 1, componentHeight)),
   ];
   const hpair = h2[0] + h2[1];
   const odd = lp.r.sb(lp.f.hd(0, 1, "com2 oddchance") ** 0.5);
-  const count = clamp(Math.floor(h / hpair), 1, h);
+  const count = clamp(Math.floor(componentHeight / hpair), 1, componentHeight);
   const htotal = count * hpair + (odd ? h2[0] : 0);
   const baseColor = computeBaseColor(lp.f, colorData, lp);
   const scale_0 = lp.r.sd(0.6, 1);
@@ -325,19 +324,19 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
       }
     }
   }
-  const w = lp.r.sd(1, 2) * lcms;
-  let h = Math.ceil(lp.r.sd(0.3, 1) * lcms);
+  const componentWidth = lp.r.sd(1, 2) * lcms;
+  let componentHeight = Math.ceil(lp.r.sd(0.3, 1) * lcms);
   const nratio = lp.r.sd(0.25, 0.6);
-  const nw = w * nratio;
-  const midw = (w + nw) / 2;
+  const nw = componentWidth * nratio;
+  const midw = (componentWidth + nw) / 2;
   const midwh = midw / 2;
-  const h2 = [
-    Math.max(1, Math.ceil(h * lp.r.sd(0.08, 0.25))),
-    Math.max(1, Math.ceil(h * lp.r.sd(0.03, 0.15))),
+  const componentHeight2 = [
+    Math.max(1, Math.ceil(componentHeight * lp.r.sd(0.08, 0.25))),
+    Math.max(1, Math.ceil(componentHeight * lp.r.sd(0.03, 0.15))),
   ];
-  const hpair = h2[0] + h2[1];
-  const count = Math.ceil(h / hpair);
-  h = count * hpair + h2[0];
+  const hpair = componentHeight2[0] + componentHeight2[1];
+  const count = Math.ceil(componentHeight / hpair);
+  componentHeight = count * hpair + componentHeight2[0];
   const [colors, colorChances] = colorData;
   const basecolor =
     colors[lp.f.hchoose(colorChances, "com3 basecolor")];
@@ -370,22 +369,22 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
     1,
     scaleColorBy(basecolor, lightness1_edge)
   );
-  const by = Math.ceil(v[1] - h / 2);
+  const by = Math.ceil(v[1] - componentHeight / 2);
   cfx.fillStyle = grad2[0];
   cfx.beginPath();
   cfx.moveTo(v[0] - nw / 2, by);
   cfx.lineTo(v[0] + nw / 2, by);
-  cfx.lineTo(v[0] + w / 2, by + h);
-  cfx.lineTo(v[0] - w / 2, by + h);
+  cfx.lineTo(v[0] + componentWidth / 2, by + componentHeight);
+  cfx.lineTo(v[0] - componentWidth / 2, by + componentHeight);
   cfx.fill();
   cfx.fillStyle = grad2[1];
-  const byh = [by + h2[0], by + hpair];
+  const byh = [by + componentHeight2[0], by + hpair];
   for (let i = 0; i < count; i++) {
-    const lyr = [i * hpair + h2[0], (i + 1) * hpair];
+    const lyr = [i * hpair + componentHeight2[0], (i + 1) * hpair];
     const ly = [byh[0] + i * hpair, byh[1] + i * hpair];
     const lw = [
-      (nw + (w - nw) * (lyr[0] / h)) / 2,
-      (nw + (w - nw) * (lyr[1] / h)) / 2,
+      (nw + (componentWidth - nw) * (lyr[0] / componentHeight)) / 2,
+      (nw + (componentWidth - nw) * (lyr[1] / componentHeight)) / 2,
     ];
     cfx.beginPath();
     cfx.moveTo(v[0] - lw[0], ly[0]);
@@ -426,7 +425,7 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
   if (!direction) {
     //forwards
     const hlimit = v[1] - CANVAS_SHIP_EDGE;
-    const h = Math.min(
+    const componentHeight = Math.min(
       Math.max(
         COMPONENT_MAXIMUM_SIZE,
         hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)
@@ -435,7 +434,7 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
         0.7 * lp.size * (lp.r.sd(0, 1) ** lp.f.hd(2, 6, "com4 hpower0"))
       )
     );
-    const bb_0_0 = v[0] - hwi, bb_0_1 = v[1] - h, bb_1_0 = v[0] + hwi + hwe;
+    const bb_0_0 = v[0] - hwi, bb_0_1 = v[1] - componentHeight, bb_1_0 = v[0] + hwi + hwe;
     const grad = cfx.createLinearGradient(
       bb_0_0,
       bb_0_1,
@@ -446,12 +445,12 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
     grad.addColorStop(0.5, colormid);
     grad.addColorStop(1, coloredge);
     cfx.fillStyle = grad;
-    cfx.fillRect(bb_0_0, bb_0_1, w, h);
-    ev = [v[0], v[1] - h];
+    cfx.fillRect(bb_0_0, bb_0_1, w, componentHeight);
+    ev = [v[0], v[1] - componentHeight];
   } else if (direction == 1) {
     //backwards
     const hlimit = lp.h - (CANVAS_SHIP_EDGE + v[1]);
-    const h = Math.min(
+    const componentHeight = Math.min(
       Math.max(
         COMPONENT_MAXIMUM_SIZE,
         hlimit - lp.r.si(0, COMPONENT_MAXIMUM_SIZE * 2)
@@ -472,8 +471,8 @@ function (cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Com
     grad.addColorStop(0.5, colormid);
     grad.addColorStop(1, coloredge);
     cfx.fillStyle = grad;
-    cfx.fillRect(bb_0_0, bb_0_1, w, h);
-    ev = [v[0], v[1] + h];
+    cfx.fillRect(bb_0_0, bb_0_1, w, componentHeight);
+    ev = [v[0], v[1] + componentHeight];
   } else if (direction == 2) {
     //to center
     const grad = cfx.createLinearGradient(
@@ -546,9 +545,9 @@ function(cfx: CanvasRenderingContext2D, lp: Ship, v: Vec, componentChances: Comp
   const drawr = smallr + 0.5;
   const shadowr = smallr + 1;
   const centerr = smallr * 0.2;
-  const hw = smallr * countx;
-  const hh = smallr * county;
-  const bv = [v[0] - hw, v[1] - hh];
+  const componentHw = smallr * countx;
+  const componentHh = smallr * county;
+  const bv = [v[0] - componentHw, v[1] - componentHh];
   cfx.fillStyle = "rgba(0,0,0," + lp.r.sd(0, 0.2) + ")";
   for (let ax = 0; ax < countx; ax++) {
     const px = bv[0] + (ax * 2 + 1) * smallr;

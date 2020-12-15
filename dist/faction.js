@@ -2,6 +2,8 @@ import { clamp, hsvToRgb } from "./utils";
 export function computeFactionComponentChances(factionRandomizer) {
     const componentChances = [];
     const dp = 8; // Default maximum power
+    // TODO: once we dont need backwards compatibility, we can probably simplify this file; the first argument of sd seems
+    // unnecessary
     componentChances[0] =
         0.8 * factionRandomizer.sd(0.001, 1) * (2 ** factionRandomizer.sd(0, dp));
     componentChances[1] =
