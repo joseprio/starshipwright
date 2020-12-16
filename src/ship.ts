@@ -85,10 +85,10 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
   const hh = Math.floor(h / 2);
   const gh = Math.floor((h - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
   const ghextra = (h - gh * COMPONENT_GRID_SIZE) / 2;
-  const cs = document.createElement("canvas"); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
-  cs.width = w;
-  cs.height = h;
-  const csx = cs.getContext("2d");
+  const shipCanvas = document.createElement("canvas"); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
+  shipCanvas.width = w;
+  shipCanvas.height = h;
+  const cx = shipCanvas.getContext("2d");
   
   // ------ Define outlines ---------------------------------------
   const outlines: Array<OutlineFunc> = [
@@ -147,16 +147,16 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
           [Math.ceil(v1[0]), Math.ceil(v1[1])],
         ]);
       }
-      csx.fillStyle = "#fff";
+      cx.fillStyle = "#fff";
       for (let i = 0; i < blocks.length; i++) {
         const lb = blocks[i];
-        csx.fillRect(
+        cx.fillRect(
           lb[0][0],
           lb[0][1],
           lb[1][0] - lb[0][0],
           lb[1][1] - lb[0][1]
         );
-        csx.fillRect(
+        cx.fillRect(
           w - lb[1][0],
           lb[0][1],
           lb[1][0] - lb[0][0],
@@ -206,15 +206,15 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
         );
         circles.push({ v: lv, r: ncr });
       }
-      csx.fillStyle = "#fff";
+      cx.fillStyle = "#fff";
       for (let i = 0; i < circles.length; i++) {
         const lc = circles[i];
-        csx.beginPath();
-        csx.arc(lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
-        csx.fill();
-        csx.beginPath();
-        csx.arc(w - lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
-        csx.fill();
+        cx.beginPath();
+        cx.arc(lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
+        cx.fill();
+        cx.beginPath();
+        cx.arc(w - lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
+        cx.fill();
       }
     },
   
@@ -234,8 +234,8 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
         Math.ceil(basemessiness * shipRandomizer.sd(0.05, 0.1) * size ** 0.5)
       );
       // @ts-ignore - We're doing it properly
-      csx.lineCap = ["round", "square"][factionRandomizer.hi(0, 1, "outline2 linecap")];
-      csx.strokeStyle = "#fff";
+      cx.lineCap = ["round", "square"][factionRandomizer.hi(0, 1, "outline2 linecap")];
+      cx.strokeStyle = "#fff";
       for (let npi = 1; npi < pointcount; npi++) {
         let np = points[npi];
         if (np == null) {
@@ -250,15 +250,15 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
         const cons = 1 + shipRandomizer.sseq(factionRandomizer.hd(0, 1, "outline2 conadjust"), 3);
         for (let nci = 0; nci < cons; nci++) {
           const pre = points[shipRandomizer.si(0, points.length - 2)];
-          csx.lineWidth = shipRandomizer.sd(0.7, 1) * basefatness * size;
-          csx.beginPath();
-          csx.moveTo(pre[0], pre[1]);
-          csx.lineTo(np[0], np[1]);
-          csx.stroke();
-          csx.beginPath();
-          csx.moveTo(w - pre[0], pre[1]);
-          csx.lineTo(w - np[0], np[1]);
-          csx.stroke();
+          cx.lineWidth = shipRandomizer.sd(0.7, 1) * basefatness * size;
+          cx.beginPath();
+          cx.moveTo(pre[0], pre[1]);
+          cx.lineTo(np[0], np[1]);
+          cx.stroke();
+          cx.beginPath();
+          cx.moveTo(w - pre[0], pre[1]);
+          cx.lineTo(w - np[0], np[1]);
+          cx.stroke();
         }
       }
     }
@@ -266,7 +266,7 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
   // ------ End define outlines -----------------------------------
 
   outlines[factionRandomizer.hchoose([1, 1, 1], "outline type")]();
-  const outline = csx.getImageData(0, 0, w, h);
+  const outline = cx.getImageData(0, 0, w, h);
 
  
   //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or -1 if (X,Y) is out of bounds.
@@ -360,10 +360,8 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
   );
   const totalcomponents = passes * goodcells.length + extra;
 
-  const cf = document.createElement("canvas"); // Canvas on which the actual ship components are drawn. Ships face upwards, with front towards Y=0
-  cf.width = w;
-  cf.height = h;
-  const cfx = cf.getContext("2d");
+  // Touching the dimensions of the canvas will reset its data
+  shipCanvas.width |= 0;
 
   // ------ Define components ---------------------------------------
 
@@ -416,7 +414,7 @@ function shadowGradient(
   edgePoint: Vec,
   amount: number
 ): CanvasGradient {
-  const grad = cfx.createLinearGradient(
+  const grad = cx.createLinearGradient(
     edgePoint[0],
     edgePoint[1],
     middlePoint[0] * 2 - edgePoint[0],
@@ -464,26 +462,26 @@ function (v) {
   const baseColor = computeBaseColor();
   const icolorh = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
   const ocolorh = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
-  cfx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.25) + ")";
-  cfx.fillRect(
+  cx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.25) + ")";
+  cx.fillRect(
     v[0] - trv[0] - 1,
     v[1] - trv[1] - 1,
     dho[0] * counts[0] + 2,
     dho[1] * counts[1] + 2
   );
-  cfx.fillStyle = ocolorh;
-  cfx.fillRect(
+  cx.fillStyle = ocolorh;
+  cx.fillRect(
     v[0] - trv[0],
     v[1] - trv[1],
     dho[0] * counts[0],
     dho[1] * counts[1]
   );
-  cfx.fillStyle = icolorh;
+  cx.fillStyle = icolorh;
   for (let x = 0; x < counts[0]; x++) {
     const bx = v[0] + borderwidth + x * dho[0] - trv[0];
     for (let y = 0; y < counts[1]; y++) {
       const by = v[1] + borderwidth + y * dho[1] - trv[1];
-      cfx.fillRect(bx, by, dhi[0], dhi[1]);
+      cx.fillRect(bx, by, dhi[0], dhi[1]);
     }
   }
   if (
@@ -491,12 +489,12 @@ function (v) {
       clamp((totaldone * 0.6 / totalcomponents + 0.3) * (lcms / COMPONENT_MAXIMUM_SIZE), 0, 0.98)
     )
   ) {
-    cfx.fillStyle = shadowGradient(
+    cx.fillStyle = shadowGradient(
       v,
       [v[0] + trv[0], v[1]],
       shipRandomizer.sd(0, 0.9)
     );
-    cfx.fillRect(
+    cx.fillRect(
       v[0] - trv[0],
       v[1] - trv[1],
       dho[0] * counts[0],
@@ -536,31 +534,31 @@ function (v) {
   );
   if (orientation) {
     const bv = [v[0] - Math.floor(componentWidth / 2), v[1] - Math.floor(componentHeight / 2)];
-    cfx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.25) + ")";
-    cfx.fillRect(bv[0] - 1, bv[1] - 1, componentWidth + 2, componentHeight + 2);
-    cfx.fillStyle = ccolor;
-    cfx.fillRect(bv[0], bv[1], componentWidth, componentHeight);
+    cx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.25) + ")";
+    cx.fillRect(bv[0] - 1, bv[1] - 1, componentWidth + 2, componentHeight + 2);
+    cx.fillStyle = ccolor;
+    cx.fillRect(bv[0], bv[1], componentWidth, componentHeight);
     for (let i = 0; i < count; i++) {
-      cfx.fillStyle = shadowGradient(
+      cx.fillStyle = shadowGradient(
         [bv[0] + (i + 0.5) * cw, v[1]],
         [bv[0] + i * cw, v[1]],
         darkness
       );
-      cfx.fillRect(bv[0] + i * cw, bv[1], cw, componentHeight);
+      cx.fillRect(bv[0] + i * cw, bv[1], cw, componentHeight);
     }
   } else {
     const bv = [v[0] - Math.floor(componentHeight / 2), v[1] - Math.floor(componentWidth / 2)];
-    cfx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.25) + ")";
-    cfx.fillRect(bv[0] - 1, bv[1] - 1, componentHeight + 2, componentWidth + 2);
-    cfx.fillStyle = ccolor;
-    cfx.fillRect(bv[0], bv[1], componentHeight, componentWidth);
+    cx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.25) + ")";
+    cx.fillRect(bv[0] - 1, bv[1] - 1, componentHeight + 2, componentWidth + 2);
+    cx.fillStyle = ccolor;
+    cx.fillRect(bv[0], bv[1], componentHeight, componentWidth);
     for (let i = 0; i < count; i++) {
-      cfx.fillStyle = shadowGradient(
+      cx.fillStyle = shadowGradient(
         [v[0], bv[1] + (i + 0.5) * cw],
         [v[0], bv[1] + i * cw],
         darkness
       );
-      cfx.fillRect(bv[0], bv[1] + i * cw, componentWidth, cw);
+      cx.fillRect(bv[0], bv[1] + i * cw, componentWidth, cw);
     }
   }
 },
@@ -612,8 +610,8 @@ function (v) {
     factionRandomizer.hd(0, 1, "com2 verticalchance") ** 0.1
   );
   if (orientation) {
-    const grad2_0 = cfx.createLinearGradient(v[0] - wh2[0], v[1], v[0] + wh2[0], v[1]);
-    const grad2_1 = cfx.createLinearGradient(v[0] - wh2[1], v[1], v[0] + wh2[1], v[1]);
+    const grad2_0 = cx.createLinearGradient(v[0] - wh2[0], v[1], v[0] + wh2[0], v[1]);
+    const grad2_1 = cx.createLinearGradient(v[0] - wh2[1], v[1], v[0] + wh2[1], v[1]);
 
     grad2_0.addColorStop(0, colord2[0]);
     grad2_0.addColorStop(0.5, color2[0]);
@@ -623,18 +621,18 @@ function (v) {
     grad2_1.addColorStop(1, colord2[1]);
     const by = Math.floor(v[1] - htotal / 2);
     for (let i = 0; i < count; i++) {
-      cfx.fillStyle = grad2_0;
-      cfx.fillRect(v[0] - wh2[0], by + i * hpair, wh2[0] * 2, h2[0]);
-      cfx.fillStyle = grad2_1;
-      cfx.fillRect(v[0] - wh2[1], by + i * hpair + h2[0], wh2[1] * 2, h2[1]);
+      cx.fillStyle = grad2_0;
+      cx.fillRect(v[0] - wh2[0], by + i * hpair, wh2[0] * 2, h2[0]);
+      cx.fillStyle = grad2_1;
+      cx.fillRect(v[0] - wh2[1], by + i * hpair + h2[0], wh2[1] * 2, h2[1]);
     }
     if (odd) {
-      cfx.fillStyle = grad2_0;
-      cfx.fillRect(v[0] - wh2[0], by + count * hpair, wh2[0] * 2, h2[0]);
+      cx.fillStyle = grad2_0;
+      cx.fillRect(v[0] - wh2[0], by + count * hpair, wh2[0] * 2, h2[0]);
     }
   } else {
-    const grad2_0 = cfx.createLinearGradient(v[0], v[1] - wh2[0], v[0], v[1] + wh2[0]);
-    const grad2_1 = cfx.createLinearGradient(v[0], v[1] - wh2[1], v[0], v[1] + wh2[1]);
+    const grad2_0 = cx.createLinearGradient(v[0], v[1] - wh2[0], v[0], v[1] + wh2[0]);
+    const grad2_1 = cx.createLinearGradient(v[0], v[1] - wh2[1], v[0], v[1] + wh2[1]);
 
     grad2_0.addColorStop(0, colord2[0]);
     grad2_0.addColorStop(0.5, color2[0]);
@@ -644,14 +642,14 @@ function (v) {
     grad2_1.addColorStop(1, colord2[1]);
     const bx = Math.floor(v[0] - htotal / 2);
     for (let i = 0; i < count; i++) {
-      cfx.fillStyle = grad2_0;
-      cfx.fillRect(bx + i * hpair, v[1] - wh2[0], h2[0], wh2[0] * 2);
-      cfx.fillStyle = grad2_1;
-      cfx.fillRect(bx + i * hpair + h2[0], v[1] - wh2[1], h2[1], wh2[1] * 2);
+      cx.fillStyle = grad2_0;
+      cx.fillRect(bx + i * hpair, v[1] - wh2[0], h2[0], wh2[0] * 2);
+      cx.fillStyle = grad2_1;
+      cx.fillRect(bx + i * hpair + h2[0], v[1] - wh2[1], h2[1], wh2[1] * 2);
     }
     if (odd) {
-      cfx.fillStyle = grad2_0;
-      cfx.fillRect(bx + count * hpair, v[1] - wh2[0], h2[0], wh2[0] * 2);
+      cx.fillStyle = grad2_0;
+      cx.fillRect(bx + count * hpair, v[1] - wh2[0], h2[0], wh2[0] * 2);
     }
   }
 },
@@ -706,8 +704,8 @@ function (v) {
     lightness0_mid - factionRandomizer.hd(0.2, 0.4, "com3 lightness0 edge");
   const lightness1_edge = factionRandomizer.hd(0, 0.2, "com3 lightness1 edge");
   const grad2 = [
-    cfx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
-    cfx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
+    cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
+    cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
   ];
   grad2[0].addColorStop(
     0,
@@ -731,14 +729,14 @@ function (v) {
     scaleColorBy(basecolor, lightness1_edge)
   );
   const by = Math.ceil(v[1] - componentHeight / 2);
-  cfx.fillStyle = grad2[0];
-  cfx.beginPath();
-  cfx.moveTo(v[0] - nw / 2, by);
-  cfx.lineTo(v[0] + nw / 2, by);
-  cfx.lineTo(v[0] + componentWidth / 2, by + componentHeight);
-  cfx.lineTo(v[0] - componentWidth / 2, by + componentHeight);
-  cfx.fill();
-  cfx.fillStyle = grad2[1];
+  cx.fillStyle = grad2[0];
+  cx.beginPath();
+  cx.moveTo(v[0] - nw / 2, by);
+  cx.lineTo(v[0] + nw / 2, by);
+  cx.lineTo(v[0] + componentWidth / 2, by + componentHeight);
+  cx.lineTo(v[0] - componentWidth / 2, by + componentHeight);
+  cx.fill();
+  cx.fillStyle = grad2[1];
   const byh = [by + componentHeight2[0], by + hpair];
   for (let i = 0; i < count; i++) {
     const lyr = [i * hpair + componentHeight2[0], (i + 1) * hpair];
@@ -747,12 +745,12 @@ function (v) {
       (nw + (componentWidth - nw) * (lyr[0] / componentHeight)) / 2,
       (nw + (componentWidth - nw) * (lyr[1] / componentHeight)) / 2,
     ];
-    cfx.beginPath();
-    cfx.moveTo(v[0] - lw[0], ly[0]);
-    cfx.lineTo(v[0] + lw[0], ly[0]);
-    cfx.lineTo(v[0] + lw[1], ly[1]);
-    cfx.lineTo(v[0] - lw[1], ly[1]);
-    cfx.fill();
+    cx.beginPath();
+    cx.moveTo(v[0] - lw[0], ly[0]);
+    cx.lineTo(v[0] + lw[0], ly[0]);
+    cx.lineTo(v[0] + lw[1], ly[1]);
+    cx.lineTo(v[0] - lw[1], ly[1]);
+    cx.fill();
   }
 },
 //Elongated cylinder (calls component 0 - 2 on top of its starting point)
@@ -796,7 +794,7 @@ function (v) {
       )
     );
     const bb_0_0 = v[0] - hwi, bb_0_1 = v[1] - componentHeight, bb_1_0 = v[0] + hwi + hwe;
-    const grad = cfx.createLinearGradient(
+    const grad = cx.createLinearGradient(
       bb_0_0,
       bb_0_1,
       bb_1_0,
@@ -805,8 +803,8 @@ function (v) {
     grad.addColorStop(0, coloredge);
     grad.addColorStop(0.5, colormid);
     grad.addColorStop(1, coloredge);
-    cfx.fillStyle = grad;
-    cfx.fillRect(bb_0_0, bb_0_1, componentWidth, componentHeight);
+    cx.fillStyle = grad;
+    cx.fillRect(bb_0_0, bb_0_1, componentWidth, componentHeight);
     ev = [v[0], v[1] - componentHeight];
   } else if (direction == 1) {
     //backwards
@@ -822,7 +820,7 @@ function (v) {
     );
     const bb_0_0 = v[0] - hwi, bb_0_1 = v[1], bb_1_0 = v[0] + hwi + hwe;
     
-    const grad = cfx.createLinearGradient(
+    const grad = cx.createLinearGradient(
       bb_0_0,
       bb_0_1,
       bb_1_0,
@@ -831,12 +829,12 @@ function (v) {
     grad.addColorStop(0, coloredge);
     grad.addColorStop(0.5, colormid);
     grad.addColorStop(1, coloredge);
-    cfx.fillStyle = grad;
-    cfx.fillRect(bb_0_0, bb_0_1, componentWidth, componentHeight);
+    cx.fillStyle = grad;
+    cx.fillRect(bb_0_0, bb_0_1, componentWidth, componentHeight);
     ev = [v[0], v[1] + componentHeight];
   } else if (direction == 2) {
     //to center
-    const grad = cfx.createLinearGradient(
+    const grad = cx.createLinearGradient(
       v[0],
       v[1] - hwi,
       v[0],
@@ -845,8 +843,8 @@ function (v) {
     grad.addColorStop(0, coloredge);
     grad.addColorStop(0.5, colormid);
     grad.addColorStop(1, coloredge);
-    cfx.fillStyle = grad;
-    cfx.fillRect(v[0], v[1] - hwi, Math.ceil(hw - v[0]) + 1, componentWidth);
+    cx.fillStyle = grad;
+    cx.fillRect(v[0], v[1] - hwi, Math.ceil(hw - v[0]) + 1, componentWidth);
     ev = [hw, v[1]];
   }
   const coverComC = [
@@ -909,27 +907,27 @@ function (v) {
   const componentHw = smallr * countx;
   const componentHh = smallr * county;
   const bv = [v[0] - componentHw, v[1] - componentHh];
-  cfx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.2) + ")";
+  cx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.2) + ")";
   for (let ax = 0; ax < countx; ax++) {
     const px = bv[0] + (ax * 2 + 1) * smallr;
     for (let ay = 0; ay < county; ay++) {
       const py = bv[1] + (ay * 2 + 1) * smallr;
-      cfx.beginPath();
-      cfx.arc(px, py, shadowr, 0, 2 * Math.PI);
-      cfx.fill();
+      cx.beginPath();
+      cx.arc(px, py, shadowr, 0, 2 * Math.PI);
+      cx.fill();
     }
   }
   for (let ax = 0; ax < countx; ax++) {
     const px = bv[0] + (ax * 2 + 1) * smallr;
     for (let ay = 0; ay < county; ay++) {
       const py = bv[1] + (ay * 2 + 1) * smallr;
-      const grad = cfx.createRadialGradient(px, py, centerr, px, py, drawr);
+      const grad = cx.createRadialGradient(px, py, centerr, px, py, drawr);
       grad.addColorStop(0, colormid);
       grad.addColorStop(1, coloredge);
-      cfx.fillStyle = grad;
-      cfx.beginPath();
-      cfx.arc(px, py, drawr, 0, 2 * Math.PI);
-      cfx.fill();
+      cx.fillStyle = grad;
+      cx.beginPath();
+      cx.arc(px, py, drawr, 0, 2 * Math.PI);
+      cx.fill();
     }
   }
 },
@@ -987,20 +985,20 @@ function (v) {
     [v[0] - hwi, v[1] + backamount + hh1i + hh1e],
   ];
   const baseColor = computeBaseColor();
-  cfx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.2) + ")";
-  cfx.beginPath();
-  cfx.moveTo(quad[0][0] - 1, quad[0][1]);
-  cfx.lineTo(quad[1][0] - 1, quad[1][1]);
-  cfx.lineTo(quad[2][0] - 1, quad[2][1]);
-  cfx.lineTo(quad[3][0] - 1, quad[3][1]);
-  cfx.fill();
-  cfx.fillStyle = scaleColorBy(baseColor, shipRandomizer.sd(0.7, 1));
-  cfx.beginPath();
-  cfx.moveTo(quad[0][0], quad[0][1]);
-  cfx.lineTo(quad[1][0], quad[1][1]);
-  cfx.lineTo(quad[2][0], quad[2][1]);
-  cfx.lineTo(quad[3][0], quad[3][1]);
-  cfx.fill();
+  cx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.2) + ")";
+  cx.beginPath();
+  cx.moveTo(quad[0][0] - 1, quad[0][1]);
+  cx.lineTo(quad[1][0] - 1, quad[1][1]);
+  cx.lineTo(quad[2][0] - 1, quad[2][1]);
+  cx.lineTo(quad[3][0] - 1, quad[3][1]);
+  cx.fill();
+  cx.fillStyle = scaleColorBy(baseColor, shipRandomizer.sd(0.7, 1));
+  cx.beginPath();
+  cx.moveTo(quad[0][0], quad[0][1]);
+  cx.lineTo(quad[1][0], quad[1][1]);
+  cx.lineTo(quad[2][0], quad[2][1]);
+  cx.lineTo(quad[3][0], quad[3][1]);
+  cx.fill();
 }];
 
 
@@ -1055,10 +1053,11 @@ function (v) {
     totaldone++;
   }
 
-  // Mirror
-  cfx.clearRect(hw + (w % 2), 0, w, h);
-  cfx.scale(-1, 1);
-  cfx.drawImage(cf, 0 - w, 0);
+  // The generated ship is asymmetric, so we fix it here
+  // Removing this makes the vast majority of ships look quite a bit worse
+  cx.clearRect(hw + (w % 2), 0, w, h);
+  cx.scale(-1, 1);
+  cx.drawImage(shipCanvas, -w, 0);
 
-  return cf;
+  return shipCanvas;
 }
