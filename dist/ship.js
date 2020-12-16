@@ -821,12 +821,10 @@ export function buildShip(factionRandomizer, p_seed, size) {
         components[shipRandomizer.schoose(componentChances)](lv);
         totaldone++;
     }
-    // TODO: there's a very cool opportunity here to have a chance to not make the ships simmetrical all the time!
-    // Mirror
-    /*
+    // The generated ship is asymmetric, so we fix it here
+    // Removing this makes the vast majority of ships look quite a bit worse
     cx.clearRect(hw + (w % 2), 0, w, h);
     cx.scale(-1, 1);
     cx.drawImage(shipCanvas, -w, 0);
-  */
     return shipCanvas;
 }
