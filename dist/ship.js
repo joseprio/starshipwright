@@ -1,10 +1,25 @@
 import { Randomizer } from "./randomizer";
 import { CANVAS_SHIP_EDGE, COMPONENT_GRID_SIZE, COMPONENT_MAXIMUM_SIZE } from "./constants";
-import { computeFactionComponentChances, computeFactionColors, } from "./faction";
-import { clamp, colorToHex, scaleColorBy } from "./utils";
+import { computeFactionComponentChances, } from "./faction";
+import { clamp, colorToHex, scaleColorBy, hsvToRgb } from "./utils";
 export function buildShip(factionRandomizer, p_seed, size) {
     const componentChances = computeFactionComponentChances(factionRandomizer);
-    const [colors, colorChances] = computeFactionColors(factionRandomizer);
+    const colors = [];
+    const colorChances = [];
+    const baseColorCount = 1 +
+        (factionRandomizer.hb(0.7, "base color +1") ? 1 : 0) +
+        factionRandomizer.hseq(0.3, 3, "base color count");
+    // Compute faction colors
+    for (let i = 0; i < baseColorCount; i++) {
+        const ls = "base color" + i;
+        colors.push(hsvToRgb([
+            (factionRandomizer.hd(0, 1, ls + "hue") ** 2),
+            clamp(factionRandomizer.hd(-0.2, 1, ls + "saturation"), 0, (factionRandomizer.hd(0, 1, ls + "saturation bound") ** 4)),
+            clamp(factionRandomizer.hd(0.7, 1.1, ls + "value"), 0, 1),
+        ]));
+        // Default maximum power is 6
+        colorChances.push((2 ** factionRandomizer.hd(0, 6, ls + "chances")));
+    }
     const shipRandomizer = new Randomizer(factionRandomizer.seed + p_seed);
     function computeBaseColor() {
         let rv = colors[shipRandomizer.schoose(colorChances)];

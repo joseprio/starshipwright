@@ -1,5 +1,4 @@
 import { Randomizer } from "./randomizer";
-import { clamp, hsvToRgb } from "./utils";
 import type { RGBColor } from "./types";
 
 export type ComponentChances = Array<number>;
@@ -27,31 +26,6 @@ export function computeFactionComponentChances(factionRandomizer: Randomizer): C
   return componentChances;
 }
 
-export function computeFactionColors(factionRandomizer: Randomizer): ColorData {
-  const colors = [];
-  const colorChances = [];
-  const dp = 6; // Default maximum power
-  const baseColorCount =
-    1 +
-    (factionRandomizer.hb(0.7, "base color +1") ? 1 : 0) +
-    factionRandomizer.hseq(0.3, 3, "base color count");
-  for (let i = 0; i < baseColorCount; i++) {
-    const ls = "base color" + i;
-    colors.push(
-      hsvToRgb([
-        (factionRandomizer.hd(0, 1, ls + "hue") ** 2),
-        clamp(
-          factionRandomizer.hd(-0.2, 1, ls + "saturation"),
-          0,
-          (factionRandomizer.hd(0, 1, ls + "saturation bound") ** 4)
-        ),
-        clamp(factionRandomizer.hd(0.7, 1.1, ls + "value"), 0, 1),
-      ])
-    );
-    colorChances.push((2 ** factionRandomizer.hd(0, dp, ls + "chances")));
-  }
-  return [colors, colorChances];
-}
 
 
   //Where lp is the ship to get the color for
