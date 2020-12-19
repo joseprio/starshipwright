@@ -413,6 +413,9 @@ function hsvToRgb(hsv) {
 
 
 
+// This library is heavily optimized towards size, as I used it for a JS13K game. Also, I'm planning to use
+// it again for that purpose in the future. This function is a lot bigger than it needs to be, but doing so
+// allows us to have all variables we need in the closure instead of passing it around in parameters
 function buildShip(factionRandomizer, p_seed, size) {
     const componentChances = computeFactionComponentChances(factionRandomizer);
     const colors = [];
@@ -718,12 +721,26 @@ function buildShip(factionRandomizer, p_seed, size) {
         }
         return rv;
     }
-    function bigness(v) {
+    function calculateLcms(componentIndex, v, magnitude, bigChanceLow, bigChanceHigh, bigIncChanceLow, bigIncChanceHigh) {
         const effectCenter = centerness(v, true);
         const effectShipsize = 1 - 1 / ((w + h) / 1000 + 1);
         const effectFaction = factionRandomizer.hd(0, 1, "master bigness") ** 0.5;
         const effectStack = 1 - totaldone / totalcomponents;
-        return effectCenter * effectShipsize * effectFaction * effectStack;
+        const bn = (effectCenter * effectShipsize * effectFaction * effectStack) ** magnitude;
+        let lcms = COMPONENT_MAXIMUM_SIZE;
+        if (shipRandomizer.sb(factionRandomizer.hd(bigChanceLow, bigChanceHigh, `com${componentIndex} bigchance`) * bn)) {
+            const chance = factionRandomizer.hd(bigIncChanceLow, bigIncChanceHigh, `com${componentIndex} bigincchance`);
+            while (shipRandomizer.sb(chance * bn)) {
+                const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
+                if (Math.min(lw[0], lw[1]) > lcms / 2) {
+                    lcms *= 1.5;
+                }
+                else {
+                    break;
+                }
+            }
+        }
+        return lcms;
     }
     function leeway(v1, v2) {
         return [
@@ -744,20 +761,7 @@ function buildShip(factionRandomizer, p_seed, size) {
     const components = [
         // Bordered block
         function (v) {
-            let lcms = COMPONENT_MAXIMUM_SIZE;
-            const bn = bigness(v) ** 0.3;
-            if (shipRandomizer.sb(factionRandomizer.hd(0, 0.9, "com0 bigchance") * bn)) {
-                const chance = factionRandomizer.hd(0, 0.5, "com0 bigincchance");
-                while (shipRandomizer.sb(chance * bn)) {
-                    const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
-                    if (Math.min(lw[0], lw[1]) > lcms / 2) {
-                        lcms *= 1.5;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            }
+            const lcms = calculateLcms(0, v, 0.3, 0, 0.9, 0, 0.5);
             const lcms2 = lcms * 2;
             const dhi = [
                 Math.ceil(shipRandomizer.sd(1, Math.max(2, lcms / 2))),
@@ -792,20 +796,7 @@ function buildShip(factionRandomizer, p_seed, size) {
         },
         // Cylinder array
         function (v) {
-            let lcms = COMPONENT_MAXIMUM_SIZE;
-            const bn = bigness(v) ** 0.2;
-            if (shipRandomizer.sb(factionRandomizer.hd(0.3, 1, "com1 bigchance") * bn)) {
-                const chance = factionRandomizer.hd(0, 0.6, "com1 bigincchance");
-                while (shipRandomizer.sb(chance * bn)) {
-                    const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
-                    if (Math.min(lw[0], lw[1]) > lcms / 2) {
-                        lcms *= 1.5;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            }
+            const lcms = calculateLcms(1, v, 0.2, 0.3, 1, 0, 0.6);
             let componentWidth = Math.ceil(shipRandomizer.sd(0.8, 2) * lcms);
             const componentHeight = Math.ceil(shipRandomizer.sd(0.8, 2) * lcms);
             const cw = shipRandomizer.si(3, Math.max(4, componentWidth));
@@ -841,20 +832,7 @@ function buildShip(factionRandomizer, p_seed, size) {
         },
         // Banded cylinder
         function (v) {
-            let lcms = COMPONENT_MAXIMUM_SIZE;
-            const bn = bigness(v) ** 0.05;
-            if (shipRandomizer.sb(factionRandomizer.hd(0, 1, "com2 bigchance") * bn)) {
-                const chance = factionRandomizer.hd(0, 0.9, "com2 bigincchance");
-                while (shipRandomizer.sb(chance * bn)) {
-                    const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
-                    if (Math.min(lw[0], lw[1]) > lcms / 2) {
-                        lcms *= 1.5;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            }
+            const lcms = calculateLcms(2, v, 0.05, 0, 1, 0, 0.9);
             const componentWidth = Math.ceil(shipRandomizer.sd(0.6, 1.4) * lcms);
             const componentHeight = Math.ceil(shipRandomizer.sd(1, 2) * lcms);
             const wh2 = [
@@ -938,20 +916,7 @@ function buildShip(factionRandomizer, p_seed, size) {
                     }
                 }
             }
-            let lcms = COMPONENT_MAXIMUM_SIZE;
-            const bn = bigness(v) ** 0.1;
-            if (shipRandomizer.sb(factionRandomizer.hd(0.6, 1, "com3 bigchance") * bn)) {
-                const chance = factionRandomizer.hd(0.3, 0.8, "com3 bigincchance");
-                while (shipRandomizer.sb(chance * bn)) {
-                    const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
-                    if (Math.min(lw[0], lw[1]) > lcms / 2) {
-                        lcms *= 1.5;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            }
+            const lcms = calculateLcms(3, v, 0.1, 0.6, 1, 0.3, 0.8);
             const componentWidth = shipRandomizer.sd(1, 2) * lcms;
             let componentHeight = Math.ceil(shipRandomizer.sd(0.3, 1) * lcms);
             const nratio = shipRandomizer.sd(0.25, 0.6);
@@ -1084,20 +1049,7 @@ function buildShip(factionRandomizer, p_seed, size) {
         },
         //Ball
         function (v) {
-            let lcms = COMPONENT_MAXIMUM_SIZE;
-            const bn = bigness(v) ** 0.1;
-            if (shipRandomizer.sb(factionRandomizer.hd(0, 0.9, "com5 bigchance") * bn)) {
-                const chance = factionRandomizer.hd(0, 0.8, "com5 bigincchance");
-                while (shipRandomizer.sb(chance * bn)) {
-                    const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
-                    if (Math.min(lw[0], lw[1]) > lcms / 2) {
-                        lcms *= 1.5;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            }
+            const lcms = calculateLcms(4, v, 0.1, 0, 0.9, 0, 0.8);
             const lightmid = shipRandomizer.sd(0.75, 1);
             const lightedge = shipRandomizer.sd(0, 0.25);
             const baseColor = computeBaseColor();
@@ -1144,20 +1096,7 @@ function buildShip(factionRandomizer, p_seed, size) {
                 components[shipRandomizer.schoose(componentChances.slice(0, 6))](v);
                 return;
             }
-            let lcms = COMPONENT_MAXIMUM_SIZE;
-            const bn = bigness(v) ** 0.05;
-            if (shipRandomizer.sb(factionRandomizer.hd(0, 0.9, "com6 bigchance") * bn)) {
-                const chance = factionRandomizer.hd(0, 0.8, "com6 bigincchance");
-                while (shipRandomizer.sb(chance * bn)) {
-                    const lw = leeway([v[0] - lcms, v[1] - lcms], [v[0] + lcms, v[1] + lcms]);
-                    if (Math.min(lw[0], lw[1]) > lcms / 2) {
-                        lcms *= 1.5;
-                    }
-                    else {
-                        break;
-                    }
-                }
-            }
+            const lcms = calculateLcms(5, v, 0.05, 0, 0.9, 0, 0.8);
             const h0 = Math.ceil(lcms * 2 * shipRandomizer.sd(0.6, 1)); //Inner height, longer.
             const hh0i = Math.floor(h0 / 2);
             const hh0e = h0 % 2;
