@@ -8,7 +8,7 @@ import {
   computeFactionComponentChances,
 } from "./faction";
 import type { Vec, RGBColor } from "./types";
-import { clamp, colorToHex, scaleColorBy, hsvToRgb } from "./utils";
+import { clamp, scaleColorBy, hsvToRgb } from "./utils";
 
 type Cell = {
   gx: number;
@@ -37,6 +37,8 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
   // Compute faction colors
   for (let i = 0; i < baseColorCount; i++) {
     const ls = "base color" + i;
+    // TODO: This is the only usage of hsvToRgb, which can actually help us simplify quite a bit of code
+    // Just doing random RGB coloring should be alright and simplify the code
     colors.push(
       hsvToRgb([
         (factionRandomizer.hd(0, 1, ls + "hue") ** 2),
@@ -235,10 +237,10 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
       for (let i = 0; i < circles.length; i++) {
         const lc = circles[i];
         cx.beginPath();
-        cx.arc(lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
+        cx.arc(lc.v[0], lc.v[1], lc.r, 0, 7);
         cx.fill();
         cx.beginPath();
-        cx.arc(w - lc.v[0], lc.v[1], lc.r, 0, 2 * Math.PI);
+        cx.arc(w - lc.v[0], lc.v[1], lc.r, 0, 7);
         cx.fill();
       }
     },
@@ -704,7 +706,7 @@ function (v) {
     0,
     scaleColorBy(basecolor, lightness1_edge)
   );
-  grad2[1].addColorStop(0.5, colorToHex(basecolor));
+  grad2[1].addColorStop(0.5, scaleColorBy(basecolor, 1));
   grad2[1].addColorStop(
     1,
     scaleColorBy(basecolor, lightness1_edge)
@@ -879,7 +881,7 @@ function (v) {
     for (let ay = 0; ay < county; ay++) {
       const py = bv[1] + (ay * 2 + 1) * smallr;
       cx.beginPath();
-      cx.arc(px, py, shadowr, 0, 2 * Math.PI);
+      cx.arc(px, py, shadowr, 0, 7);
       cx.fill();
     }
   }
@@ -892,7 +894,7 @@ function (v) {
       grad.addColorStop(1, coloredge);
       cx.fillStyle = grad;
       cx.beginPath();
-      cx.arc(px, py, drawr, 0, 2 * Math.PI);
+      cx.arc(px, py, drawr, 0, 7);
       cx.fill();
     }
   }

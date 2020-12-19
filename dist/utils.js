@@ -4,7 +4,7 @@ export function clamp(n, min, max) {
 function colorChannelToHex(n) {
     return Math.floor(clamp(n, 0, 1) * 255).toString(16).padStart(2, "0");
 }
-export function colorToHex(color) {
+function colorToHex(color) {
     return "#" +
         colorChannelToHex(color[0]) +
         colorChannelToHex(color[1]) +

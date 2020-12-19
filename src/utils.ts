@@ -8,7 +8,7 @@ function colorChannelToHex(n: number): string {
   return Math.floor(clamp(n, 0, 1) * 255).toString(16).padStart(2, "0");
 }
 
-export function colorToHex(color: RGBColor): string {
+function colorToHex(color: RGBColor): string {
   return "#" +
     colorChannelToHex(color[0]) +
     colorChannelToHex(color[1]) +
