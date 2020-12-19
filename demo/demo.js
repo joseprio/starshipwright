@@ -151,7 +151,7 @@ class Randomizer {
     /*
     hr_original(seed?: string): number {
       let t = 1206170165;
-      if (seed != null) {
+      if (seed) {
         for (let x = seed.length - 1; x >= 0; x--) {
           const c = seed.charCodeAt(x);
           t = ((t << 5) + t) ^ c ^ (t << ((c % 13) + 1)) ^ (t >> ((c % 17) + 1));
@@ -168,11 +168,11 @@ class Randomizer {
     hr(seed) {
         const state = [1160605769, 1424711319, 876532818, 1419174464];
         let rv = 1206170165;
-        if (seed == null) {
+        if (!seed) {
             seed = "?/?/?/";
             rv = 3379896793;
         }
-        if (this.hrCache.hasOwnProperty(seed)) {
+        if (this.hrCache[seed]) {
             return this.hrCache[seed];
         }
         for (let x = seed.length - 1; x >= 0; x--) {
@@ -456,9 +456,7 @@ function buildShip(factionRandomizer, p_seed, size) {
     }
     //The initial overall size of this ship, in pixels
     size =
-        size == null
-            ? shipRandomizer.sd(factionRandomizer.hd(2.5, 3.5, "size min"), factionRandomizer.hd(5, 7, "size max")) ** 3
-            : size;
+        size || shipRandomizer.sd(factionRandomizer.hd(2.5, 3.5, "size min"), factionRandomizer.hd(5, 7, "size max")) ** 3;
     const wratio = shipRandomizer.sd(factionRandomizer.hd(0.5, 1, "wratio min"), factionRandomizer.hd(1, 1.3, "wratio max"));
     const hratio = shipRandomizer.sd(factionRandomizer.hd(0.7, 1, "hratio min"), factionRandomizer.hd(1.1, 1.7, "hratio max"));
     const w = Math.floor(size * wratio) + 2 * CANVAS_SHIP_EDGE; // Maximum width of this ship, in pixels
@@ -583,7 +581,7 @@ function buildShip(factionRandomizer, p_seed, size) {
             cx.strokeStyle = "#fff";
             for (let npi = 1; npi < pointcount; npi++) {
                 let np = points[npi];
-                if (np == null) {
+                if (!np) {
                     np = [
                         shipRandomizer.sd(0, 1) * innersize[0] + CANVAS_SHIP_EDGE,
                         (shipRandomizer.sd(0, 1) ** factionRandomizer.hd(0.1, 1, "outline2 frontbias")) *
@@ -990,7 +988,7 @@ function buildShip(factionRandomizer, p_seed, size) {
                 backwards,
                 toCenter * (1 + cn),
             ]);
-            let ev = null;
+            let ev;
             // Shorter than comparing with 0
             if (!direction) {
                 //forwards

@@ -56,7 +56,7 @@ export class Randomizer {
     /*
     hr_original(seed?: string): number {
       let t = 1206170165;
-      if (seed != null) {
+      if (seed) {
         for (let x = seed.length - 1; x >= 0; x--) {
           const c = seed.charCodeAt(x);
           t = ((t << 5) + t) ^ c ^ (t << ((c % 13) + 1)) ^ (t >> ((c % 17) + 1));
@@ -73,11 +73,11 @@ export class Randomizer {
     hr(seed) {
         const state = [1160605769, 1424711319, 876532818, 1419174464];
         let rv = 1206170165;
-        if (seed == null) {
+        if (!seed) {
             seed = "?/?/?/";
             rv = 3379896793;
         }
-        if (this.hrCache.hasOwnProperty(seed)) {
+        if (this.hrCache[seed]) {
             return this.hrCache[seed];
         }
         for (let x = seed.length - 1; x >= 0; x--) {
