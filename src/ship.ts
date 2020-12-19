@@ -90,12 +90,10 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
 
   //The initial overall size of this ship, in pixels
   size =
-    size == null
-      ? shipRandomizer.sd(
+    size || shipRandomizer.sd(
           factionRandomizer.hd(2.5, 3.5, "size min"),
           factionRandomizer.hd(5, 7, "size max")
-        ) ** 3
-      : size;
+        ) ** 3;
   const wratio = shipRandomizer.sd(
     factionRandomizer.hd(0.5, 1, "wratio min"),
     factionRandomizer.hd(1, 1.3, "wratio max")
@@ -265,7 +263,7 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
       cx.strokeStyle = "#fff";
       for (let npi = 1; npi < pointcount; npi++) {
         let np = points[npi];
-        if (np == null) {
+        if (!np) {
           np = [
             shipRandomizer.sd(0, 1) * innersize[0] + CANVAS_SHIP_EDGE,
             (shipRandomizer.sd(0, 1) ** factionRandomizer.hd(0.1, 1, "outline2 frontbias")) *
@@ -762,7 +760,7 @@ function (v) {
     backwards,
     toCenter * (1 + cn),
   ]);
-  let ev = null;
+  let ev: Vec;
   // Shorter than comparing with 0
   if (!direction) {
     //forwards
