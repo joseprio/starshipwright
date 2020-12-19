@@ -1049,7 +1049,7 @@ function buildShip(factionRandomizer, p_seed, size) {
         },
         //Ball
         function (v) {
-            const lcms = calculateLcms(4, v, 0.1, 0, 0.9, 0, 0.8);
+            const lcms = calculateLcms(5, v, 0.1, 0, 0.9, 0, 0.8);
             const lightmid = shipRandomizer.sd(0.75, 1);
             const lightedge = shipRandomizer.sd(0, 0.25);
             const baseColor = computeBaseColor();
@@ -1096,7 +1096,7 @@ function buildShip(factionRandomizer, p_seed, size) {
                 components[shipRandomizer.schoose(componentChances.slice(0, 6))](v);
                 return;
             }
-            const lcms = calculateLcms(5, v, 0.05, 0, 0.9, 0, 0.8);
+            const lcms = calculateLcms(6, v, 0.05, 0, 0.9, 0, 0.8);
             const h0 = Math.ceil(lcms * 2 * shipRandomizer.sd(0.6, 1)); //Inner height, longer.
             const hh0i = Math.floor(h0 / 2);
             const hh0e = h0 % 2;
