@@ -293,13 +293,9 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
 
   outlines[factionRandomizer.hchoose([1, 1, 1], "outline type")]();
   const outline = cx.getImageData(0, 0, w, h);
-
  
-  //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or 0 if (X,Y) is out of bounds.
+  //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y)
   function getOutlineAlpha(x: number, y: number): number {
-    if (x < 0 || x > w || y < 0 || y > h) {
-      return 0;
-    }
     return outline.data[(y * w + x) * 4 + 3];
   }
 
