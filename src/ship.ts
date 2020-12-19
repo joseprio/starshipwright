@@ -419,11 +419,14 @@ function calculateLcms(componentIndex: number, v: Vec, magnitude: number, bigCha
   if (shipRandomizer.sb(factionRandomizer.hd(bigChanceLow, bigChanceHigh, `com${componentIndex} bigchance`) * bn)) {
     const chance = factionRandomizer.hd(bigIncChanceLow, bigIncChanceHigh, `com${componentIndex} bigincchance`);
     while (shipRandomizer.sb(chance * bn)) {
-      const lw = leeway(
-        [v[0] - lcms, v[1] - lcms],
-        [v[0] + lcms, v[1] + lcms]
-      );
-      if (Math.min(lw[0], lw[1]) > lcms / 2) {
+      const minLeeway =
+        Math.min(
+          v[0] - lcms - CANVAS_SHIP_EDGE,
+          w - CANVAS_SHIP_EDGE - v[0] + lcms,
+          v[1] - lcms - CANVAS_SHIP_EDGE,
+          h - CANVAS_SHIP_EDGE - v[1] + lcms
+        );
+      if (minLeeway > lcms / 2) {
         lcms *= 1.5;
       } else {
         break;
@@ -431,19 +434,6 @@ function calculateLcms(componentIndex: number, v: Vec, magnitude: number, bigCha
     }
   }
   return lcms;
-}
-
-function leeway(v1: Vec, v2: Vec): Vec {
-  return [
-    Math.min(
-      v1[0] - CANVAS_SHIP_EDGE,
-      w - CANVAS_SHIP_EDGE - v2[0]
-    ),
-    Math.min(
-      v1[1] - CANVAS_SHIP_EDGE,
-      h - CANVAS_SHIP_EDGE - v2[1]
-    ),
-  ];
 }
 
 //lp is the ship. amount is the amount of shadow at the edges, 0 - 1 (the middle is always 0). middlep and edgep should be vectors at the middle and edge of the gradient.
