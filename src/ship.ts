@@ -419,14 +419,17 @@ function calculateLcms(componentIndex: number, v: Vec, magnitude: number, bigCha
   if (shipRandomizer.sb(factionRandomizer.hd(bigChanceLow, bigChanceHigh, `com${componentIndex} bigchance`) * bn)) {
     const chance = factionRandomizer.hd(bigIncChanceLow, bigIncChanceHigh, `com${componentIndex} bigincchance`);
     while (shipRandomizer.sb(chance * bn)) {
-      const minLeeway =
+      const lw = [
         Math.min(
           v[0] - lcms - CANVAS_SHIP_EDGE,
-          w - CANVAS_SHIP_EDGE - v[0] + lcms,
+          w - CANVAS_SHIP_EDGE - v[0] + lcms
+        ),
+        Math.min(
           v[1] - lcms - CANVAS_SHIP_EDGE,
           h - CANVAS_SHIP_EDGE - v[1] + lcms
-        );
-      if (minLeeway > lcms / 2) {
+        ),
+      ];
+      if (Math.min(lw[0], lw[1]) > lcms / 2) {
         lcms *= 1.5;
       } else {
         break;
