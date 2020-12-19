@@ -255,10 +255,9 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
       const basefatness =
         COMPONENT_GRID_SIZE / size +
         factionRandomizer.hd(0.03, 0.1, "outline2 basefatness");
-      const basemessiness = 1 / basefatness;
       const pointcount = Math.max(
         3,
-        Math.ceil(basemessiness * shipRandomizer.sd(0.05, 0.1) * size ** 0.5)
+        Math.ceil(shipRandomizer.sd(0.05, 0.1) / basefatness * size ** 0.5)
       );
       // @ts-ignore - We're doing it properly
       cx.lineCap = ["round", "square"][factionRandomizer.hi(0, 1, "outline2 linecap")];
@@ -296,10 +295,10 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
   const outline = cx.getImageData(0, 0, w, h);
 
  
-  //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or -1 if (X,Y) is out of bounds.
+  //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y), or 0 if (X,Y) is out of bounds.
   function getOutlineAlpha(x: number, y: number): number {
     if (x < 0 || x > w || y < 0 || y > h) {
-      return -1;
+      return 0;
     }
     return outline.data[(y * w + x) * 4 + 3];
   }
@@ -326,7 +325,7 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
     if (lcell.gx > 0) {
       const ncell = cgrid[lcell.gx - 1][lcell.gy];
       if (ncell.phase == 0) {
-        if (getOutlineAlpha(ncell.x, ncell.y) > 0) {
+        if (getOutlineAlpha(ncell.x, ncell.y)) {
           ncell.phase = 1;
           goodcells.push(ncell);
         } else {
@@ -337,7 +336,7 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
     if (lcell.gx < gw - 1) {
       const ncell = cgrid[lcell.gx + 1][lcell.gy];
       if (ncell.phase == 0) {
-        if (getOutlineAlpha(ncell.x, ncell.y) > 0) {
+        if (getOutlineAlpha(ncell.x, ncell.y)) {
           ncell.phase = 1;
           goodcells.push(ncell);
         } else {
@@ -348,7 +347,7 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
     if (lcell.gy > 0) {
       const ncell = cgrid[lcell.gx][lcell.gy - 1];
       if (ncell.phase == 0) {
-        if (getOutlineAlpha(ncell.x, ncell.y) > 0) {
+        if (getOutlineAlpha(ncell.x, ncell.y)) {
           ncell.phase = 1;
           goodcells.push(ncell);
         } else {
@@ -359,7 +358,7 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
     if (lcell.gy < gh - 1) {
       const ncell = cgrid[lcell.gx][lcell.gy + 1];
       if (ncell.phase == 0) {
-        if (getOutlineAlpha(ncell.x, ncell.y) > 0) {
+        if (getOutlineAlpha(ncell.x, ncell.y)) {
           ncell.phase = 1;
           goodcells.push(ncell);
         } else {
@@ -991,7 +990,7 @@ function (v) {
       ) {
         continue;
       }
-      if (getOutlineAlpha(nv[0], nv[1]) <= 0) {
+      if (!getOutlineAlpha(nv[0], nv[1])) {
         continue;
       }
       lv = nv;
