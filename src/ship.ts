@@ -27,8 +27,8 @@ type ComponentFunc = (v: Vec) => void;
 export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: number): HTMLCanvasElement {
   const componentChances = computeFactionComponentChances(factionRandomizer);
 
-  const colors = [];
-  const colorChances = [];
+  const colors: Array<RGBColor> = [];
+  const colorChances: Array<number> = [];
 
   const baseColorCount =
     1 +
@@ -458,7 +458,7 @@ function shadowGradient(
     middlePoint[0] * 2 - edgePoint[0],
     middlePoint[1] * 2 - edgePoint[1]
   );
-  const darkness = `rgba(0,0,0,${clamp(amount, 0, 1)})`;
+  const darkness = `rgba(0,0,0,${amount})`;
   grad.addColorStop(0, darkness);
   grad.addColorStop(0.5, "rgba(0,0,0,0)");
   grad.addColorStop(1, darkness);

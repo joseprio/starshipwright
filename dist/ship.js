@@ -336,7 +336,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
     //lp is the ship. amount is the amount of shadow at the edges, 0 - 1 (the middle is always 0). middlep and edgep should be vectors at the middle and edge of the gradient.
     function shadowGradient(middlePoint, edgePoint, amount) {
         const grad = cx.createLinearGradient(edgePoint[0], edgePoint[1], middlePoint[0] * 2 - edgePoint[0], middlePoint[1] * 2 - edgePoint[1]);
-        const darkness = `rgba(0,0,0,${clamp(amount, 0, 1)})`;
+        const darkness = `rgba(0,0,0,${amount})`;
         grad.addColorStop(0, darkness);
         grad.addColorStop(0.5, "rgba(0,0,0,0)");
         grad.addColorStop(1, darkness);

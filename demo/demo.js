@@ -311,7 +311,7 @@ function computeFactionComponentChances(factionRandomizer) {
     const componentChances = [];
     const dp = 8; // Default maximum power
     // TODO: once we dont need backwards compatibility, we can probably simplify this file; the first argument of sd seems
-    // unnecessary
+    // unnecessary as we want to cherrypick ships anyways
     componentChances[0] =
         0.8 * factionRandomizer.sd(0.001, 1) * (2 ** factionRandomizer.sd(0, dp));
     componentChances[1] =
@@ -328,44 +328,6 @@ function computeFactionComponentChances(factionRandomizer) {
         0.5 * factionRandomizer.sd(0, 1) * (2 ** factionRandomizer.sd(0, dp));
     return componentChances;
 }
-//Where lp is the ship to get the color for
-/*
-getwindowcolor(lp) {
-  if (this.cache["window colors"] == null) {
-    const dp = 5; //Default maximum power.
-    this.cache["window color count"] =
-      1 + (this.r.hb(0.3, "window color +1") ? 1 : 0);
-    this.cache["window colors"] = new Array(this.cache["window color count"]);
-    this.cache["window color chances"] = new Array(
-      this.cache["window color count"]
-    );
-    for (let i = 0; i < this.cache["window color count"]; i++) {
-      const ls = "window color" + i;
-      this.cache["window colors"][i] = hsvToRgb([
-        this.r.hb(0.6, "window color blues only")
-          ? this.r.hd(1 / 3, 3 / 4, "window color blue hue")
-          : this.r.hd(0, 1, "window color hue"),
-        Math.pow(
-          clamp(this.r.hd(-0.2, 1.2, "window color hue"), 0, 1),
-          0.5
-        ),
-        Math.pow(
-          clamp(this.r.hd(0.4, 1.3, "window color value"), 0, 1),
-          0.5
-        ),
-      ]);
-      this.cache["window color chances"][i] = Math.pow(
-        2,
-        this.r.hd(0, dp, ls + "chances")
-      );
-    }
-  }
-  const rv = this.cache["window colors"][
-    lp.r.schoose(this.cache["window color chances"])
-  ];
-  return rv;
-}
-*/
 
 // CONCATENATED MODULE: ./src/utils.ts
 function clamp(n, min, max) {
@@ -747,7 +709,7 @@ function buildShip(factionRandomizer, p_seed, size) {
     //lp is the ship. amount is the amount of shadow at the edges, 0 - 1 (the middle is always 0). middlep and edgep should be vectors at the middle and edge of the gradient.
     function shadowGradient(middlePoint, edgePoint, amount) {
         const grad = cx.createLinearGradient(edgePoint[0], edgePoint[1], middlePoint[0] * 2 - edgePoint[0], middlePoint[1] * 2 - edgePoint[1]);
-        const darkness = `rgba(0,0,0,${clamp(amount, 0, 1)})`;
+        const darkness = `rgba(0,0,0,${amount})`;
         grad.addColorStop(0, darkness);
         grad.addColorStop(0.5, "rgba(0,0,0,0)");
         grad.addColorStop(1, darkness);
