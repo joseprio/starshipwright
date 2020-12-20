@@ -1,5 +1,5 @@
 import { Randomizer } from "./randomizer";
-import { CANVAS_SHIP_EDGE, COMPONENT_GRID_SIZE, COMPONENT_MAXIMUM_SIZE } from "./constants";
+import { COMPONENT_GRID_SIZE, COMPONENT_MAXIMUM_SIZE } from "./constants";
 import { computeFactionComponentChances, } from "./faction";
 import { clamp, scaleColorBy, hsvToRgb } from "./utils";
 // This library is heavily optimized towards size, as I used it for a JS13K game. Also, I'm planning to use
@@ -50,13 +50,13 @@ export function buildShip(factionRandomizer, p_seed, size) {
         size || shipRandomizer.sd(factionRandomizer.hd(2.5, 3.5, "size min"), factionRandomizer.hd(5, 7, "size max")) ** 3;
     const wratio = shipRandomizer.sd(factionRandomizer.hd(0.5, 1, "wratio min"), factionRandomizer.hd(1, 1.3, "wratio max"));
     const hratio = shipRandomizer.sd(factionRandomizer.hd(0.7, 1, "hratio min"), factionRandomizer.hd(1.1, 1.7, "hratio max"));
-    const w = Math.floor(size * wratio) + 2 * CANVAS_SHIP_EDGE; // Maximum width of this ship, in pixels
+    const w = Math.floor(size * wratio); // Maximum width of this ship, in pixels
     const hw = Math.floor(w / 2);
-    const gw = Math.floor((w - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
+    const gw = Math.floor(w / COMPONENT_GRID_SIZE);
     const gwextra = (w - gw * COMPONENT_GRID_SIZE) / 2;
-    const h = Math.floor(size * hratio) + 2 * CANVAS_SHIP_EDGE; // Maximum height of this ship, in pixels
+    const h = Math.floor(size * hratio); // Maximum height of this ship, in pixels
     const hh = Math.floor(h / 2);
-    const gh = Math.floor((h - 2 * CANVAS_SHIP_EDGE) / COMPONENT_GRID_SIZE);
+    const gh = Math.floor(h / COMPONENT_GRID_SIZE);
     const ghextra = (h - gh * COMPONENT_GRID_SIZE) / 2;
     const shipCanvas = document.createElement("canvas"); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
     shipCanvas.width = w;
@@ -66,13 +66,12 @@ export function buildShip(factionRandomizer, p_seed, size) {
     const outlines = [
         // 0: Joined rectangles.
         function () {
-            const csarea = (w - 2 * CANVAS_SHIP_EDGE) * (h - 2 * CANVAS_SHIP_EDGE);
-            const csarealimit = csarea / 20;
-            const initialWidth = Math.ceil((w - 2 * CANVAS_SHIP_EDGE) * factionRandomizer.hd(0.1, 1, "outline0 iw") / 5);
+            const csarealimit = w * h / 20;
+            const initialWidth = Math.ceil(w * factionRandomizer.hd(0.1, 1, "outline0 iw") / 5);
             const blocks = [
                 [
-                    [hw - initialWidth, CANVAS_SHIP_EDGE],
-                    [hw + initialWidth, h - CANVAS_SHIP_EDGE],
+                    [hw - initialWidth, 0],
+                    [hw + initialWidth, h],
                 ],
             ];
             const blockcount = 2 +
@@ -88,8 +87,8 @@ export function buildShip(factionRandomizer, p_seed, size) {
                     v0[1] = base[1][1] - (v0[1] - base[0][1]);
                 }
                 const v1 = [
-                    clamp(shipRandomizer.sd(0, 1) * w, CANVAS_SHIP_EDGE, w - CANVAS_SHIP_EDGE),
-                    clamp(shipRandomizer.sd(0, 1) * h, CANVAS_SHIP_EDGE, h - CANVAS_SHIP_EDGE),
+                    clamp(shipRandomizer.sd(0, 1) * w, 0, w),
+                    clamp(shipRandomizer.sd(0, 1) * h, 0, h),
                 ];
                 const area = Math.abs((v1[0] - v0[0]) * (v1[1] - v0[1]));
                 const ratio = csarealimit / area;
@@ -121,14 +120,14 @@ export function buildShip(factionRandomizer, p_seed, size) {
         },
         // 1: Joined circles
         function () {
-            const csarea = (w - 2 * CANVAS_SHIP_EDGE) * (h - 2 * CANVAS_SHIP_EDGE);
+            const csarea = w * h;
             const csarealimit = csarea / 20;
             const csrlimit = Math.max(2, (csarealimit / Math.PI) ** 0.5);
-            const initialwidth = Math.ceil((w - 2 * CANVAS_SHIP_EDGE) * factionRandomizer.hd(0.1, 1, "outline1 iw") / 5);
+            const initialwidth = Math.ceil(w * factionRandomizer.hd(0.1, 1, "outline1 iw") / 5);
             const circles = [];
-            const initialcount = Math.floor((h - 2 * CANVAS_SHIP_EDGE) / (initialwidth * 2));
+            const initialcount = Math.floor(h / (initialwidth * 2));
             for (let i = 0; i < initialcount; i++) {
-                let lv = [hw, h - (CANVAS_SHIP_EDGE + initialwidth * (i * 2 + 1))];
+                let lv = [hw, h - (initialwidth * (i * 2 + 1))];
                 circles.push({ v: lv, r: initialwidth });
             }
             const circlecount = initialcount +
@@ -142,7 +141,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
                     pa = shipRandomizer.sd(0, Math.PI);
                 }
                 let lv = [base.v[0] + Math.cos(pa) * pr, base.v[1] + Math.sin(pa) * pr];
-                ncr = Math.min(ncr, lv[0] - CANVAS_SHIP_EDGE, w - CANVAS_SHIP_EDGE - lv[0], lv[1] - CANVAS_SHIP_EDGE, h - CANVAS_SHIP_EDGE - lv[1]);
+                ncr = Math.min(ncr, lv[0], w - lv[0], lv[1], h - lv[1]);
                 circles.push({ v: lv, r: ncr });
             }
             cx.fillStyle = "#fff";
@@ -158,10 +157,10 @@ export function buildShip(factionRandomizer, p_seed, size) {
         },
         // 2: Mess of lines
         function () {
-            const innersize = [w - 2 * CANVAS_SHIP_EDGE, h - 2 * CANVAS_SHIP_EDGE];
+            const innersize = [w, h];
             const points = [
-                [hw, shipRandomizer.sd(0, 0.05) * innersize[1] + CANVAS_SHIP_EDGE],
-                [hw, shipRandomizer.sd(0.95, 1) * innersize[1] + CANVAS_SHIP_EDGE],
+                [hw, shipRandomizer.sd(0, 0.05) * innersize[1]],
+                [hw, shipRandomizer.sd(0.95, 1) * innersize[1]],
             ];
             const basefatness = COMPONENT_GRID_SIZE / size +
                 factionRandomizer.hd(0.03, 0.1, "outline2 basefatness");
@@ -173,10 +172,9 @@ export function buildShip(factionRandomizer, p_seed, size) {
                 let np = points[npi];
                 if (!np) {
                     np = [
-                        shipRandomizer.sd(0, 1) * innersize[0] + CANVAS_SHIP_EDGE,
+                        shipRandomizer.sd(0, 1) * innersize[0],
                         shipRandomizer.sd(0, 1) ** factionRandomizer.hd(0.1, 1, "outline2 frontbias") *
-                            innersize[1] +
-                            CANVAS_SHIP_EDGE,
+                            innersize[1],
                     ];
                     points.push(np);
                 }
@@ -316,7 +314,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
         if (shipRandomizer.sb(factionRandomizer.hd(bigChanceLow, bigChanceHigh, `com${componentIndex} bigchance`) * bn)) {
             const chance = factionRandomizer.hd(bigIncChanceLow, bigIncChanceHigh, `com${componentIndex} bigincchance`);
             while (shipRandomizer.sb(chance * bn)) {
-                const minLeeway = Math.min(v[0] - lcms - CANVAS_SHIP_EDGE, w - CANVAS_SHIP_EDGE - v[0] - lcms, v[1] - lcms - CANVAS_SHIP_EDGE, h - CANVAS_SHIP_EDGE - v[1] - lcms);
+                const minLeeway = Math.min(v[0] - lcms, w - v[0] - lcms, v[1] - lcms, h - v[1] - lcms);
                 if (minLeeway > lcms / 2) {
                     lcms *= 1.5;
                 }
@@ -376,6 +374,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
         // Cylinder array
         function (v) {
             const lcms = calculateLcms(1, v, 0.2, 0.3, 1, 0, 0.6);
+            // TODO: making this a const instead is likely to be beneficial, but we would need to change the order, breaking backwards compatibility
             let componentWidth = Math.ceil(shipRandomizer.sd(0.8, 2) * lcms);
             const componentHeight = Math.ceil(shipRandomizer.sd(0.8, 2) * lcms);
             const cw = shipRandomizer.si(3, Math.max(4, componentWidth));
@@ -497,6 +496,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
             }
             const lcms = calculateLcms(3, v, 0.1, 0.6, 1, 0.3, 0.8);
             const componentWidth = shipRandomizer.sd(1, 2) * lcms;
+            // TODO: making this a const instead is likely to be beneficial, but we would need to change the order, breaking backwards compatibility
             let componentHeight = Math.ceil(shipRandomizer.sd(0.3, 1) * lcms);
             const nratio = shipRandomizer.sd(0.25, 0.6);
             const nw = componentWidth * nratio;
@@ -573,7 +573,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
             // Shorter than comparing with 0
             if (!direction) {
                 //forwards
-                const hlimit = v[1] - CANVAS_SHIP_EDGE;
+                const hlimit = v[1];
                 const componentHeight = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit - shipRandomizer.si(0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.7 * size * shipRandomizer.sd(0, 1) ** factionRandomizer.hd(2, 6, "com4 hpower0")));
                 const bb_0_0 = v[0] - hwi, bb_0_1 = v[1] - componentHeight, bb_1_0 = v[0] + hwi + hwe;
                 const grad = cx.createLinearGradient(bb_0_0, bb_0_1, bb_1_0, bb_0_1);
@@ -586,7 +586,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
             }
             else if (direction == 1) {
                 //backwards
-                const hlimit = h - (CANVAS_SHIP_EDGE + v[1]);
+                const hlimit = h - v[1];
                 const componentHeight = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit - shipRandomizer.si(0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.6 * size * shipRandomizer.sd(0, 1) ** factionRandomizer.hd(2, 7, "com4 hpower1")));
                 const bb_0_0 = v[0] - hwi, bb_0_1 = v[1], bb_1_0 = v[0] + hwi + hwe;
                 const grad = cx.createLinearGradient(bb_0_0, bb_0_1, bb_1_0, bb_0_1);
@@ -740,10 +740,10 @@ export function buildShip(factionRandomizer, p_seed, size) {
                 ncell.x + shipRandomizer.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
                 ncell.y + shipRandomizer.si(-COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
             ];
-            if (nv[0] < CANVAS_SHIP_EDGE ||
-                nv[0] > w - CANVAS_SHIP_EDGE ||
-                nv[1] < CANVAS_SHIP_EDGE ||
-                nv[1] > h - CANVAS_SHIP_EDGE ||
+            if (nv[0] < 0 ||
+                nv[0] > w ||
+                nv[1] < 0 ||
+                nv[1] > h ||
                 !getOutlineAlpha(nv[0], nv[1])) {
                 continue;
             }
