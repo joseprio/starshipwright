@@ -858,8 +858,8 @@ function buildShip(factionRandomizer, p_seed, size) {
         //Rocket engine (or tries to call another random component if too far forward)
         function (v) {
             if (shipRandomizer.sb(frontness(v) - 0.3) ||
-                getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) > 0 ||
-                getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8) > 0) {
+                getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) ||
+                getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8)) {
                 for (let tries = 0; tries < 100; tries++) {
                     const which = shipRandomizer.schoose(componentChances);
                     if (which != 3) {
@@ -986,12 +986,12 @@ function buildShip(factionRandomizer, p_seed, size) {
                 (factionRandomizer.hd(0, 1, "com4 covercomc2") ** 2),
             ];
             components[shipRandomizer.schoose(coverComC)](v);
-            if (getCellPhase(ev[0], ev[1]) > 0) {
+            if (getCellPhase(ev[0], ev[1])) {
                 const nev = [
                     ev[0] + Math.round(shipRandomizer.sd(-1, 1) * COMPONENT_GRID_SIZE),
                     ev[1] + Math.round(shipRandomizer.sd(-1, 1) * COMPONENT_GRID_SIZE),
                 ];
-                if (getCellPhase(nev[0], nev[1]) > 0) {
+                if (getCellPhase(nev[0], nev[1])) {
                     components[shipRandomizer.schoose(coverComC)](nev);
                 }
                 else {
