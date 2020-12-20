@@ -436,19 +436,6 @@ function calculateLcms(componentIndex: number, v: Vec, magnitude: number, bigCha
   return lcms;
 }
 
-function leeway(v1: Vec, v2: Vec): Vec {
-  return [
-    Math.min(
-      v1[0] - CANVAS_SHIP_EDGE,
-      w - CANVAS_SHIP_EDGE - v2[0]
-    ),
-    Math.min(
-      v1[1] - CANVAS_SHIP_EDGE,
-      h - CANVAS_SHIP_EDGE - v2[1]
-    ),
-  ];
-}
-
 //lp is the ship. amount is the amount of shadow at the edges, 0 - 1 (the middle is always 0). middlep and edgep should be vectors at the middle and edge of the gradient.
 function shadowGradient(
   middlePoint: Vec,
@@ -653,8 +640,8 @@ function (v) {
 function (v) {
   if (
     shipRandomizer.sb(frontness(v) - 0.3) ||
-    getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) > 0 ||
-    getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8) > 0
+    getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) ||
+    getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8)
   ) {
     for (let tries = 0; tries < 100; tries++) {
       const which = shipRandomizer.schoose(componentChances);
@@ -834,16 +821,12 @@ function (v) {
     (factionRandomizer.hd(0, 1, "com4 covercomc2") ** 2),
   ];
   components[shipRandomizer.schoose(coverComC)](v);
-  if (getCellPhase(ev[0], ev[1]) > 0) {
+  if (getCellPhase(ev[0], ev[1])) {
     const nev: Vec = [
       ev[0] + Math.round(shipRandomizer.sd(-1, 1) * COMPONENT_GRID_SIZE),
       ev[1] + Math.round(shipRandomizer.sd(-1, 1) * COMPONENT_GRID_SIZE),
     ];
-    if (getCellPhase(nev[0], nev[1]) > 0) {
-      components[shipRandomizer.schoose(coverComC)](nev);
-    } else {
-      components[shipRandomizer.schoose(coverComC)](ev);
-    }
+    components[shipRandomizer.schoose(coverComC)](getCellPhase(nev[0], nev[1]) ? nev : ev);
   }
 },
 //Ball
