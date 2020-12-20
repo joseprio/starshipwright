@@ -968,8 +968,11 @@ function (v) {
         nv[0] < CANVAS_SHIP_EDGE ||
         nv[0] > w - CANVAS_SHIP_EDGE ||
         nv[1] < CANVAS_SHIP_EDGE ||
-        nv[1] > h - CANVAS_SHIP_EDGE ||
-        !getOutlineAlpha(nv[0], nv[1])) {
+        nv[1] > h - CANVAS_SHIP_EDGE
+      ) {
+        continue;
+      }
+      if (!getOutlineAlpha(nv[0], nv[1])) {
         continue;
       }
       lv = nv;
