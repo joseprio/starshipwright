@@ -433,11 +433,11 @@ function buildShip(factionRandomizer, p_seed, size) {
     shipCanvas.width = w;
     shipCanvas.height = h;
     const cx = shipCanvas.getContext("2d");
+    const csarealimit = w * h / 20;
     // ------ Define outlines ---------------------------------------
     const outlines = [
         // 0: Joined rectangles.
         function () {
-            const csarealimit = w * h / 20;
             const initialWidth = Math.ceil(w * factionRandomizer.hd(0.1, 1, "outline0 iw") / 5);
             const blocks = [
                 [
@@ -491,8 +491,6 @@ function buildShip(factionRandomizer, p_seed, size) {
         },
         // 1: Joined circles
         function () {
-            const csarea = w * h;
-            const csarealimit = csarea / 20;
             const csrlimit = Math.max(2, (csarealimit / Math.PI) ** 0.5);
             const initialwidth = Math.ceil(w * factionRandomizer.hd(0.1, 1, "outline1 iw") / 5);
             const circles = [];
@@ -528,10 +526,9 @@ function buildShip(factionRandomizer, p_seed, size) {
         },
         // 2: Mess of lines
         function () {
-            const innersize = [w, h];
             const points = [
-                [hw, shipRandomizer.sd(0, 0.05) * innersize[1]],
-                [hw, shipRandomizer.sd(0.95, 1) * innersize[1]],
+                [hw, shipRandomizer.sd(0, 0.05) * h],
+                [hw, shipRandomizer.sd(0.95, 1) * h],
             ];
             const basefatness = COMPONENT_GRID_SIZE / size +
                 factionRandomizer.hd(0.03, 0.1, "outline2 basefatness");
@@ -543,9 +540,9 @@ function buildShip(factionRandomizer, p_seed, size) {
                 let np = points[npi];
                 if (!np) {
                     np = [
-                        shipRandomizer.sd(0, 1) * innersize[0],
+                        shipRandomizer.sd(0, 1) * w,
                         shipRandomizer.sd(0, 1) ** factionRandomizer.hd(0.1, 1, "outline2 frontbias") *
-                            innersize[1],
+                            h,
                     ];
                     points.push(np);
                 }

@@ -115,12 +115,12 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
   shipCanvas.width = w;
   shipCanvas.height = h;
   const cx = shipCanvas.getContext("2d");
+  const csarealimit = w * h / 20;
   
   // ------ Define outlines ---------------------------------------
   const outlines: Array<OutlineFunc> = [
     // 0: Joined rectangles.
     function () {
-      const csarealimit = w * h / 20;
       const initialWidth = Math.ceil(
         w * factionRandomizer.hd(0.1, 1, "outline0 iw") / 5
       );
@@ -191,8 +191,6 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
     },
     // 1: Joined circles
     function () {
-      const csarea = w  * h;
-      const csarealimit = csarea / 20;
       const csrlimit = Math.max(2, (csarealimit / Math.PI) ** 0.5);
       const initialwidth = Math.ceil(
         w * factionRandomizer.hd(0.1, 1, "outline1 iw") / 5
@@ -245,10 +243,9 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
   
     // 2: Mess of lines
     function () {
-      const innersize = [w , h];
       const points = [
-        [hw, shipRandomizer.sd(0, 0.05) * innersize[1]],
-        [hw, shipRandomizer.sd(0.95, 1) * innersize[1]],
+        [hw, shipRandomizer.sd(0, 0.05) * h],
+        [hw, shipRandomizer.sd(0.95, 1) * h],
       ];
       const basefatness =
         COMPONENT_GRID_SIZE / size +
@@ -264,9 +261,9 @@ export function buildShip(factionRandomizer: Randomizer, p_seed: string, size?: 
         let np = points[npi];
         if (!np) {
           np = [
-            shipRandomizer.sd(0, 1) * innersize[0],
+            shipRandomizer.sd(0, 1) * w,
             shipRandomizer.sd(0, 1) ** factionRandomizer.hd(0.1, 1, "outline2 frontbias") *
-              innersize[1],
+              h,
           ];
           points.push(np);
         }
