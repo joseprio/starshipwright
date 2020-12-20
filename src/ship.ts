@@ -900,7 +900,7 @@ function (v) {
   const hh1i = Math.floor(h1 / 2);
   const hh1e = h0 % 2;
   const backamount = Math.max(
-    (h1 - h0) / 2,
+    0 - (h0 - h1) / 2,
     h0 *
       (shipRandomizer.sd(0, 0.45) + shipRandomizer.sd(0, 0.45)) *
       (factionRandomizer.hb(0.8, "com6 backnesstype")
