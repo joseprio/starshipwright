@@ -597,7 +597,7 @@ function buildShip(factionRandomizer, p_seed, size) {
         const lcell = goodcells[nextcheck];
         if (lcell.gx > 0) {
             const ncell = cgrid[lcell.gx - 1][lcell.gy];
-            if (ncell.phase == 0) {
+            if (!ncell.phase) {
                 if (getOutlineAlpha(ncell.x, ncell.y)) {
                     ncell.phase = 1;
                     goodcells.push(ncell);
@@ -609,7 +609,7 @@ function buildShip(factionRandomizer, p_seed, size) {
         }
         if (lcell.gx < gw - 1) {
             const ncell = cgrid[lcell.gx + 1][lcell.gy];
-            if (ncell.phase == 0) {
+            if (!ncell.phase) {
                 if (getOutlineAlpha(ncell.x, ncell.y)) {
                     ncell.phase = 1;
                     goodcells.push(ncell);
@@ -621,7 +621,7 @@ function buildShip(factionRandomizer, p_seed, size) {
         }
         if (lcell.gy > 0) {
             const ncell = cgrid[lcell.gx][lcell.gy - 1];
-            if (ncell.phase == 0) {
+            if (!ncell.phase) {
                 if (getOutlineAlpha(ncell.x, ncell.y)) {
                     ncell.phase = 1;
                     goodcells.push(ncell);
@@ -633,7 +633,7 @@ function buildShip(factionRandomizer, p_seed, size) {
         }
         if (lcell.gy < gh - 1) {
             const ncell = cgrid[lcell.gx][lcell.gy + 1];
-            if (ncell.phase == 0) {
+            if (!ncell.phase) {
                 if (getOutlineAlpha(ncell.x, ncell.y)) {
                     ncell.phase = 1;
                     goodcells.push(ncell);
@@ -1123,10 +1123,8 @@ function buildShip(factionRandomizer, p_seed, size) {
             lv = nv;
             break;
         }
-        if (Math.abs(lv[0] - hw) < COMPONENT_GRID_SIZE) {
-            if (shipRandomizer.sb(factionRandomizer.hd(0, 1, "com middleness"))) {
-                lv[0] = hw;
-            }
+        if (Math.abs(lv[0] - hw) < COMPONENT_GRID_SIZE && shipRandomizer.sb(factionRandomizer.hd(0, 1, "com middleness"))) {
+            lv[0] = hw;
         }
         components[shipRandomizer.schoose(componentChances)](lv);
         totaldone++;
