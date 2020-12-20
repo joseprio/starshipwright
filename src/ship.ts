@@ -739,9 +739,9 @@ function (v) {
   );
   const hwi = Math.floor(componentWidth / 2);
   const hwe = componentWidth % 2;
-  const forwards = 1 * (factionRandomizer.hd(0, 1, "com4 directionc0") ** 4);
-  const backwards = 0.1 * (factionRandomizer.hd(0, 1, "com4 directionc1") ** 4);
-  const toCenter = 0.2 * (factionRandomizer.hd(0, 1, "com4 directionc2") ** 4);
+  const forwards = factionRandomizer.hd(0, 1, "com4 directionc0") ** 4;
+  const backwards = factionRandomizer.hd(0, 1, "com4 directionc1") ** 4 / 10;
+  const toCenter = factionRandomizer.hd(0, 1, "com4 directionc2") ** 4 / 5;
   const direction = shipRandomizer.schoose([
     forwards * (2 - cn),
     backwards,
@@ -816,9 +816,9 @@ function (v) {
     ev = [hw, v[1]];
   }
   const coverComC = [
-    0.6 * (factionRandomizer.hd(0, 1, "com4 covercomc0") ** 2),
-    0.2 * (factionRandomizer.hd(0, 1, "com4 covercomc1") ** 2),
-    (factionRandomizer.hd(0, 1, "com4 covercomc2") ** 2),
+    0.6 * factionRandomizer.hd(0, 1, "com4 covercomc0") ** 2,
+    factionRandomizer.hd(0, 1, "com4 covercomc1") ** 2 / 5,
+    factionRandomizer.hd(0, 1, "com4 covercomc2") ** 2,
   ];
   components[shipRandomizer.schoose(coverComC)](v);
   if (isCellGood(ev[0], ev[1])) {
