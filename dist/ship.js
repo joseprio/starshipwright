@@ -287,14 +287,14 @@ export function buildShip(factionRandomizer, p_seed, size) {
     // Touching the dimensions of the canvas will reset its data
     shipCanvas.width |= 0;
     // ------ Define components ---------------------------------------
-    //Returns the phase of the cell containing (X,Y), or 0 if there is no such cell
-    function getCellPhase(x, y) {
+    //Returns true if the cell at (X,Y) is good, or false if there is no such cell
+    function isCellGood(x, y) {
         const gx = Math.floor((x - gwextra) / COMPONENT_GRID_SIZE);
         const gy = Math.floor((y - ghextra) / COMPONENT_GRID_SIZE);
         if (gx < 0 || gx >= gw || gy < 0 || gy >= gh) {
-            return 0;
+            return false;
         }
-        return cgrid[gx][gy].phase;
+        return cgrid[gx][gy].phase > 0;
     }
     function frontness(v) {
         return 1 - v[1] / h;
@@ -485,8 +485,8 @@ export function buildShip(factionRandomizer, p_seed, size) {
         //Rocket engine (or tries to call another random component if too far forward)
         function (v) {
             if (shipRandomizer.sb(frontness(v) - 0.3) ||
-                getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) ||
-                getCellPhase(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8)) {
+                isCellGood(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) ||
+                isCellGood(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8)) {
                 for (let tries = 0; tries < 100; tries++) {
                     const which = shipRandomizer.schoose(componentChances);
                     if (which != 3) {
@@ -613,17 +613,12 @@ export function buildShip(factionRandomizer, p_seed, size) {
                 (factionRandomizer.hd(0, 1, "com4 covercomc2") ** 2),
             ];
             components[shipRandomizer.schoose(coverComC)](v);
-            if (getCellPhase(ev[0], ev[1])) {
+            if (isCellGood(ev[0], ev[1])) {
                 const nev = [
                     ev[0] + Math.round(shipRandomizer.sd(-1, 1) * COMPONENT_GRID_SIZE),
                     ev[1] + Math.round(shipRandomizer.sd(-1, 1) * COMPONENT_GRID_SIZE),
                 ];
-                if (getCellPhase(nev[0], nev[1])) {
-                    components[shipRandomizer.schoose(coverComC)](nev);
-                }
-                else {
-                    components[shipRandomizer.schoose(coverComC)](ev);
-                }
+                components[shipRandomizer.schoose(coverComC)](isCellGood(nev[0], nev[1]) ? nev : ev);
             }
         },
         //Ball
