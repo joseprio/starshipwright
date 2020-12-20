@@ -934,9 +934,9 @@ function buildShip(factionRandomizer, p_seed, size) {
                 factionRandomizer.hd(0.02, 0.1, "com4 maxwidth")));
             const hwi = Math.floor(componentWidth / 2);
             const hwe = componentWidth % 2;
-            const forwards = 1 * (factionRandomizer.hd(0, 1, "com4 directionc0") ** 4);
-            const backwards = 0.1 * (factionRandomizer.hd(0, 1, "com4 directionc1") ** 4);
-            const toCenter = 0.2 * (factionRandomizer.hd(0, 1, "com4 directionc2") ** 4);
+            const forwards = factionRandomizer.hd(0, 1, "com4 directionc0") ** 4;
+            const backwards = factionRandomizer.hd(0, 1, "com4 directionc1") ** 4 / 10;
+            const toCenter = factionRandomizer.hd(0, 1, "com4 directionc2") ** 4 / 5;
             const direction = shipRandomizer.schoose([
                 forwards * (2 - cn),
                 backwards,
@@ -982,8 +982,8 @@ function buildShip(factionRandomizer, p_seed, size) {
             }
             const coverComC = [
                 0.6 * (factionRandomizer.hd(0, 1, "com4 covercomc0") ** 2),
-                0.2 * (factionRandomizer.hd(0, 1, "com4 covercomc1") ** 2),
-                (factionRandomizer.hd(0, 1, "com4 covercomc2") ** 2),
+                (factionRandomizer.hd(0, 1, "com4 covercomc1") ** 2),
+                (factionRandomizer.hd(0, 1, "com4 covercomc2") ** 2) / 5,
             ];
             components[shipRandomizer.schoose(coverComC)](v);
             if (isCellGood(ev[0], ev[1])) {
@@ -1053,7 +1053,7 @@ function buildShip(factionRandomizer, p_seed, size) {
                     factionRandomizer.hd(0.5, 1.5, "com6 h1power"));
             const hh1i = Math.floor(h1 / 2);
             const hh1e = h0 % 2;
-            const backamount = Math.max(0 - (h0 - h1) / 2, h0 *
+            const backamount = Math.max((h1 - h0) / 2, h0 *
                 (shipRandomizer.sd(0, 0.45) + shipRandomizer.sd(0, 0.45)) *
                 (factionRandomizer.hb(0.8, "com6 backnesstype")
                     ? factionRandomizer.hd(0.2, 0.9, "com6 backness#pos")
@@ -1116,10 +1116,8 @@ function buildShip(factionRandomizer, p_seed, size) {
             if (nv[0] < CANVAS_SHIP_EDGE ||
                 nv[0] > w - CANVAS_SHIP_EDGE ||
                 nv[1] < CANVAS_SHIP_EDGE ||
-                nv[1] > h - CANVAS_SHIP_EDGE) {
-                continue;
-            }
-            if (!getOutlineAlpha(nv[0], nv[1])) {
+                nv[1] > h - CANVAS_SHIP_EDGE ||
+                !getOutlineAlpha(nv[0], nv[1])) {
                 continue;
             }
             lv = nv;
