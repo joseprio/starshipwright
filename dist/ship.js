@@ -613,7 +613,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
                 ev = [v[0], v[1] + componentHeight];
             }
             else {
-                //to center
+                // to center
                 const grad = cx.createLinearGradient(v[0], v[1] - hwi, v[0], v[1] + hwi + hwe);
                 grad.addColorStop(0, coloredge);
                 grad.addColorStop(0.5, colormid);
@@ -694,7 +694,6 @@ export function buildShip(factionRandomizer, p_seed, size) {
                 shipRandomizer.sd(factionRandomizer.hd(0, 0.8, "com6 h1min") ** 0.5, 0.9) **
                     factionRandomizer.hd(0.5, 1.5, "com6 h1power");
             const hh1i = Math.floor(h1 / 2);
-            const hh1e = h0 % 2;
             const backamount = Math.max((h1 - h0) / 2, h0 *
                 (shipRandomizer.sd(0, 0.45) + shipRandomizer.sd(0, 0.45)) *
                 (factionRandomizer.hb(0.8, "com6 backnesstype")
@@ -709,7 +708,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
                 [v[0] - hwi, v[1] + backamount - hh1i],
                 [v[0] + hwi + hwe, v[1] - hh0i],
                 [v[0] + hwi + hwe, v[1] + hh0i + hh0e],
-                [v[0] - hwi, v[1] + backamount + hh1i + hh1e],
+                [v[0] - hwi, v[1] + backamount + hh1i + h0 % 2],
             ];
             const baseColor = computeBaseColor();
             cx.fillStyle = `rgba(0,0,0,${shipRandomizer.sd(0, 0.2)})`;
