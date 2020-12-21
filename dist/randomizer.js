@@ -132,13 +132,11 @@ export class Randomizer {
     }
     //Returns a boolean with the specified chance of being true (and false otherwise), by hashing this object's seed with the specified string.
     hb(chance, seed) {
-        return (this.hd(0, 1, seed) < chance);
+        return this.hd(0, 1, seed) < chance;
     }
     //Returns an integer with the specified chance of being -1 (and 1 otherwise), from the stream.
     ss(chance) {
-        return this.sb(chance)
-            ? -1
-            : 1;
+        return this.sb(chance) ? -1 : 1;
     }
     //Returns an integer with the specified chance of being -1 (and 1 otherwise), by hashing this object's seed with the specified string.
     /*
@@ -154,8 +152,7 @@ export class Randomizer {
     //Returns an integer {0,1,2,...}, starting from 0, with the specified chance of advancing to each successive integer, from the stream.
     sseq(chance, max) {
         let rv = 0;
-        while (this.sb(chance) &&
-            rv < max) {
+        while (this.sb(chance) && rv < max) {
             rv++;
         }
         return rv;

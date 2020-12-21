@@ -2,13 +2,15 @@ export function clamp(n, min, max) {
     return Math.max(min, Math.min(max, n));
 }
 function colorChannelToHex(n) {
-    return Math.floor(clamp(n, 0, 1) * 255).toString(16).padStart(2, "0");
+    return Math.floor(clamp(n, 0, 1) * 255)
+        .toString(16)
+        .padStart(2, "0");
 }
 function colorToHex(color) {
-    return "#" +
+    return ("#" +
         colorChannelToHex(color[0]) +
         colorChannelToHex(color[1]) +
-        colorChannelToHex(color[2]);
+        colorChannelToHex(color[2]));
 }
 // Take a color and multiplies it with a factor. factor = 0 produces black.
 export function scaleColorBy(color, factor) {

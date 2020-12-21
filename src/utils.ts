@@ -5,14 +5,18 @@ export function clamp(n: number, min: number, max: number): number {
 }
 
 function colorChannelToHex(n: number): string {
-  return Math.floor(clamp(n, 0, 1) * 255).toString(16).padStart(2, "0");
+  return Math.floor(clamp(n, 0, 1) * 255)
+    .toString(16)
+    .padStart(2, "0");
 }
 
 function colorToHex(color: RGBColor): string {
-  return "#" +
+  return (
+    "#" +
     colorChannelToHex(color[0]) +
     colorChannelToHex(color[1]) +
-    colorChannelToHex(color[2]);
+    colorChannelToHex(color[2])
+  );
 }
 
 // Take a color and multiplies it with a factor. factor = 0 produces black.
