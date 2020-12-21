@@ -1,7 +1,10 @@
 import { Randomizer } from "./randomizer";
-import { COMPONENT_GRID_SIZE, COMPONENT_MAXIMUM_SIZE } from "./constants";
 import { computeFactionComponentChances } from "./faction";
 import { clamp, scaleColorBy, hsvToRgb } from "./utils";
+//Size of the component grid
+const COMPONENT_GRID_SIZE = 6;
+//Base maximum extent of a component from its origin point. Should be at least equal to cgridsize, but no greater than csedge.
+const COMPONENT_MAXIMUM_SIZE = 8;
 // This library is heavily optimized towards size, as I used it for a JS13K game. Also, I'm planning to use
 // it again for that purpose in the future. This function is a lot bigger than it needs to be, but doing so
 // allows us to have all variables we need in the closure instead of passing it around in parameters

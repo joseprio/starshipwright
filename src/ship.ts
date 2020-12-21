@@ -1,8 +1,13 @@
 import { Randomizer } from "./randomizer";
-import { COMPONENT_GRID_SIZE, COMPONENT_MAXIMUM_SIZE } from "./constants";
 import { computeFactionComponentChances } from "./faction";
 import type { Vec, RGBColor } from "./types";
 import { clamp, scaleColorBy, hsvToRgb } from "./utils";
+
+//Size of the component grid
+const COMPONENT_GRID_SIZE = 6;
+
+//Base maximum extent of a component from its origin point. Should be at least equal to cgridsize, but no greater than csedge.
+const COMPONENT_MAXIMUM_SIZE = 8;
 
 type Cell = {
   gx: number;
