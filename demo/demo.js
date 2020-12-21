@@ -964,7 +964,7 @@ function buildShip(factionRandomizer, p_seed, size) {
                 cx.fillRect(bb_0_0, bb_0_1, componentWidth, componentHeight);
                 ev = [v[0], v[1] - componentHeight];
             }
-            else if (direction == 1) {
+            else if (direction < 2) {
                 //backwards
                 const hlimit = h - v[1];
                 const componentHeight = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit - shipRandomizer.si(0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.6 *
@@ -980,7 +980,7 @@ function buildShip(factionRandomizer, p_seed, size) {
                 cx.fillRect(bb_0_0, bb_0_1, componentWidth, componentHeight);
                 ev = [v[0], v[1] + componentHeight];
             }
-            else if (direction == 2) {
+            else {
                 //to center
                 const grad = cx.createLinearGradient(v[0], v[1] - hwi, v[0], v[1] + hwi + hwe);
                 grad.addColorStop(0, coloredge);

@@ -876,7 +876,7 @@ export function buildShip(
         cx.fillStyle = grad;
         cx.fillRect(bb_0_0, bb_0_1, componentWidth, componentHeight);
         ev = [v[0], v[1] - componentHeight];
-      } else if (direction == 1) {
+      } else if (direction < 2) {
         //backwards
         const hlimit = h - v[1];
         const componentHeight = Math.min(
@@ -902,7 +902,7 @@ export function buildShip(
         cx.fillStyle = grad;
         cx.fillRect(bb_0_0, bb_0_1, componentWidth, componentHeight);
         ev = [v[0], v[1] + componentHeight];
-      } else if (direction == 2) {
+      } else {
         //to center
         const grad = cx.createLinearGradient(
           v[0],
