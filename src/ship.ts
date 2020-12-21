@@ -42,7 +42,7 @@ export function buildShip(
     const ls = "base color" + i;
     // TODO: This is the only usage of hsvToRgb, which can actually help us simplify quite a bit of code
     // Just doing random RGB coloring should be alright and simplify the code
-    colors[i] =
+    colors.push(
       hsvToRgb([
         factionRandomizer.hd(0, 1, ls + "hue") ** 2,
         clamp(
@@ -51,9 +51,10 @@ export function buildShip(
           factionRandomizer.hd(0, 1, ls + "saturation bound") ** 4
         ),
         clamp(factionRandomizer.hd(0.7, 1.1, ls + "value"), 0, 1),
-      ]);
+      ])
+    );
     // Default maximum power is 6
-    colorChances[i] = 2 ** factionRandomizer.hd(0, 6, ls + "chances");
+    colorChances.push(2 ** factionRandomizer.hd(0, 6, ls + "chances"));
   }
 
   const shipRandomizer = new Randomizer(factionRandomizer.seed + p_seed);
@@ -209,7 +210,7 @@ export function buildShip(
       const initialcount = Math.floor(h / (initialwidth * 2));
       for (let i = 0; i < initialcount; i++) {
         let lv = [hw, h - initialwidth * (i * 2 + 1)];
-        circles[i] = { v: lv, r: initialwidth };
+        circles.push({ v: lv, r: initialwidth });
       }
       const circlecount =
         initialcount +
