@@ -522,25 +522,22 @@ export function buildShip(factionRandomizer, p_seed, size) {
             const lightness0_mid = factionRandomizer.hd(0.5, 0.8, "com3 lightness0 mid");
             const lightness0_edge = lightness0_mid - factionRandomizer.hd(0.2, 0.4, "com3 lightness0 edge");
             const lightness1_edge = factionRandomizer.hd(0, 0.2, "com3 lightness1 edge");
-            const grad2 = [
-                cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
-                cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
-            ];
-            grad2[0].addColorStop(0, scaleColorBy(basecolor, lightness0_edge));
-            grad2[0].addColorStop(0.5, scaleColorBy(basecolor, lightness0_mid));
-            grad2[0].addColorStop(1, scaleColorBy(basecolor, lightness0_edge));
-            grad2[1].addColorStop(0, scaleColorBy(basecolor, lightness1_edge));
-            grad2[1].addColorStop(0.5, scaleColorBy(basecolor, 1));
-            grad2[1].addColorStop(1, scaleColorBy(basecolor, lightness1_edge));
+            const grad2_0 = cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]);
+            const grad2_1 = cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]);
             const by = Math.ceil(v[1] - componentHeight / 2);
-            cx.fillStyle = grad2[0];
+            grad2_0.addColorStop(0, scaleColorBy(basecolor, lightness0_edge));
+            grad2_0.addColorStop(0.5, scaleColorBy(basecolor, lightness0_mid));
+            grad2_0.addColorStop(1, scaleColorBy(basecolor, lightness0_edge));
+            grad2_1.addColorStop(0, scaleColorBy(basecolor, lightness1_edge));
+            grad2_1.addColorStop(0.5, scaleColorBy(basecolor, 1));
+            grad2_1.addColorStop(1, scaleColorBy(basecolor, lightness1_edge));
+            cx.fillStyle = grad2_0;
             cx.beginPath();
             cx.moveTo(v[0] - nw / 2, by);
             cx.lineTo(v[0] + nw / 2, by);
             cx.lineTo(v[0] + componentWidth / 2, by + componentHeight);
             cx.lineTo(v[0] - componentWidth / 2, by + componentHeight);
             cx.fill();
-            cx.fillStyle = grad2[1];
             const byh = [by + componentHeight2[0], by + hpair];
             for (let i = 0; i < count; i++) {
                 const lyr = [i * hpair + componentHeight2[0], (i + 1) * hpair];
@@ -549,6 +546,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
                     (nw + (componentWidth - nw) * (lyr[0] / componentHeight)) / 2,
                     (nw + (componentWidth - nw) * (lyr[1] / componentHeight)) / 2,
                 ];
+                cx.fillStyle = grad2_1;
                 cx.beginPath();
                 cx.moveTo(v[0] - lw[0], ly[0]);
                 cx.lineTo(v[0] + lw[0], ly[0]);
