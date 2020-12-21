@@ -691,6 +691,7 @@ export function buildShip(
           v[0] + wh2[1],
           v[1]
         );
+        const by = Math.floor(v[1] - htotal / 2);
 
         grad2_0.addColorStop(0, colord2[0]);
         grad2_0.addColorStop(0.5, color2[0]);
@@ -698,7 +699,6 @@ export function buildShip(
         grad2_1.addColorStop(0, colord2[1]);
         grad2_1.addColorStop(0.5, color2[1]);
         grad2_1.addColorStop(1, colord2[1]);
-        const by = Math.floor(v[1] - htotal / 2);
         for (let i = 0; i < count; i++) {
           cx.fillStyle = grad2_0;
           cx.fillRect(v[0] - wh2[0], by + i * hpair, wh2[0] * 2, h2[0]);
@@ -722,14 +722,13 @@ export function buildShip(
           v[0],
           v[1] + wh2[1]
         );
-
+        const bx = Math.floor(v[0] - htotal / 2);
         grad2_0.addColorStop(0, colord2[0]);
         grad2_0.addColorStop(0.5, color2[0]);
         grad2_0.addColorStop(1, colord2[0]);
         grad2_1.addColorStop(0, colord2[1]);
         grad2_1.addColorStop(0.5, color2[1]);
         grad2_1.addColorStop(1, colord2[1]);
-        const bx = Math.floor(v[0] - htotal / 2);
         for (let i = 0; i < count; i++) {
           cx.fillStyle = grad2_0;
           cx.fillRect(bx + i * hpair, v[1] - wh2[0], h2[0], wh2[0] * 2);
@@ -786,23 +785,26 @@ export function buildShip(
         0.2,
         "com3 lightness1 edge"
       );
-      const grad2_0 = cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]);
-      const grad2_1 = cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]);
+      const grad2 = [
+        cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
+        cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
+      ];
       const by = Math.ceil(v[1] - componentHeight / 2);
-      grad2_0.addColorStop(0, scaleColorBy(basecolor, lightness0_edge));
-      grad2_0.addColorStop(0.5, scaleColorBy(basecolor, lightness0_mid));
-      grad2_0.addColorStop(1, scaleColorBy(basecolor, lightness0_edge));
-      grad2_1.addColorStop(0, scaleColorBy(basecolor, lightness1_edge));
-      grad2_1.addColorStop(0.5, scaleColorBy(basecolor, 1));
-      grad2_1.addColorStop(1, scaleColorBy(basecolor, lightness1_edge));
-      cx.fillStyle = grad2_0;
+      const byh = [by + componentHeight2[0], by + hpair];
+      grad2[0].addColorStop(0, scaleColorBy(basecolor, lightness0_edge));
+      grad2[0].addColorStop(0.5, scaleColorBy(basecolor, lightness0_mid));
+      grad2[0].addColorStop(1, scaleColorBy(basecolor, lightness0_edge));
+      grad2[1].addColorStop(0, scaleColorBy(basecolor, lightness1_edge));
+      grad2[1].addColorStop(0.5, scaleColorBy(basecolor, 1));
+      grad2[1].addColorStop(1, scaleColorBy(basecolor, lightness1_edge));
+      cx.fillStyle = grad2[0];
       cx.beginPath();
       cx.moveTo(v[0] - nw / 2, by);
       cx.lineTo(v[0] + nw / 2, by);
       cx.lineTo(v[0] + componentWidth / 2, by + componentHeight);
       cx.lineTo(v[0] - componentWidth / 2, by + componentHeight);
       cx.fill();
-      const byh = [by + componentHeight2[0], by + hpair];
+      cx.fillStyle = grad2[1];
       for (let i = 0; i < count; i++) {
         const lyr = [i * hpair + componentHeight2[0], (i + 1) * hpair];
         const ly = [byh[0] + i * hpair, byh[1] + i * hpair];
@@ -810,7 +812,6 @@ export function buildShip(
           (nw + (componentWidth - nw) * (lyr[0] / componentHeight)) / 2,
           (nw + (componentWidth - nw) * (lyr[1] / componentHeight)) / 2,
         ];
-        cx.fillStyle = grad2_1;
         cx.beginPath();
         cx.moveTo(v[0] - lw[0], ly[0]);
         cx.lineTo(v[0] + lw[0], ly[0]);
