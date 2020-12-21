@@ -17,25 +17,7 @@ export function scaleColorBy(color, factor) {
     return colorToHex([color[0] * factor, color[1] * factor, color[2] * factor]);
 }
 // Takes a triplet [H,S,V] and returns a triplet [R,G,B], representing the same color. All components are 0 - 1.
-export function hsvToRgb(hsv) {
-    const c = hsv[1] * hsv[2];
-    const m = hsv[2] - c;
-    const h = ((hsv[0] % 1) + 1) % 1;
-    const hrel = 6 * h;
-    const hseg = Math.floor(hrel);
-    const x = c * (1 - Math.abs((hrel % 2) - 1));
-    switch (hseg) {
-        case 0:
-            return [c + m, x + m, m];
-        case 1:
-            return [x + m, c + m, m];
-        case 2:
-            return [m, c + m, x + m];
-        case 3:
-            return [m, x + m, c + m];
-        case 4:
-            return [x + m, m, c + m];
-        default:
-            return [c + m, m, x + m];
-    }
+export function hsvToRgb(h, s, v) {
+    const f = (n, k = (n + h * 6) % 6) => v - v * s * Math.max(Math.min(k, 4 - k, 1), 0);
+    return [f(5), f(3), f(1)];
 }

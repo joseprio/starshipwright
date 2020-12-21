@@ -43,15 +43,15 @@ export function buildShip(
     // TODO: This is the only usage of hsvToRgb, which can actually help us simplify quite a bit of code
     // Just doing random RGB coloring should be alright and simplify the code
     colors.push(
-      hsvToRgb([
+      hsvToRgb(
         factionRandomizer.hd(0, 1, ls + "hue") ** 2,
         clamp(
           factionRandomizer.hd(-0.2, 1, ls + "saturation"),
           0,
           factionRandomizer.hd(0, 1, ls + "saturation bound") ** 4
         ),
-        clamp(factionRandomizer.hd(0.7, 1.1, ls + "value"), 0, 1),
-      ])
+        clamp(factionRandomizer.hd(0.7, 1.1, ls + "value"), 0, 1)
+      )
     );
     // Default maximum power is 6
     colorChances.push(2 ** factionRandomizer.hd(0, 6, ls + "chances"));

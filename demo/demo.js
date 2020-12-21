@@ -338,27 +338,9 @@ function scaleColorBy(color, factor) {
     return colorToHex([color[0] * factor, color[1] * factor, color[2] * factor]);
 }
 // Takes a triplet [H,S,V] and returns a triplet [R,G,B], representing the same color. All components are 0 - 1.
-function hsvToRgb(hsv) {
-    const c = hsv[1] * hsv[2];
-    const m = hsv[2] - c;
-    const h = ((hsv[0] % 1) + 1) % 1;
-    const hrel = 6 * h;
-    const hseg = Math.floor(hrel);
-    const x = c * (1 - Math.abs((hrel % 2) - 1));
-    switch (hseg) {
-        case 0:
-            return [c + m, x + m, m];
-        case 1:
-            return [x + m, c + m, m];
-        case 2:
-            return [m, c + m, x + m];
-        case 3:
-            return [m, x + m, c + m];
-        case 4:
-            return [x + m, m, c + m];
-        default:
-            return [c + m, m, x + m];
-    }
+function hsvToRgb(h, s, v) {
+    const f = (n, k = (n + h * 6) % 6) => v - v * s * Math.max(Math.min(k, 4 - k, 1), 0);
+    return [f(5), f(3), f(1)];
 }
 
 // CONCATENATED MODULE: ./src/ship.ts
@@ -384,11 +366,7 @@ function buildShip(factionRandomizer, p_seed, size) {
         const ls = "base color" + i;
         // TODO: This is the only usage of hsvToRgb, which can actually help us simplify quite a bit of code
         // Just doing random RGB coloring should be alright and simplify the code
-        colors.push(hsvToRgb([
-            factionRandomizer.hd(0, 1, ls + "hue") ** 2,
-            clamp(factionRandomizer.hd(-0.2, 1, ls + "saturation"), 0, factionRandomizer.hd(0, 1, ls + "saturation bound") ** 4),
-            clamp(factionRandomizer.hd(0.7, 1.1, ls + "value"), 0, 1),
-        ]));
+        colors.push(hsvToRgb(factionRandomizer.hd(0, 1, ls + "hue") ** 2, clamp(factionRandomizer.hd(-0.2, 1, ls + "saturation"), 0, factionRandomizer.hd(0, 1, ls + "saturation bound") ** 4), clamp(factionRandomizer.hd(0.7, 1.1, ls + "value"), 0, 1)));
         // Default maximum power is 6
         colorChances.push(2 ** factionRandomizer.hd(0, 6, ls + "chances"));
     }
