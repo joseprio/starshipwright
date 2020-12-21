@@ -1,4 +1,4 @@
-import type { HSVColor, RGBColor } from "./types";
+import type { RGBColor } from "./types";
 
 export function clamp(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, n));
