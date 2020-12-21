@@ -57,7 +57,7 @@ export function buildShip(
     colorChances.push(2 ** factionRandomizer.hd(0, 6, ls + "chances"));
   }
 
-  const shipRandomizer = new Randomizer(factionRandomizer.seedValue + p_seed);
+  const shipRandomizer = new Randomizer(factionRandomizer.seed + p_seed);
 
   function computeBaseColor(): RGBColor {
     let rv = colors[shipRandomizer.schoose(colorChances)];

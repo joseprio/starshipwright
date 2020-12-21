@@ -28,7 +28,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
         // Default maximum power is 6
         colorChances.push(2 ** factionRandomizer.hd(0, 6, ls + "chances"));
     }
-    const shipRandomizer = new Randomizer(factionRandomizer.seedValue + p_seed);
+    const shipRandomizer = new Randomizer(factionRandomizer.seed + p_seed);
     function computeBaseColor() {
         let rv = colors[shipRandomizer.schoose(colorChances)];
         if (shipRandomizer.sb(factionRandomizer.hd(0, 0.5, "base color shift chance") ** 2)) {

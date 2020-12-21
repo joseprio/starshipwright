@@ -98,12 +98,12 @@ class Randomizer {
         this.seedPosition = 0;
         this.arrayPosition = 0;
         this.hrCache = {};
-        this.seedValue = p_seed;
-        if (this.seedValue.length < 8) {
-            this.seedValue = "padding_" + this.seedValue;
+        this.seed = p_seed;
+        if (this.seed.length < 8) {
+            this.seed = "padding_" + this.seed;
         }
-        if (this.seedValue.length % 2 == 0) {
-            this.seedValue = "1" + this.seedValue;
+        if (this.seed.length % 2 == 0) {
+            this.seed = "1" + this.seed;
         }
         this.stateArray = [
             2972948403,
@@ -116,8 +116,8 @@ class Randomizer {
             1593177610,
         ];
         this.current = 3234042090;
-        for (let i = this.seedValue.length - 1; i >= 0; i--) {
-            const c = this.seedValue.charCodeAt(i);
+        for (let i = this.seed.length - 1; i >= 0; i--) {
+            const c = this.seed.charCodeAt(i);
             this.current =
                 (((this.current << 5) + this.current) ^
                     c ^
@@ -130,7 +130,7 @@ class Randomizer {
     }
     //Returns a raw unsigned 32-bit integer from the stream.
     sr() {
-        const c = this.seedValue.charCodeAt(this.seedPosition);
+        const c = this.seed.charCodeAt(this.seedPosition);
         const lsa = this.stateArray[this.arrayPosition];
         this.current =
             (((this.current << 5) + this.current + lsa) ^
@@ -143,7 +143,7 @@ class Randomizer {
                 (lsa << ((c % 19) + 1)) ^
                 ((this.current % 134217728) * 3427)) >>>
                 0;
-        this.seedPosition = (this.seedPosition + 1) % this.seedValue.length;
+        this.seedPosition = (this.seedPosition + 1) % this.seed.length;
         this.arrayPosition = (this.arrayPosition + 1) % 8;
         return this.current;
     }
@@ -186,8 +186,8 @@ class Randomizer {
             state[3] = (state[3] ^ (state[3] >> 19) ^ t) >>> 0;
             rv = ((rv ^ (c << 24)) * 3427) ^ state[3];
         }
-        for (let y = this.seedValue.length - 1; y >= 0; y--) {
-            const c = this.seedValue.charCodeAt(y);
+        for (let y = this.seed.length - 1; y >= 0; y--) {
+            const c = this.seed.charCodeAt(y);
             let t = state[0] ^ c;
             t = (t ^ (t << 11)) >>> 0;
             t = (t ^ (t >> 8)) >>> 0;
@@ -392,7 +392,7 @@ function buildShip(factionRandomizer, p_seed, size) {
         // Default maximum power is 6
         colorChances.push(2 ** factionRandomizer.hd(0, 6, ls + "chances"));
     }
-    const shipRandomizer = new Randomizer(factionRandomizer.seedValue + p_seed);
+    const shipRandomizer = new Randomizer(factionRandomizer.seed + p_seed);
     function computeBaseColor() {
         let rv = colors[shipRandomizer.schoose(colorChances)];
         if (shipRandomizer.sb(factionRandomizer.hd(0, 0.5, "base color shift chance") ** 2)) {

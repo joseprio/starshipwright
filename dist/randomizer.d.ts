@@ -1,5 +1,5 @@
 export declare class Randomizer {
-    seedValue: string;
+    seed: string;
     stateArray: Array<number>;
     current: number;
     seedPosition: number;
