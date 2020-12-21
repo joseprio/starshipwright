@@ -3,12 +3,12 @@ export class Randomizer {
         this.seedPosition = 0;
         this.arrayPosition = 0;
         this.hrCache = {};
-        this.seed = p_seed;
-        if (this.seed.length < 8) {
-            this.seed = "padding_" + this.seed;
+        this.seedValue = p_seed;
+        if (this.seedValue.length < 8) {
+            this.seedValue = "padding_" + this.seedValue;
         }
-        if (this.seed.length % 2 == 0) {
-            this.seed = "1" + this.seed;
+        if (this.seedValue.length % 2 == 0) {
+            this.seedValue = "1" + this.seedValue;
         }
         this.stateArray = [
             2972948403,
@@ -21,8 +21,8 @@ export class Randomizer {
             1593177610,
         ];
         this.current = 3234042090;
-        for (let i = this.seed.length - 1; i >= 0; i--) {
-            const c = this.seed.charCodeAt(i);
+        for (let i = this.seedValue.length - 1; i >= 0; i--) {
+            const c = this.seedValue.charCodeAt(i);
             this.current =
                 (((this.current << 5) + this.current) ^
                     c ^
@@ -35,7 +35,7 @@ export class Randomizer {
     }
     //Returns a raw unsigned 32-bit integer from the stream.
     sr() {
-        const c = this.seed.charCodeAt(this.seedPosition);
+        const c = this.seedValue.charCodeAt(this.seedPosition);
         const lsa = this.stateArray[this.arrayPosition];
         this.current =
             (((this.current << 5) + this.current + lsa) ^
@@ -48,7 +48,7 @@ export class Randomizer {
                 (lsa << ((c % 19) + 1)) ^
                 ((this.current % 134217728) * 3427)) >>>
                 0;
-        this.seedPosition = (this.seedPosition + 1) % this.seed.length;
+        this.seedPosition = (this.seedPosition + 1) % this.seedValue.length;
         this.arrayPosition = (this.arrayPosition + 1) % 8;
         return this.current;
     }
@@ -91,8 +91,8 @@ export class Randomizer {
             state[3] = (state[3] ^ (state[3] >> 19) ^ t) >>> 0;
             rv = ((rv ^ (c << 24)) * 3427) ^ state[3];
         }
-        for (let y = this.seed.length - 1; y >= 0; y--) {
-            const c = this.seed.charCodeAt(y);
+        for (let y = this.seedValue.length - 1; y >= 0; y--) {
+            const c = this.seedValue.charCodeAt(y);
             let t = state[0] ^ c;
             t = (t ^ (t << 11)) >>> 0;
             t = (t ^ (t >> 8)) >>> 0;
