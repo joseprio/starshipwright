@@ -393,7 +393,7 @@ function buildShip(factionRandomizer, p_seed, size) {
         colorChances.push(2 ** factionRandomizer.hd(0, 6, ls + "chances"));
     }
     const shipRandomizer = new Randomizer(factionRandomizer.seed + p_seed);
-    const computeBaseColor = () => {
+    function computeBaseColor() {
         let rv = colors[shipRandomizer.schoose(colorChances)];
         if (shipRandomizer.sb(factionRandomizer.hd(0, 0.5, "base color shift chance") ** 2)) {
             rv = [rv[0], rv[1], rv[2]];
@@ -411,7 +411,7 @@ function buildShip(factionRandomizer, p_seed, size) {
                     clamp(shipRandomizer.ss(0.7) + shipRandomizer.ss(0.7), -1, 1), 0, 1);
         }
         return rv;
-    };
+    }
     //The initial overall size of this ship, in pixels
     size =
         size ||
@@ -434,7 +434,7 @@ function buildShip(factionRandomizer, p_seed, size) {
     // ------ Define outlines ---------------------------------------
     const outlines = [
         // 0: Joined rectangles.
-        () => {
+        function () {
             const initialWidth = Math.ceil((w * factionRandomizer.hd(0.1, 1, "outline0 iw")) / 5);
             const blocks = [
                 [
@@ -489,7 +489,7 @@ function buildShip(factionRandomizer, p_seed, size) {
             }
         },
         // 1: Joined circles
-        () => {
+        function () {
             const csrlimit = Math.max(2, (csarealimit / Math.PI) ** 0.5);
             const initialwidth = Math.ceil((w * factionRandomizer.hd(0.1, 1, "outline1 iw")) / 5);
             const circles = [];
@@ -527,7 +527,7 @@ function buildShip(factionRandomizer, p_seed, size) {
             }
         },
         // 2: Mess of lines
-        () => {
+        function () {
             const points = [
                 [hw, shipRandomizer.sd(0, 0.05) * h],
                 [hw, shipRandomizer.sd(0.95, 1) * h],
@@ -570,7 +570,9 @@ function buildShip(factionRandomizer, p_seed, size) {
     outlines[factionRandomizer.hchoose([1, 1, 1], "outline type")]();
     const outline = cx.getImageData(0, 0, w, h);
     //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y)
-    const getOutlineAlpha = (x, y) => outline.data[(y * w + x) * 4 + 3];
+    function getOutlineAlpha(x, y) {
+        return outline.data[(y * w + x) * 4 + 3];
+    }
     const cgrid = [];
     for (let gx = 0; gx < gw; gx++) {
         cgrid[gx] = [];
@@ -653,20 +655,25 @@ function buildShip(factionRandomizer, p_seed, size) {
     shipCanvas.width |= 0;
     // ------ Define components ---------------------------------------
     //Returns true if the cell at (X,Y) is good, or false if there is no such cell
-    const isCellGood = (x, y) => {
+    function isCellGood(x, y) {
         const gx = Math.floor((x - gwextra) / COMPONENT_GRID_SIZE);
         const gy = Math.floor((y - ghextra) / COMPONENT_GRID_SIZE);
         if (gx < 0 || gx >= gw || gy < 0 || gy >= gh) {
             return false;
         }
         return cgrid[gx][gy].phase == 1;
-    };
-    const frontness = (v) => 1 - v[1] / h;
-    const centerness = (v, doY) => {
-        const rv = Math.min(1, 1 - Math.abs(v[0] - hw) / hw);
-        return doY ? Math.min(rv, 1 - Math.abs(v[1] - hh) / hh) : rv;
-    };
-    const calculateLcms = (componentIndex, v, magnitude, bigChanceLow, bigChanceHigh, bigIncChanceLow, bigIncChanceHigh) => {
+    }
+    function frontness(v) {
+        return 1 - v[1] / h;
+    }
+    function centerness(v, doY) {
+        let rv = Math.min(1, 1 - Math.abs(v[0] - hw) / hw);
+        if (doY) {
+            rv = Math.min(rv, 1 - Math.abs(v[1] - hh) / hh);
+        }
+        return rv;
+    }
+    function calculateLcms(componentIndex, v, magnitude, bigChanceLow, bigChanceHigh, bigIncChanceLow, bigIncChanceHigh) {
         const effectCenter = centerness(v, true);
         const effectShipsize = 1 - 1 / ((w + h) / 1000 + 1);
         const effectFaction = factionRandomizer.hd(0, 1, "master bigness") ** 0.5;
@@ -687,20 +694,20 @@ function buildShip(factionRandomizer, p_seed, size) {
             }
         }
         return lcms;
-    };
+    }
     //lp is the ship. amount is the amount of shadow at the edges, 0 - 1 (the middle is always 0). middlep and edgep should be vectors at the middle and edge of the gradient.
-    const shadowGradient = (middlePoint, edgePoint, amount) => {
+    function shadowGradient(middlePoint, edgePoint, amount) {
         const grad = cx.createLinearGradient(edgePoint[0], edgePoint[1], middlePoint[0] * 2 - edgePoint[0], middlePoint[1] * 2 - edgePoint[1]);
         const darkness = `rgba(0,0,0,${amount})`;
         grad.addColorStop(0, darkness);
         grad.addColorStop(0.5, "rgba(0,0,0,0)");
         grad.addColorStop(1, darkness);
         return grad;
-    };
+    }
     // Each component function takes an argument 'lp' (for the ship) and 'v' (an integral 2-vector denoting the center of the component)
     const components = [
         // Bordered block
-        (v) => {
+        function (v) {
             const lcms = calculateLcms(0, v, 0.3, 0, 0.9, 0, 0.5);
             const lcms2 = lcms * 2;
             const dhi = [
@@ -736,7 +743,7 @@ function buildShip(factionRandomizer, p_seed, size) {
             }
         },
         // Cylinder array
-        (v) => {
+        function (v) {
             const lcms = calculateLcms(1, v, 0.2, 0.3, 1, 0, 0.6);
             // TODO: making this a const instead is likely to be beneficial, but we would need to change the order, breaking backwards compatibility
             let componentWidth = Math.ceil(shipRandomizer.sd(0.8, 2) * lcms);
@@ -779,7 +786,7 @@ function buildShip(factionRandomizer, p_seed, size) {
             }
         },
         // Banded cylinder
-        (v) => {
+        function (v) {
             const lcms = calculateLcms(2, v, 0.05, 0, 1, 0, 0.9);
             const componentWidth = Math.ceil(shipRandomizer.sd(0.6, 1.4) * lcms);
             const componentHeight = Math.ceil(shipRandomizer.sd(1, 2) * lcms);
@@ -852,7 +859,7 @@ function buildShip(factionRandomizer, p_seed, size) {
             }
         },
         //Rocket engine (or tries to call another random component if too far forward)
-        (v) => {
+        function (v) {
             if (shipRandomizer.sb(frontness(v) - 0.3) ||
                 isCellGood(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) ||
                 isCellGood(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8)) {
@@ -919,7 +926,7 @@ function buildShip(factionRandomizer, p_seed, size) {
             }
         },
         //Elongated cylinder (calls component 0 - 2 on top of its starting point)
-        (v) => {
+        function (v) {
             const cn = centerness(v, false);
             const lightmid = shipRandomizer.sd(0.7, 1);
             const lightedge = shipRandomizer.sd(0, 0.2);
@@ -998,7 +1005,7 @@ function buildShip(factionRandomizer, p_seed, size) {
             }
         },
         //Ball
-        (v) => {
+        function (v) {
             const lcms = calculateLcms(5, v, 0.1, 0, 0.9, 0, 0.8);
             const lightmid = shipRandomizer.sd(0.75, 1);
             const lightedge = shipRandomizer.sd(0, 0.25);
@@ -1041,7 +1048,7 @@ function buildShip(factionRandomizer, p_seed, size) {
             }
         },
         //Forward-facing trapezoidal fin
-        (v) => {
+        function (v) {
             if (nextpass <= 0 || shipRandomizer.sb(frontness(v))) {
                 components[shipRandomizer.schoose(componentChances.slice(0, 6))](v);
                 return;
