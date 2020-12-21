@@ -324,7 +324,7 @@ function clamp(n, min, max) {
 }
 // Take a color and multiplies it with a factor. factor = 0 produces black.
 function scaleColorBy(color, factor) {
-    return `rgb(${color[0] * factor},${color[1] * factor},${color[2] * factor})`;
+    return `rgb(${color.map(channel => channel * factor * 100).join('%,')}%)`;
 }
 // Takes a triplet [H,S,V] and returns a triplet [R,G,B], representing the same color. All components are 0 - 1.
 function hsvToRgb(h, s, v) {
