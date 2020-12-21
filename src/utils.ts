@@ -6,7 +6,7 @@ export function clamp(n: number, min: number, max: number): number {
 
 // Take a color and multiplies it with a factor. factor = 0 produces black.
 export function scaleColorBy(color: RGBColor, factor: number): string {
-  return `rgb(${color.map(channel => channel * factor * 100).join('%,')}%)`;
+  return `rgba(${color.map(channel => channel * factor * 100).join('%,')}%,1)`;
 }
 
 // Takes a triplet [H,S,V] and returns a triplet [R,G,B], representing the same color. All components are 0 - 1.
