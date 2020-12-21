@@ -332,7 +332,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
         const grad = cx.createLinearGradient(edgePoint[0], edgePoint[1], middlePoint[0] * 2 - edgePoint[0], middlePoint[1] * 2 - edgePoint[1]);
         const darkness = `rgba(0,0,0,${amount})`;
         grad.addColorStop(0, darkness);
-        grad.addColorStop(0.5, "rgba(0,0,0,0)");
+        grad.addColorStop(0.5, `rgba(0,0,0,0)`);
         grad.addColorStop(1, darkness);
         return grad;
     }
@@ -356,7 +356,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
             const baseColor = computeBaseColor();
             const icolorh = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
             const ocolorh = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
-            cx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.25) + ")";
+            cx.fillStyle = `rgba(0,0,0,${shipRandomizer.sd(0, 0.25)})`;
             cx.fillRect(v[0] - trv[0] - 1, v[1] - trv[1] - 1, dho[0] * counts[0] + 2, dho[1] * counts[1] + 2);
             cx.fillStyle = ocolorh;
             cx.fillRect(v[0] - trv[0], v[1] - trv[1], dho[0] * counts[0], dho[1] * counts[1]);
@@ -393,7 +393,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
                     v[0] - Math.floor(componentWidth / 2),
                     v[1] - Math.floor(componentHeight / 2),
                 ];
-                cx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.25) + ")";
+                cx.fillStyle = `rgba(0,0,0,${shipRandomizer.sd(0, 0.25)})`;
                 cx.fillRect(bv[0] - 1, bv[1] - 1, componentWidth + 2, componentHeight + 2);
                 cx.fillStyle = ccolor;
                 cx.fillRect(bv[0], bv[1], componentWidth, componentHeight);
@@ -407,7 +407,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
                     v[0] - Math.floor(componentHeight / 2),
                     v[1] - Math.floor(componentWidth / 2),
                 ];
-                cx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.25) + ")";
+                cx.fillStyle = `rgba(0,0,0,${shipRandomizer.sd(0, 0.25)})`;
                 cx.fillRect(bv[0] - 1, bv[1] - 1, componentHeight + 2, componentWidth + 2);
                 cx.fillStyle = ccolor;
                 cx.fillRect(bv[0], bv[1], componentHeight, componentWidth);
@@ -655,7 +655,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
             const componentHw = smallr * countx;
             const componentHh = smallr * county;
             const bv = [v[0] - componentHw, v[1] - componentHh];
-            cx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.2) + ")";
+            cx.fillStyle = `rgba(0,0,0,${shipRandomizer.sd(0, 0.2)})`;
             for (let ax = 0; ax < countx; ax++) {
                 const px = bv[0] + (ax * 2 + 1) * smallr;
                 for (let ay = 0; ay < county; ay++) {
@@ -712,7 +712,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
                 [v[0] - hwi, v[1] + backamount + hh1i + hh1e],
             ];
             const baseColor = computeBaseColor();
-            cx.fillStyle = "rgba(0,0,0," + shipRandomizer.sd(0, 0.2) + ")";
+            cx.fillStyle = `rgba(0,0,0,${shipRandomizer.sd(0, 0.2)})`;
             cx.beginPath();
             cx.moveTo(quad[0][0] - 1, quad[0][1]);
             cx.lineTo(quad[1][0] - 1, quad[1][1]);
