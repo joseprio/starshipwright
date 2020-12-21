@@ -15,16 +15,23 @@ yarn add starshipwright
 ## Usage
 
 ```js
-import {TODO} from 'starshipwright';
+import { generateShip, generateFactionRandomizer } from 'starshipwright';
 
 ...
 
-TODO
+const faction = generateFactionRandomizer("factionRandomSeed");
+const ship = generateShip(faction, "shipRandomSeed"); // HTML Canvas
 ```
 
 ## API
 
-TODO
+### generateFactionRandomizer(seed: string) ⇒ `Randomizer`
+
+Returns a randomizer initialized with the specified seed.
+
+### generateShip(faction: Randomizer, seed: string, size?: number) ⇒ `Randomizer`
+
+Returns a canvas that contains the generated ship.
 
 ## Demo
 
