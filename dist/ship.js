@@ -218,7 +218,6 @@ export function buildShip(factionRandomizer, p_seed, size) {
                 gy: gy,
                 x: Math.floor(gwextra + (gx + 0.5) * COMPONENT_GRID_SIZE),
                 y: Math.floor(ghextra + (gy + 0.5) * COMPONENT_GRID_SIZE),
-                phase: 0,
             }; // Phase is 0 for unchecked, 1 for checked and good, and -1 for checked and bad
         }
     }
@@ -234,7 +233,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
                     goodcells.push(ncell);
                 }
                 else {
-                    ncell.phase = -1;
+                    ncell.phase = 2;
                 }
             }
         }
@@ -246,7 +245,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
                     goodcells.push(ncell);
                 }
                 else {
-                    ncell.phase = -1;
+                    ncell.phase = 2;
                 }
             }
         }
@@ -258,7 +257,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
                     goodcells.push(ncell);
                 }
                 else {
-                    ncell.phase = -1;
+                    ncell.phase = 2;
                 }
             }
         }
@@ -270,7 +269,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
                     goodcells.push(ncell);
                 }
                 else {
-                    ncell.phase = -1;
+                    ncell.phase = 2;
                 }
             }
         }
@@ -298,7 +297,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
         if (gx < 0 || gx >= gw || gy < 0 || gy >= gh) {
             return false;
         }
-        return cgrid[gx][gy].phase > 0;
+        return cgrid[gx][gy].phase == 1;
     }
     function frontness(v) {
         return 1 - v[1] / h;

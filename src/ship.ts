@@ -14,7 +14,7 @@ type Cell = {
   gy: number;
   x: number;
   y: number;
-  phase: number;
+  phase?: number;
 };
 
 type OutlineFunc = () => void;
@@ -323,7 +323,6 @@ export function buildShip(
         gy: gy,
         x: Math.floor(gwextra + (gx + 0.5) * COMPONENT_GRID_SIZE),
         y: Math.floor(ghextra + (gy + 0.5) * COMPONENT_GRID_SIZE),
-        phase: 0,
       }; // Phase is 0 for unchecked, 1 for checked and good, and -1 for checked and bad
     }
   }
@@ -338,7 +337,7 @@ export function buildShip(
           ncell.phase = 1;
           goodcells.push(ncell);
         } else {
-          ncell.phase = -1;
+          ncell.phase = 2;
         }
       }
     }
@@ -349,7 +348,7 @@ export function buildShip(
           ncell.phase = 1;
           goodcells.push(ncell);
         } else {
-          ncell.phase = -1;
+          ncell.phase = 2;
         }
       }
     }
@@ -360,7 +359,7 @@ export function buildShip(
           ncell.phase = 1;
           goodcells.push(ncell);
         } else {
-          ncell.phase = -1;
+          ncell.phase = 2;
         }
       }
     }
@@ -371,7 +370,7 @@ export function buildShip(
           ncell.phase = 1;
           goodcells.push(ncell);
         } else {
-          ncell.phase = -1;
+          ncell.phase = 2;
         }
       }
     }
@@ -407,7 +406,7 @@ export function buildShip(
     if (gx < 0 || gx >= gw || gy < 0 || gy >= gh) {
       return false;
     }
-    return cgrid[gx][gy].phase > 0;
+    return cgrid[gx][gy].phase == 1;
   }
 
   function frontness(v: Vec): number {
