@@ -40,7 +40,6 @@ export function buildShip(
   // Compute faction colors
   for (let i = 0; i < baseColorCount; i++) {
     const ls = "base color" + i;
-    // TODO: This is the only usage of hsvToRgb, which can actually help us simplify quite a bit of code
     // Just doing random RGB coloring should be alright and simplify the code
     colors.push(
       hsvToRgb(
@@ -507,6 +506,7 @@ export function buildShip(
         Math.round((counts[1] * dho[1]) / 2),
       ];
       const baseColor = computeBaseColor();
+      // TODO: icolorh and ocolorh can be inlined, but that would change the order and break the backwards compatibility
       const icolorh = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
       const ocolorh = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
       cx.fillStyle = `rgba(0,0,0,${shipRandomizer.sd(0, 0.25)})`;

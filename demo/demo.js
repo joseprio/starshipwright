@@ -353,7 +353,6 @@ function buildShip(factionRandomizer, p_seed, size) {
     // Compute faction colors
     for (let i = 0; i < baseColorCount; i++) {
         const ls = "base color" + i;
-        // TODO: This is the only usage of hsvToRgb, which can actually help us simplify quite a bit of code
         // Just doing random RGB coloring should be alright and simplify the code
         colors.push(hsvToRgb(factionRandomizer.hd(0, 1, ls + "hue") ** 2, clamp(factionRandomizer.hd(-0.2, 1, ls + "saturation"), 0, factionRandomizer.hd(0, 1, ls + "saturation bound") ** 4), clamp(factionRandomizer.hd(0.7, 1.1, ls + "value"), 0, 1)));
         // Default maximum power is 6
@@ -689,6 +688,7 @@ function buildShip(factionRandomizer, p_seed, size) {
                 Math.round((counts[1] * dho[1]) / 2),
             ];
             const baseColor = computeBaseColor();
+            // TODO: icolorh and ocolorh can be inlined, but that would change the order and break the backwards compatibility
             const icolorh = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
             const ocolorh = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
             cx.fillStyle = `rgba(0,0,0,${shipRandomizer.sd(0, 0.25)})`;
