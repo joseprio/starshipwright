@@ -168,10 +168,6 @@ class Randomizer {
     hr(seed) {
         const state = [1160605769, 1424711319, 876532818, 1419174464];
         let rv = 1206170165;
-        if (!seed) {
-            seed = "?/?/?/";
-            rv = 3379896793;
-        }
         if (this.hrCache[seed]) {
             return this.hrCache[seed];
         }

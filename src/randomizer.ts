@@ -77,13 +77,9 @@ export class Randomizer {
   */
 
   //Returns a raw unsigned 32-bit integer based on hashing this object's seed with the specified string
-  hr(seed?: string): number {
+  hr(seed: string): number {
     const state = [1160605769, 1424711319, 876532818, 1419174464];
     let rv = 1206170165;
-    if (!seed) {
-      seed = "?/?/?/";
-      rv = 3379896793;
-    }
     if (this.hrCache[seed]) {
       return this.hrCache[seed];
     }

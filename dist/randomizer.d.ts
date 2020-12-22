@@ -9,7 +9,7 @@ export declare class Randomizer {
     };
     constructor(p_seed: string);
     sr(): number;
-    hr(seed?: string): number;
+    hr(seed: string): number;
     sd(min: number, max: number): number;
     si(min: number, max: number): number;
     sb(chance: number): boolean;
