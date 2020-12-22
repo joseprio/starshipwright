@@ -506,9 +506,6 @@ export function buildShip(
         Math.round((counts[1] * dho[1]) / 2),
       ];
       const baseColor = computeBaseColor();
-      // TODO: icolorh and ocolorh can be inlined, but that would change the order and break the backwards compatibility
-      const icolorh = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
-      const ocolorh = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
       cx.fillStyle = `rgba(0,0,0,${shipRandomizer.sd(0, 0.25)})`;
       cx.fillRect(
         v[0] - trv[0] - 1,
@@ -516,14 +513,14 @@ export function buildShip(
         dho[0] * counts[0] + 2,
         dho[1] * counts[1] + 2
       );
-      cx.fillStyle = ocolorh;
+      cx.fillStyle = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
       cx.fillRect(
         v[0] - trv[0],
         v[1] - trv[1],
         dho[0] * counts[0],
         dho[1] * counts[1]
       );
-      cx.fillStyle = icolorh;
+      cx.fillStyle = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
       for (let x = 0; x < counts[0]; x++) {
         const bx = v[0] + borderwidth + x * dho[0] - trv[0];
         for (let y = 0; y < counts[1]; y++) {
@@ -557,12 +554,11 @@ export function buildShip(
     // Cylinder array
     function (v) {
       const lcms = calculateLcms(1, v, 0.2, 0.3, 1, 0, 0.6);
-      // TODO: making this a const instead is likely to be beneficial, but we would need to change the order, breaking backwards compatibility
-      let componentWidth = Math.ceil(shipRandomizer.sd(0.8, 2) * lcms);
+      const baseComponentWidth = Math.ceil(shipRandomizer.sd(0.8, 2) * lcms);
       const componentHeight = Math.ceil(shipRandomizer.sd(0.8, 2) * lcms);
-      const cw = shipRandomizer.si(3, Math.max(4, componentWidth));
-      const count = Math.max(1, Math.round(componentWidth / cw));
-      componentWidth = count * cw;
+      const cw = shipRandomizer.si(3, Math.max(4, baseComponentWidth));
+      const count = Math.max(1, Math.round(baseComponentWidth / cw));
+      const componentWidth = count * cw;
       const baseColor = computeBaseColor();
       const ccolor = scaleColorBy(baseColor, shipRandomizer.sd(0.5, 1));
       const darkness = shipRandomizer.sd(0.3, 0.9);
@@ -758,19 +754,15 @@ export function buildShip(
       }
       const lcms = calculateLcms(3, v, 0.1, 0.6, 1, 0.3, 0.8);
       const componentWidth = shipRandomizer.sd(1, 2) * lcms;
-      // TODO: making this a const instead is likely to be beneficial, but we would need to change the order, breaking backwards compatibility
-      let componentHeight = Math.ceil(shipRandomizer.sd(0.3, 1) * lcms);
+      const baseComponentHeight = Math.ceil(shipRandomizer.sd(0.3, 1) * lcms);
       const nratio = shipRandomizer.sd(0.25, 0.6);
       const nw = componentWidth * nratio;
       const midw = (componentWidth + nw) / 2;
       const midwh = midw / 2;
-      const componentHeight2 = [
-        Math.max(1, Math.ceil(componentHeight * shipRandomizer.sd(0.08, 0.25))),
-        Math.max(1, Math.ceil(componentHeight * shipRandomizer.sd(0.03, 0.15))),
-      ];
-      const hpair = componentHeight2[0] + componentHeight2[1];
-      const count = Math.ceil(componentHeight / hpair);
-      componentHeight = count * hpair + componentHeight2[0];
+      const componentHeight2 = Math.max(1, Math.ceil(baseComponentHeight * shipRandomizer.sd(0.08, 0.25)));
+      const hpair = componentHeight2 + Math.max(1, Math.ceil(baseComponentHeight * shipRandomizer.sd(0.03, 0.15)));
+      const count = Math.ceil(baseComponentHeight / hpair);
+      const componentHeight = count * hpair + componentHeight2;
       const basecolor =
         colors[factionRandomizer.hchoose(colorChances, "com3 basecolor")];
       const lightness0_mid = factionRandomizer.hd(
@@ -790,7 +782,7 @@ export function buildShip(
         cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
       ];
       const by = Math.ceil(v[1] - componentHeight / 2);
-      const byh = [by + componentHeight2[0], by + hpair];
+      const byh = [by + componentHeight2, by + hpair];
       grad2[0].addColorStop(0, scaleColorBy(basecolor, lightness0_edge));
       grad2[0].addColorStop(0.5, scaleColorBy(basecolor, lightness0_mid));
       grad2[0].addColorStop(1, scaleColorBy(basecolor, lightness0_edge));
@@ -806,7 +798,7 @@ export function buildShip(
       cx.fill();
       cx.fillStyle = grad2[1];
       for (let i = 0; i < count; i++) {
-        const lyr = [i * hpair + componentHeight2[0], (i + 1) * hpair];
+        const lyr = [i * hpair + componentHeight2, (i + 1) * hpair];
         const ly = [byh[0] + i * hpair, byh[1] + i * hpair];
         const lw = [
           (nw + (componentWidth - nw) * (lyr[0] / componentHeight)) / 2,
@@ -955,18 +947,14 @@ export function buildShip(
       const smallr =
         (shipRandomizer.sd(0.5, 1) * lcms) / Math.max(countx, county);
       const drawr = smallr + 0.5;
-      const shadowr = smallr + 1;
-      const centerr = smallr / 5;
-      const componentHw = smallr * countx;
-      const componentHh = smallr * county;
-      const bv = [v[0] - componentHw, v[1] - componentHh];
+      const bv = [v[0] - smallr * countx, v[1] - smallr * county];
       cx.fillStyle = `rgba(0,0,0,${shipRandomizer.sd(0, 0.2)})`;
       for (let ax = 0; ax < countx; ax++) {
         const px = bv[0] + (ax * 2 + 1) * smallr;
         for (let ay = 0; ay < county; ay++) {
           const py = bv[1] + (ay * 2 + 1) * smallr;
           cx.beginPath();
-          cx.arc(px, py, shadowr, 0, 7);
+          cx.arc(px, py, smallr + 1, 0, 7);
           cx.fill();
         }
       }
@@ -974,7 +962,7 @@ export function buildShip(
         const px = bv[0] + (ax * 2 + 1) * smallr;
         for (let ay = 0; ay < county; ay++) {
           const py = bv[1] + (ay * 2 + 1) * smallr;
-          const grad = cx.createRadialGradient(px, py, centerr, px, py, drawr);
+          const grad = cx.createRadialGradient(px, py, smallr / 5, px, py, drawr);
           grad.addColorStop(0, colormid);
           grad.addColorStop(1, coloredge);
           cx.fillStyle = grad;
