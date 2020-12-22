@@ -423,8 +423,8 @@ function buildShip(factionRandomizer, p_seed, size) {
                     v0[1] = base[1][1] - (v0[1] - base[0][1]);
                 }
                 const v1 = [
-                    clamp(shipRandomizer.sd(0, 1) * w, 0, w),
-                    clamp(shipRandomizer.sd(0, 1) * h, 0, h),
+                    shipRandomizer.sd(0, 1) * w,
+                    shipRandomizer.sd(0, 1) * h,
                 ];
                 const area = Math.abs((v1[0] - v0[0]) * (v1[1] - v0[1]));
                 const ratio = csarealimit / area;
@@ -754,8 +754,8 @@ function buildShip(factionRandomizer, p_seed, size) {
             const componentWidth = Math.ceil(shipRandomizer.sd(0.6, 1.4) * lcms);
             const componentHeight = Math.ceil(shipRandomizer.sd(1, 2) * lcms);
             const wh2 = [
-                Math.ceil(clamp((componentWidth * shipRandomizer.sd(0.7, 1)) / 2, 1, componentWidth)),
-                Math.ceil(clamp((componentWidth * shipRandomizer.sd(0.8, 1)) / 2, 1, componentWidth)),
+                Math.ceil(Math.max((componentWidth * shipRandomizer.sd(0.7, 1)) / 2, 1)),
+                Math.ceil(Math.max((componentWidth * shipRandomizer.sd(0.8, 1)) / 2, 1)),
             ];
             const h2 = [
                 Math.floor(clamp(componentWidth * shipRandomizer.sd(0.05, 0.25), 1, componentHeight)),
@@ -763,7 +763,7 @@ function buildShip(factionRandomizer, p_seed, size) {
             ];
             const hpair = h2[0] + h2[1];
             const odd = shipRandomizer.sb(factionRandomizer.hd(0, 1, "com2 oddchance") ** 0.5);
-            const count = clamp(Math.floor(componentHeight / hpair), 1, componentHeight);
+            const count = Math.max(Math.floor(componentHeight / hpair), 1);
             const htotal = count * hpair + (odd ? h2[0] : 0);
             const baseColor = computeBaseColor();
             const scale_0 = shipRandomizer.sd(0.6, 1);

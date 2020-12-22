@@ -158,8 +158,8 @@ export function buildShip(
           v0[1] = base[1][1] - (v0[1] - base[0][1]);
         }
         const v1 = [
-          clamp(shipRandomizer.sd(0, 1) * w, 0, w),
-          clamp(shipRandomizer.sd(0, 1) * h, 0, h),
+          shipRandomizer.sd(0, 1) * w,
+          shipRandomizer.sd(0, 1) * h,
         ];
         const area = Math.abs((v1[0] - v0[0]) * (v1[1] - v0[1]));
         const ratio = csarealimit / area;
@@ -619,17 +619,15 @@ export function buildShip(
       const componentHeight = Math.ceil(shipRandomizer.sd(1, 2) * lcms);
       const wh2 = [
         Math.ceil(
-          clamp(
+          Math.max(
             (componentWidth * shipRandomizer.sd(0.7, 1)) / 2,
-            1,
-            componentWidth
+            1
           )
         ),
         Math.ceil(
-          clamp(
+          Math.max(
             (componentWidth * shipRandomizer.sd(0.8, 1)) / 2,
-            1,
-            componentWidth
+            1
           )
         ),
       ];
@@ -653,10 +651,9 @@ export function buildShip(
       const odd = shipRandomizer.sb(
         factionRandomizer.hd(0, 1, "com2 oddchance") ** 0.5
       );
-      const count = clamp(
+      const count = Math.max(
         Math.floor(componentHeight / hpair),
-        1,
-        componentHeight
+        1
       );
       const htotal = count * hpair + (odd ? h2[0] : 0);
       const baseColor = computeBaseColor();
