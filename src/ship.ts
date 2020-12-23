@@ -57,9 +57,10 @@ const enum FactionSeed {
   Component1HChance = 33,
   Component2OddChance = 34,
   Component2VerticalChance = 35,
-  Component3Lightness0Edge = 36,
-  Component3Lightness0Mid = 37,
-  Component3Lightness1Edge = 38,
+  Component3BaseColor = 36,
+  Component3Lightness0Edge = 37,
+  Component3Lightness0Mid = 38,
+  Component3Lightness1Edge = 39,
   Component4CoverComC0 = 40,
   Component4CoverComC1 = 41,
   Component4CoverComC2 = 42,
@@ -120,38 +121,34 @@ export function buildShip(
 
   function computeBaseColor(): RGBColor {
     let rv = colors[shipRandomizer.schoose(colorChances)];
-    if (
-      shipRandomizer.sb(
+    return shipRandomizer.sb(
         factionRandomizer.hd(0, 0.5, FactionSeed.BaseColorShiftChance) ** 2
-      )
-    ) {
-      rv = [rv[0], rv[1], rv[2]];
-      rv[0] = clamp(
-        rv[0] +
-          factionRandomizer.hd(0, 0.6, FactionSeed.BaseColorShiftChanceRed) ** 2 *
-            clamp(shipRandomizer.sd(-1, 1.2), 0, 1) *
-            clamp(shipRandomizer.ss(0.7) + shipRandomizer.ss(0.7), -1, 1),
-        0,
-        1
-      );
-      rv[1] = clamp(
-        rv[1] +
-          factionRandomizer.hd(0, 0.6, FactionSeed.BaseColorShiftChanceGreen) ** 2 *
-            clamp(shipRandomizer.sd(-1, 1.2), 0, 1) *
-            clamp(shipRandomizer.ss(0.7) + shipRandomizer.ss(0.7), -1, 1),
-        0,
-        1
-      );
-      rv[2] = clamp(
-        rv[2] +
-          factionRandomizer.hd(0, 0.6, FactionSeed.BaseColorShiftChanceBlue) ** 2 *
-            clamp(shipRandomizer.sd(-1, 1.2), 0, 1) *
-            clamp(shipRandomizer.ss(0.7) + shipRandomizer.ss(0.7), -1, 1),
-        0,
-        1
-      );
-    }
-    return rv;
+      ) ? [
+        clamp(
+          rv[0] +
+            factionRandomizer.hd(0, 0.6, FactionSeed.BaseColorShiftChanceRed) ** 2 *
+              clamp(shipRandomizer.sd(-1, 1.2), 0, 1) *
+              clamp(shipRandomizer.ss(0.7) + shipRandomizer.ss(0.7), -1, 1),
+          0,
+          1
+        ),
+        clamp(
+          rv[1] +
+            factionRandomizer.hd(0, 0.6, FactionSeed.BaseColorShiftChanceGreen) ** 2 *
+              clamp(shipRandomizer.sd(-1, 1.2), 0, 1) *
+              clamp(shipRandomizer.ss(0.7) + shipRandomizer.ss(0.7), -1, 1),
+          0,
+          1
+        ),
+          clamp(
+          rv[2] +
+            factionRandomizer.hd(0, 0.6, FactionSeed.BaseColorShiftChanceBlue) ** 2 *
+              clamp(shipRandomizer.sd(-1, 1.2), 0, 1) *
+              clamp(shipRandomizer.ss(0.7) + shipRandomizer.ss(0.7), -1, 1),
+          0,
+          1
+        )
+      ] : rv;
   }
 
   //The initial overall size of this ship, in pixels
@@ -386,8 +383,8 @@ export function buildShip(
     }
   }
   const goodcells = [cgrid[Math.floor(gw / 2)][Math.floor(gh / 2)]];
-  let nextcheck = 0;
-  while (nextcheck < goodcells.length) {
+  
+  for (let nextcheck = 0; nextcheck < goodcells.length; nextcheck++) {
     const lcell = goodcells[nextcheck];
     if (lcell.gx > 0) {
       const ncell = cgrid[lcell.gx - 1][lcell.gy];
@@ -433,7 +430,6 @@ export function buildShip(
         }
       }
     }
-    nextcheck++;
   }
   for (let i = 0; i < goodcells.length; i++) {
     const lcell = goodcells[i];
@@ -511,7 +507,8 @@ export function buildShip(
         bigIncChanceHigh,
         `${FactionSeed.ComponentBigIncChance}-${componentIndex}`
       );
-      while (shipRandomizer.sb(chance * bn)) {
+      // Using for as it's smaller, even though it didn't make the zip smaller
+      for (;shipRandomizer.sb(chance * bn);) {
         const minLeeway = Math.min(
           v[0] - lcms,
           w - v[0] - lcms,
@@ -801,6 +798,7 @@ export function buildShip(
         isCellGood(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) ||
         isCellGood(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8)
       ) {
+        // Any component but this one
         for (let tries = 0; tries < 100; tries++) {
           const which = shipRandomizer.schoose(componentChances);
           if (which != 3) {
@@ -812,8 +810,7 @@ export function buildShip(
       const lcms = calculateLcms(3, v, 0.1, 0.6, 1, 0.3, 0.8);
       const componentWidth = shipRandomizer.sd(1, 2) * lcms;
       const baseComponentHeight = Math.ceil(shipRandomizer.sd(0.3, 1) * lcms);
-      const nratio = shipRandomizer.sd(0.25, 0.6);
-      const nw = componentWidth * nratio;
+      const nw = componentWidth * shipRandomizer.sd(0.25, 0.6);;
       const midw = (componentWidth + nw) / 2;
       const midwh = midw / 2;
       const componentHeight2 = Math.max(1, Math.ceil(baseComponentHeight * shipRandomizer.sd(0.08, 0.25)));
@@ -821,7 +818,7 @@ export function buildShip(
       const count = Math.ceil(baseComponentHeight / hpair);
       const componentHeight = count * hpair + componentHeight2;
       const basecolor =
-        colors[factionRandomizer.hchoose(colorChances, "com3 basecolor")];
+        colors[factionRandomizer.hchoose(colorChances, FactionSeed.Component3BaseColor)];
       const lightness0_mid = factionRandomizer.hd(
         0.5,
         0.8,
@@ -839,7 +836,8 @@ export function buildShip(
         cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
       ];
       const by = Math.ceil(v[1] - componentHeight / 2);
-      const byh = [by + componentHeight2, by + hpair];
+      const byh_0 = by + componentHeight2
+      const byh_1 = by + hpair;
       grad2[0].addColorStop(0, scaleColorBy(basecolor, lightness0_edge));
       grad2[0].addColorStop(0.5, scaleColorBy(basecolor, lightness0_mid));
       grad2[0].addColorStop(1, scaleColorBy(basecolor, lightness0_edge));
@@ -855,11 +853,12 @@ export function buildShip(
       cx.fill();
       cx.fillStyle = grad2[1];
       for (let i = 0; i < count; i++) {
-        const lyr = [i * hpair + componentHeight2, (i + 1) * hpair];
-        const ly = [byh[0] + i * hpair, byh[1] + i * hpair];
+        const lyr_0 = i * hpair + componentHeight2
+        const lyr_1 = (i + 1) * hpair;
+        const ly = [byh_0 + i * hpair, byh_1 + i * hpair];
         const lw = [
-          (nw + (componentWidth - nw) * (lyr[0] / componentHeight)) / 2,
-          (nw + (componentWidth - nw) * (lyr[1] / componentHeight)) / 2,
+          (nw + (componentWidth - nw) * (lyr_0 / componentHeight)) / 2,
+          (nw + (componentWidth - nw) * (lyr_1 / componentHeight)) / 2,
         ];
         cx.beginPath();
         cx.moveTo(v[0] - lw[0], ly[0]);
