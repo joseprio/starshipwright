@@ -1,24 +1,26 @@
 export declare class Randomizer {
     seed: string;
-    stateArray: Array<number>;
-    current: number;
-    seedPosition: number;
-    arrayPosition: number;
+    c: number;
+    s0: number;
+    s1: number;
+    s2: number;
     hrCache: {
         [key: string]: number;
     };
     constructor(p_seed: string);
+    sq(): number;
+    hq(seed: string | number): number;
     sr(): number;
-    hr(seed: string): number;
+    hr(seed: string | number): number;
     sd(min: number, max: number): number;
+    hd(min: number, max: number, seed: string | number): number;
     si(min: number, max: number): number;
     sb(chance: number): boolean;
-    hd(min: number, max: number, seed: string): number;
-    hi(min: number, max: number, s: string): number;
-    hb(chance: number, seed: string): boolean;
+    hi(min: number, max: number, seed: string | number): number;
+    hb(chance: number, seed: string | number): boolean;
     ss(chance: number): number;
     sseq(chance: number, max: number): number;
-    hseq(chance: number, max: number, seed: string): number;
+    hseq(chance: number, max: number, seed: string | number): number;
     schoose(chances: Array<number>): number;
-    hchoose(chances: Array<number>, seed?: string): number;
+    hchoose(chances: Array<number>, seed: string | number): number;
 }

@@ -20,6 +20,66 @@ type Cell = {
 type OutlineFunc = () => void;
 type ComponentFunc = (v: Vec) => void;
 
+const enum FactionSeed {
+  BaseColorPlusOne = 0,
+  BaseColorCount = 1,
+  BaseColorHue = 2,
+  BaseColorSaturation = 3,
+  BaseColorSaturationBound = 4,
+  BaseColorValue = 5,
+  BaseColorChances = 6,
+  BaseColorShiftChance = 7,
+  BaseColorShiftChanceRed = 8,
+  BaseColorShiftChanceBlue = 9,
+  BaseColorShiftChanceGreen = 10,
+  SizeMin = 11,
+  SizeMax = 12,
+  WidthRationMin = 13,
+  WidthRationMax = 14,
+  HeightRationMin = 15,
+  HeightRationMax = 16,
+  Outline0InitialWidth = 17,
+  Outline0BlockCount = 18,
+  Outline0FrontBias = 19,
+  Outline1InitialWidth = 20,
+  Outline1CircleCount = 21,
+  Outline1FrontBias = 22,
+  Outline2BaseFatness = 23,
+  Outline2LineCap = 24,
+  Outline2FrontBias = 25,
+  Outline2ConAdjust = 26,
+  OutlineType = 27,
+  BaseComponentPasses = 28,
+  ExtraComponentAmount = 29,
+  MasterBigness = 30,
+  ComponentBigChance = 31,
+  ComponentBigIncChance = 32,
+  Component1HChance = 33,
+  Component2OddChance = 34,
+  Component2VerticalChance = 35,
+  Component3Lightness0Edge = 36,
+  Component3Lightness0Mid = 37,
+  Component3Lightness1Edge = 38,
+  Component4CoverComC0 = 40,
+  Component4CoverComC1 = 41,
+  Component4CoverComC2 = 42,
+  Component4DirectionC0 = 43,
+  Component4DirectionC1 = 44,
+  Component4DirectionC2 = 45,
+  Component4HPower0 = 46,
+  Component4HPower1 = 47,
+  Component4MaxWidth = 48,
+  Component5MultXC = 50,
+  Component5MultYC = 51,
+  Component6H1Min = 60,
+  Component6H1Power = 61,
+  Component6BacknessType = 62,
+  Component6BacknessPositive = 63,
+  Component6BacknessNegative = 64,
+  Component6Width = 65,
+  ComponentMiddleness = 70,
+}
+
 // This library is heavily optimized towards size, as I used it for a JS13K game. Also, I'm planning to use
 // it again for that purpose in the future. This function is a lot bigger than it needs to be, but doing so
 // allows us to have all variables we need in the closure instead of passing it around in parameters
@@ -35,25 +95,25 @@ export function buildShip(
 
   const baseColorCount =
     1 +
-    (factionRandomizer.hb(0.7, "base color +1") ? 1 : 0) +
-    factionRandomizer.hseq(0.3, 3, "base color count");
+    (factionRandomizer.hb(0.7, FactionSeed.BaseColorPlusOne) ? 1 : 0) +
+    factionRandomizer.hseq(0.3, 3, FactionSeed.BaseColorCount);
   // Compute faction colors
   for (let i = 0; i < baseColorCount; i++) {
-    const ls = "base color" + i;
+    const ls = "-" + i;
     // Just doing random RGB coloring should be alright and simplify the code
     colors.push(
       hsvToRgb(
-        factionRandomizer.hd(0, 1, ls + "hue") ** 2,
+        factionRandomizer.hd(0, 1, FactionSeed.BaseColorHue + ls) ** 2,
         clamp(
-          factionRandomizer.hd(-0.2, 1, ls + "saturation"),
+          factionRandomizer.hd(-0.2, 1, FactionSeed.BaseColorSaturation + ls),
           0,
-          factionRandomizer.hd(0, 1, ls + "saturation bound") ** 4
+          factionRandomizer.hd(0, 1, FactionSeed.BaseColorSaturationBound + ls) ** 4
         ),
-        clamp(factionRandomizer.hd(0.7, 1.1, ls + "value"), 0, 1)
+        clamp(factionRandomizer.hd(0.7, 1.1, FactionSeed.BaseColorValue + ls), 0, 1)
       )
     );
     // Default maximum power is 6
-    colorChances.push(2 ** factionRandomizer.hd(0, 6, ls + "chances"));
+    colorChances.push(2 ** factionRandomizer.hd(0, 6, FactionSeed.BaseColorChances + ls));
   }
 
   const shipRandomizer = new Randomizer(factionRandomizer.seed + p_seed);
@@ -62,13 +122,13 @@ export function buildShip(
     let rv = colors[shipRandomizer.schoose(colorChances)];
     if (
       shipRandomizer.sb(
-        factionRandomizer.hd(0, 0.5, "base color shift chance") ** 2
+        factionRandomizer.hd(0, 0.5, FactionSeed.BaseColorShiftChance) ** 2
       )
     ) {
       rv = [rv[0], rv[1], rv[2]];
       rv[0] = clamp(
         rv[0] +
-          factionRandomizer.hd(0, 0.6, "base color shift range red") ** 2 *
+          factionRandomizer.hd(0, 0.6, FactionSeed.BaseColorShiftChanceRed) ** 2 *
             clamp(shipRandomizer.sd(-1, 1.2), 0, 1) *
             clamp(shipRandomizer.ss(0.7) + shipRandomizer.ss(0.7), -1, 1),
         0,
@@ -76,7 +136,7 @@ export function buildShip(
       );
       rv[1] = clamp(
         rv[1] +
-          factionRandomizer.hd(0, 0.6, "base color shift range green") ** 2 *
+          factionRandomizer.hd(0, 0.6, FactionSeed.BaseColorShiftChanceGreen) ** 2 *
             clamp(shipRandomizer.sd(-1, 1.2), 0, 1) *
             clamp(shipRandomizer.ss(0.7) + shipRandomizer.ss(0.7), -1, 1),
         0,
@@ -84,7 +144,7 @@ export function buildShip(
       );
       rv[2] = clamp(
         rv[2] +
-          factionRandomizer.hd(0, 0.6, "base color shift range blue") ** 2 *
+          factionRandomizer.hd(0, 0.6, FactionSeed.BaseColorShiftChanceBlue) ** 2 *
             clamp(shipRandomizer.sd(-1, 1.2), 0, 1) *
             clamp(shipRandomizer.ss(0.7) + shipRandomizer.ss(0.7), -1, 1),
         0,
@@ -98,16 +158,16 @@ export function buildShip(
   size =
     size ||
     shipRandomizer.sd(
-      factionRandomizer.hd(2.5, 3.5, "size min"),
-      factionRandomizer.hd(5, 7, "size max")
+      factionRandomizer.hd(2.5, 3.5, FactionSeed.SizeMin),
+      factionRandomizer.hd(5, 7, FactionSeed.SizeMax)
     ) ** 3;
   const wratio = shipRandomizer.sd(
-    factionRandomizer.hd(0.5, 1, "wratio min"),
-    factionRandomizer.hd(1, 1.3, "wratio max")
+    factionRandomizer.hd(0.5, 1, FactionSeed.WidthRationMin),
+    factionRandomizer.hd(1, 1.3, FactionSeed.WidthRationMax)
   );
   const hratio = shipRandomizer.sd(
-    factionRandomizer.hd(0.7, 1, "hratio min"),
-    factionRandomizer.hd(1.1, 1.7, "hratio max")
+    factionRandomizer.hd(0.7, 1, FactionSeed.HeightRationMin),
+    factionRandomizer.hd(1.1, 1.7, FactionSeed.HeightRationMax)
   );
   const w = Math.floor(size * wratio); // Maximum width of this ship, in pixels
   const hw = Math.floor(w / 2);
@@ -128,7 +188,7 @@ export function buildShip(
     // 0: Joined rectangles.
     function () {
       const initialWidth = Math.ceil(
-        (w * factionRandomizer.hd(0.1, 1, "outline0 iw")) / 5
+        (w * factionRandomizer.hd(0.1, 1, FactionSeed.Outline0InitialWidth)) / 5
       );
       const blocks = [
         [
@@ -140,7 +200,7 @@ export function buildShip(
         2 +
         Math.floor(
           shipRandomizer.sd(0.5, 1) *
-            factionRandomizer.hd(2, 8, "outline0 bc") *
+            factionRandomizer.hd(2, 8, FactionSeed.Outline0BlockCount) *
             size ** 0.5
         );
       for (let i = 1; i < blockcount; i++) {
@@ -152,7 +212,7 @@ export function buildShip(
         if (
           v0[1] < (base[0][1] + base[1][1]) / 2 &&
           shipRandomizer.sb(
-            factionRandomizer.hd(0.5, 1.5, "outline0 frontbias")
+            factionRandomizer.hd(0.5, 1.5, FactionSeed.Outline0FrontBias)
           )
         ) {
           v0[1] = base[1][1] - (v0[1] - base[0][1]);
@@ -203,7 +263,7 @@ export function buildShip(
     function () {
       const csrlimit = Math.max(2, (csarealimit / Math.PI) ** 0.5);
       const initialwidth = Math.ceil(
-        (w * factionRandomizer.hd(0.1, 1, "outline1 iw")) / 5
+        (w * factionRandomizer.hd(0.1, 1, FactionSeed.Outline1InitialWidth)) / 5
       );
       const circles = [];
       const initialcount = Math.floor(h / (initialwidth * 2));
@@ -215,7 +275,7 @@ export function buildShip(
         initialcount +
         Math.floor(
           shipRandomizer.sd(0.5, 1) *
-            factionRandomizer.hd(10, 50, "outline1 cc") *
+            factionRandomizer.hd(10, 50, FactionSeed.Outline1CircleCount) *
             size ** 0.5
         );
       for (let i = initialcount; i < circlecount; i++) {
@@ -232,7 +292,7 @@ export function buildShip(
         if (
           pa > Math.PI &&
           shipRandomizer.sb(
-            factionRandomizer.hd(0.5, 1.5, "outline1 frontbias")
+            factionRandomizer.hd(0.5, 1.5, FactionSeed.Outline1FrontBias)
           )
         ) {
           pa = shipRandomizer.sd(0, Math.PI);
@@ -261,14 +321,14 @@ export function buildShip(
       ];
       const basefatness =
         COMPONENT_GRID_SIZE / size +
-        factionRandomizer.hd(0.03, 0.1, "outline2 basefatness");
+        factionRandomizer.hd(0.03, 0.1, FactionSeed.Outline2BaseFatness);
       const pointcount = Math.max(
         3,
         Math.ceil((shipRandomizer.sd(0.05, 0.1) / basefatness) * size ** 0.5)
       );
       // @ts-ignore - We're doing it properly
       cx.lineCap = ["round", "square"][
-        factionRandomizer.hi(0, 1, "outline2 linecap")
+        factionRandomizer.hi(0, 1, FactionSeed.Outline2LineCap)
       ];
       cx.strokeStyle = "#fff";
       for (let npi = 1; npi < pointcount; npi++) {
@@ -277,7 +337,7 @@ export function buildShip(
           np = [
             shipRandomizer.sd(0, 1) * w,
             shipRandomizer.sd(0, 1) **
-              factionRandomizer.hd(0.1, 1, "outline2 frontbias") *
+              factionRandomizer.hd(0.1, 1, FactionSeed.Outline2FrontBias) *
               h,
           ];
           points.push(np);
@@ -285,7 +345,7 @@ export function buildShip(
         const cons =
           1 +
           shipRandomizer.sseq(
-            factionRandomizer.hd(0, 1, "outline2 conadjust"),
+            factionRandomizer.hd(0, 1, FactionSeed.Outline2ConAdjust),
             3
           );
         for (let nci = 0; nci < cons; nci++) {
@@ -305,7 +365,7 @@ export function buildShip(
   ];
   // ------ End define outlines -----------------------------------
 
-  outlines[factionRandomizer.hchoose([1, 1, 1], "outline type")]();
+  outlines[factionRandomizer.hchoose([1, 1, 1], FactionSeed.OutlineType)]();
   const outline = cx.getImageData(0, 0, w, h);
 
   //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y)
@@ -383,12 +443,12 @@ export function buildShip(
       goodcells.push(ocell);
     }
   }
-  const passes = factionRandomizer.hi(1, 2, "base component passes");
+  const passes = factionRandomizer.hi(1, 2, FactionSeed.BaseComponentPasses);
   const extra = Math.max(
     1,
     Math.floor(
       goodcells.length *
-        factionRandomizer.hd(0, 1 / passes, "extra component amount")
+        factionRandomizer.hd(0, 1 / passes,  FactionSeed.ExtraComponentAmount)
     )
   );
   const totalcomponents = passes * goodcells.length + extra;
@@ -431,7 +491,7 @@ export function buildShip(
   ): number {
     const effectCenter = centerness(v, true);
     const effectShipsize = 1 - 1 / ((w + h) / 1000 + 1);
-    const effectFaction = factionRandomizer.hd(0, 1, "master bigness") ** 0.5;
+    const effectFaction = factionRandomizer.hd(0, 1, FactionSeed.MasterBigness) ** 0.5;
     const effectStack = 1 - totaldone / totalcomponents;
     const bn =
       (effectCenter * effectShipsize * effectFaction * effectStack) **
@@ -442,14 +502,14 @@ export function buildShip(
         factionRandomizer.hd(
           bigChanceLow,
           bigChanceHigh,
-          `com${componentIndex} bigchance`
+          `${FactionSeed.ComponentBigChance}-${componentIndex}`
         ) * bn
       )
     ) {
       const chance = factionRandomizer.hd(
         bigIncChanceLow,
         bigIncChanceHigh,
-        `com${componentIndex} bigincchance`
+        `${FactionSeed.ComponentBigIncChance}-${componentIndex}`
       );
       while (shipRandomizer.sb(chance * bn)) {
         const minLeeway = Math.min(
@@ -564,7 +624,7 @@ export function buildShip(
       const darkness = shipRandomizer.sd(0.3, 0.9);
       // true = horizontal array, false = vertical array
       const orientation = shipRandomizer.sb(
-        clamp(factionRandomizer.hd(-0.2, 1.2, "com1 hchance"), 0, 1)
+        clamp(factionRandomizer.hd(-0.2, 1.2, FactionSeed.Component1HChance), 0, 1)
       );
       if (orientation) {
         const bv = [
@@ -649,7 +709,7 @@ export function buildShip(
       ];
       const hpair = h2[0] + h2[1];
       const odd = shipRandomizer.sb(
-        factionRandomizer.hd(0, 1, "com2 oddchance") ** 0.5
+        factionRandomizer.hd(0, 1, FactionSeed.Component2OddChance) ** 0.5
       );
       const count = Math.max(
         Math.floor(componentHeight / hpair),
@@ -669,7 +729,7 @@ export function buildShip(
         scaleColorBy(baseColor, lightness * scale_1),
       ];
       const orientation = shipRandomizer.sb(
-        factionRandomizer.hd(0, 1, "com2 verticalchance") ** 0.1
+        factionRandomizer.hd(0, 1, FactionSeed.Component2VerticalChance) ** 0.1
       );
       if (orientation) {
         const grad2_0 = cx.createLinearGradient(
@@ -765,14 +825,14 @@ export function buildShip(
       const lightness0_mid = factionRandomizer.hd(
         0.5,
         0.8,
-        "com3 lightness0 mid"
+        FactionSeed.Component3Lightness0Mid
       );
       const lightness0_edge =
-        lightness0_mid - factionRandomizer.hd(0.2, 0.4, "com3 lightness0 edge");
+        lightness0_mid - factionRandomizer.hd(0.2, 0.4, FactionSeed.Component3Lightness0Edge);
       const lightness1_edge = factionRandomizer.hd(
         0,
         0.2,
-        "com3 lightness1 edge"
+        FactionSeed.Component3Lightness1Edge
       );
       const grad2 = [
         cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
@@ -822,16 +882,16 @@ export function buildShip(
         Math.ceil(
           size *
             shipRandomizer.sd(0.4, 1) ** 2 *
-            factionRandomizer.hd(0.02, 0.1, "com4 maxwidth")
+            factionRandomizer.hd(0.02, 0.1, FactionSeed.Component4MaxWidth)
         )
       );
       const hwi = Math.floor(componentWidth / 2);
       const hwe = componentWidth % 2;
-      const forwards = factionRandomizer.hd(0, 1, "com4 directionc0") ** 4;
+      const forwards = factionRandomizer.hd(0, 1,FactionSeed.Component4DirectionC0) ** 4;
       const backwards =
-        0.1 * factionRandomizer.hd(0, 1, "com4 directionc1") ** 4;
+        0.1 * factionRandomizer.hd(0, 1, FactionSeed.Component4DirectionC1) ** 4;
       const toCenter =
-        0.2 * factionRandomizer.hd(0, 1, "com4 directionc2") ** 4;
+        0.2 * factionRandomizer.hd(0, 1, FactionSeed.Component4DirectionC2) ** 4;
       const direction = shipRandomizer.schoose([
         forwards * (2 - cn),
         backwards,
@@ -851,7 +911,7 @@ export function buildShip(
             0.7 *
               size *
               shipRandomizer.sd(0, 1) **
-                factionRandomizer.hd(2, 6, "com4 hpower0")
+                factionRandomizer.hd(2, 6, FactionSeed.Component4HPower0)
           )
         );
         const bb_0_0 = v[0] - hwi,
@@ -876,7 +936,7 @@ export function buildShip(
             0.6 *
               size *
               shipRandomizer.sd(0, 1) **
-                factionRandomizer.hd(2, 7, "com4 hpower1")
+                factionRandomizer.hd(2, 7, FactionSeed.Component4HPower1)
           )
         );
         const bb_0_0 = v[0] - hwi,
@@ -906,9 +966,9 @@ export function buildShip(
         ev = [hw, v[1]];
       }
       const coverComC = [
-        0.6 * factionRandomizer.hd(0, 1, "com4 covercomc0") ** 2,
-        0.2 * factionRandomizer.hd(0, 1, "com4 covercomc1") ** 2,
-        factionRandomizer.hd(0, 1, "com4 covercomc2") ** 2,
+        0.6 * factionRandomizer.hd(0, 1, FactionSeed.Component4CoverComC0) ** 2,
+        0.2 * factionRandomizer.hd(0, 1, FactionSeed.Component4CoverComC1) ** 2,
+        factionRandomizer.hd(0, 1, FactionSeed.Component4CoverComC2) ** 2,
       ];
       components[shipRandomizer.schoose(coverComC)](v);
       if (isCellGood(ev[0], ev[1])) {
@@ -932,13 +992,13 @@ export function buildShip(
       const countx =
         1 +
         shipRandomizer.sseq(
-          factionRandomizer.hd(0, 1, "com5 multxc"),
+          factionRandomizer.hd(0, 1, FactionSeed.Component5MultXC),
           Math.floor(1.2 * (lcms / COMPONENT_MAXIMUM_SIZE) ** 0.6)
         );
       const county =
         1 +
         shipRandomizer.sseq(
-          factionRandomizer.hd(0, 1, "com5 multyc"),
+          factionRandomizer.hd(0, 1, FactionSeed.Component5MultYC),
           Math.floor(1.2 * (lcms / COMPONENT_MAXIMUM_SIZE) ** 0.6)
         );
       const smallr =
@@ -983,23 +1043,23 @@ export function buildShip(
       const h1 =
         h0 *
         shipRandomizer.sd(
-          factionRandomizer.hd(0, 0.8, "com6 h1min") ** 0.5,
+          factionRandomizer.hd(0, 0.8, FactionSeed.Component6H1Min) ** 0.5,
           0.9
         ) **
-          factionRandomizer.hd(0.5, 1.5, "com6 h1power");
+          factionRandomizer.hd(0.5, 1.5, FactionSeed.Component6H1Power);
       const hh1i = Math.floor(h1 / 2);
       const backamount = Math.max(
         (h1 - h0) / 2,
         h0 *
           (shipRandomizer.sd(0, 0.45) + shipRandomizer.sd(0, 0.45)) *
-          (factionRandomizer.hb(0.8, "com6 backnesstype")
-            ? factionRandomizer.hd(0.2, 0.9, "com6 backness#pos")
-            : factionRandomizer.hd(-0.2, -0.05, "com6 backness#neg"))
+          (factionRandomizer.hb(0.8, FactionSeed.Component6BacknessType)
+            ? factionRandomizer.hd(0.2, 0.9, FactionSeed.Component6BacknessPositive)
+            : factionRandomizer.hd(-0.2, -0.05, FactionSeed.Component6BacknessNegative))
       );
       const componentWidth = Math.ceil(
         lcms *
           shipRandomizer.sd(0.7, 1) *
-          factionRandomizer.hd(0.1, 3.5, "com6 width") ** 0.5
+          factionRandomizer.hd(0.1, 3.5, FactionSeed.Component6Width) ** 0.5
       );
       const hwi = Math.floor(componentWidth / 2);
       const hwe = componentWidth % 2;
@@ -1072,7 +1132,7 @@ export function buildShip(
     }
     if (
       Math.abs(lv[0] - hw) < COMPONENT_GRID_SIZE &&
-      shipRandomizer.sb(factionRandomizer.hd(0, 1, "com middleness"))
+      shipRandomizer.sb(factionRandomizer.hd(0, 1, FactionSeed.ComponentMiddleness))
     ) {
       lv[0] = hw;
     }

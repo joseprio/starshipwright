@@ -1,109 +1,57 @@
 export class Randomizer {
     constructor(p_seed) {
-        this.seedPosition = 0;
-        this.arrayPosition = 0;
         this.hrCache = {};
         this.seed = p_seed;
-        if (this.seed.length < 8) {
-            this.seed = "padding_" + this.seed;
+        const mash = Mash();
+        this.c = 1;
+        this.s0 = mash(' ');
+        this.s1 = mash(' ');
+        this.s2 = mash(' ');
+        this.s0 -= mash(p_seed);
+        if (this.s0 < 0) {
+            this.s0 += 1;
         }
-        if (this.seed.length % 2 == 0) {
-            this.seed = "1" + this.seed;
+        this.s1 -= mash(p_seed);
+        if (this.s1 < 0) {
+            this.s1 += 1;
         }
-        this.stateArray = [
-            2972948403,
-            3086140710,
-            2071788248,
-            3026137486,
-            1411764137,
-            2265725585,
-            2923087685,
-            1593177610,
-        ];
-        this.current = 3234042090;
-        for (let i = this.seed.length - 1; i >= 0; i--) {
-            const c = this.seed.charCodeAt(i);
-            this.current =
-                (((this.current << 5) + this.current) ^
-                    c ^
-                    (this.current << ((c % 13) + 1)) ^
-                    (this.current >> ((c % 17) + 1))) >>>
-                    0;
-            this.stateArray[i % 8] ^=
-                (((this.current >> 9) * ((this.current % 16384) + 3427)) ^ c) >>> 0;
+        this.s2 -= mash(p_seed);
+        if (this.s2 < 0) {
+            this.s2 += 1;
         }
+    }
+    // Stream quick
+    sq() {
+        const t = 2091639 * this.s0 + this.c * 2.3283064365386963e-10; // 2^-32
+        this.s0 = this.s1;
+        this.s1 = this.s2;
+        return this.s2 = t - (this.c = t | 0);
+    }
+    // Hash quick
+    hq(seed) {
+        if (!this.hrCache[seed]) {
+            const hashRandomizer = new Randomizer(this.seed + "@" + seed);
+            this.hrCache[seed] = hashRandomizer.sq();
+        }
+        return this.hrCache[seed];
     }
     //Returns a raw unsigned 32-bit integer from the stream.
     sr() {
-        const c = this.seed.charCodeAt(this.seedPosition);
-        const lsa = this.stateArray[this.arrayPosition];
-        this.current =
-            (((this.current << 5) + this.current + lsa) ^
-                c ^
-                (this.current << ((c % 17) + 1)) ^
-                (this.current >> ((c % 13) + 1))) >>>
-                0;
-        this.stateArray[this.arrayPosition] =
-            ((lsa >> 3) ^
-                (lsa << ((c % 19) + 1)) ^
-                ((this.current % 134217728) * 3427)) >>>
-                0;
-        this.seedPosition = (this.seedPosition + 1) % this.seed.length;
-        this.arrayPosition = (this.arrayPosition + 1) % 8;
-        return this.current;
+        return (this.sq() * 0x100000000) | 0;
     }
-    //Returns a raw unsigned 32-bit integer based on hashing this object's seed with the specified string.
-    /*
-    hr_original(seed?: string): number {
-      let t = 1206170165;
-      if (seed) {
-        for (let x = seed.length - 1; x >= 0; x--) {
-          const c = seed.charCodeAt(x);
-          t = ((t << 5) + t) ^ c ^ (t << ((c % 13) + 1)) ^ (t >> ((c % 17) + 1));
-        }
-      }
-      for (let y = this.seed.length - 1; y >= 0; y--) {
-        const c = this.seed.charCodeAt(y);
-        t = ((t << 5) + t) ^ c ^ (t << ((c % 13) + 1)) ^ (t >> ((c % 17) + 1));
-      }
-      return t >>> 0;
-    }
-    */
     //Returns a raw unsigned 32-bit integer based on hashing this object's seed with the specified string
     hr(seed) {
-        const state = [1160605769, 1424711319, 876532818, 1419174464];
-        let rv = 1206170165;
-        if (this.hrCache[seed]) {
-            return this.hrCache[seed];
-        }
-        for (let x = seed.length - 1; x >= 0; x--) {
-            const c = seed.charCodeAt(x);
-            let t = state[0] ^ c;
-            t = (t ^ (t << 11)) >>> 0;
-            t = (t ^ (t >> 8)) >>> 0;
-            state[0] = state[1];
-            state[1] = state[2];
-            state[2] = state[3];
-            state[3] = (state[3] ^ (state[3] >> 19) ^ t) >>> 0;
-            rv = ((rv ^ (c << 24)) * 3427) ^ state[3];
-        }
-        for (let y = this.seed.length - 1; y >= 0; y--) {
-            const c = this.seed.charCodeAt(y);
-            let t = state[0] ^ c;
-            t = (t ^ (t << 11)) >>> 0;
-            t = (t ^ (t >> 8)) >>> 0;
-            state[0] = state[1];
-            state[1] = state[2];
-            state[2] = state[3];
-            state[3] = (state[3] ^ (state[3] >> 19) ^ t) >>> 0;
-            rv = ((rv ^ (c << 24)) * 3427) ^ state[3];
-        }
-        this.hrCache[seed] = rv >>> 0;
-        return this.hrCache[seed];
+        return (this.hq(seed) * 0x100000000) | 0;
     }
     //Returns a double between the specified minimum and maximum, from the stream.
     sd(min, max) {
-        return (((this.sr() * 4294967296 + this.sr()) / 18446744073709551616) *
+        return ((this.sq() + (this.sq() * 0x200000 | 0) * 1.1102230246251565e-16) *
+            (max - min) +
+            min);
+    }
+    //Returns a double between the specified minimum and maximum, by hashing this object's seed with the specified string.
+    hd(min, max, seed) {
+        return ((this.hq(seed) + (this.hq(seed + "@") * 0x200000 | 0) * 1.1102230246251565e-16) *
             (max - min) +
             min);
     }
@@ -115,16 +63,9 @@ export class Randomizer {
     sb(chance) {
         return this.sd(0, 1) < chance;
     }
-    //Returns a double between the specified minimum and maximum, by hashing this object's seed with the specified string.
-    hd(min, max, seed) {
-        return (((this.hr(seed) * 4294967296 + this.hr(seed + "@")) /
-            18446744073709551616) *
-            (max - min) +
-            min);
-    }
     //Returns an integer between the specified minimum and maximum, by hashing this object's seed with the specified string.
-    hi(min, max, s) {
-        return Math.floor(this.hd(min, max + 1, s));
+    hi(min, max, seed) {
+        return Math.floor(this.hd(min, max + 1, seed));
     }
     //Returns a boolean with the specified chance of being true (and false otherwise), by hashing this object's seed with the specified string.
     hb(chance, seed) {
@@ -134,17 +75,6 @@ export class Randomizer {
     ss(chance) {
         return this.sb(chance) ? -1 : 1;
     }
-    //Returns an integer with the specified chance of being -1 (and 1 otherwise), by hashing this object's seed with the specified string.
-    /*
-    hs(chance: number, seed: string): number {
-      return (this.hr(seed) * 4294967296 +
-        this.hr(seed + "@")) /
-        18446744073709551616 <
-        chance
-        ? -1
-        : 1;
-    }
-    */
     //Returns an integer {0,1,2,...}, starting from 0, with the specified chance of advancing to each successive integer, from the stream.
     sseq(chance, max) {
         let rv = 0;
@@ -156,10 +86,7 @@ export class Randomizer {
     //Returns an integer {0,1,2,...}, starting from 0, with the specified chance of advancing to each successive integer, by hashing this object's seed with the specified string.
     hseq(chance, max, seed) {
         let rv = 0;
-        while ((this.hr(seed + rv) * 4294967296 + this.hr(seed + "@" + rv)) /
-            18446744073709551616 <
-            chance &&
-            rv < max) {
+        while (this.hb(chance, seed + "@" + rv) && rv < max) {
             rv++;
         }
         return rv;
@@ -194,4 +121,20 @@ export class Randomizer {
         }
         return 0;
     }
+}
+function Mash() {
+    let n = 0xefc8249d;
+    return function (data) {
+        for (let i = 0; i < data.length; i++) {
+            n += data.charCodeAt(i);
+            let h = 0.02519603282416938 * n;
+            n = h >>> 0;
+            h -= n;
+            h *= n;
+            n = h >>> 0;
+            h -= n;
+            n += h * 0x100000000; // 2^32
+        }
+        return (n >>> 0) * 2.3283064365386963e-10; // 2^-32
+    };
 }
