@@ -338,34 +338,32 @@ export function buildShip(factionRandomizer, p_seed, size) {
         function (v) {
             const lcms = calculateLcms(0, v, 0.3, 0, 0.9, 0, 0.5);
             const lcms2 = lcms * 2;
-            const dhi = [
-                Math.ceil(shipRandomizer.sd(1, Math.max(2, lcms / 2))),
-                Math.ceil(shipRandomizer.sd(1, Math.max(2, lcms / 2))),
-            ];
-            const borderwidth = Math.min(dhi[0], dhi[1]) * shipRandomizer.sd(0.1, 1.2);
-            const dho = [dhi[0] + borderwidth * 2, dhi[1] + borderwidth * 2];
-            const counts = [Math.ceil(lcms2 / dho[0]), Math.ceil(lcms2 / dho[1])];
-            const trv = [
-                Math.round((counts[0] * dho[0]) / 2),
-                Math.round((counts[1] * dho[1]) / 2),
-            ];
+            const dhi_0 = Math.ceil(shipRandomizer.sd(1, Math.max(2, lcms / 2)));
+            const dhi_1 = Math.ceil(shipRandomizer.sd(1, Math.max(2, lcms / 2)));
+            const borderwidth = Math.min(dhi_0, dhi_1) * shipRandomizer.sd(0.1, 1.2);
+            const dho_0 = dhi_0 + borderwidth * 2;
+            const dho_1 = dhi_1 + borderwidth * 2;
+            const counts_0 = Math.ceil(lcms2 / dho_0);
+            const counts_1 = Math.ceil(lcms2 / dho_1);
+            const trv_0 = Math.round((counts_0 * dho_0) / 2);
+            const trv_1 = Math.round((counts_1 * dho_1) / 2);
             const baseColor = computeBaseColor();
             cx.fillStyle = `rgba(0,0,0,${shipRandomizer.sd(0, 0.25)})`;
-            cx.fillRect(v[0] - trv[0] - 1, v[1] - trv[1] - 1, dho[0] * counts[0] + 2, dho[1] * counts[1] + 2);
+            cx.fillRect(v[0] - trv_0 - 1, v[1] - trv_1 - 1, dho_0 * counts_0 + 2, dho_1 * counts_1 + 2);
             cx.fillStyle = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
-            cx.fillRect(v[0] - trv[0], v[1] - trv[1], dho[0] * counts[0], dho[1] * counts[1]);
+            cx.fillRect(v[0] - trv_0, v[1] - trv_1, dho_0 * counts_0, dho_1 * counts_1);
             cx.fillStyle = scaleColorBy(baseColor, shipRandomizer.sd(0.4, 1));
-            for (let x = 0; x < counts[0]; x++) {
-                const bx = v[0] + borderwidth + x * dho[0] - trv[0];
-                for (let y = 0; y < counts[1]; y++) {
-                    const by = v[1] + borderwidth + y * dho[1] - trv[1];
-                    cx.fillRect(bx, by, dhi[0], dhi[1]);
+            for (let x = 0; x < counts_0; x++) {
+                const bx = v[0] + borderwidth + x * dho_0 - trv_0;
+                for (let y = 0; y < counts_1; y++) {
+                    const by = v[1] + borderwidth + y * dho_1 - trv_1;
+                    cx.fillRect(bx, by, dhi_0, dhi_1);
                 }
             }
             if (shipRandomizer.sb(clamp(((totaldone * 0.6) / totalcomponents + 0.3) *
                 (lcms / COMPONENT_MAXIMUM_SIZE), 0, 0.98))) {
-                cx.fillStyle = shadowGradient(v, [v[0] + trv[0], v[1]], shipRandomizer.sd(0, 0.9));
-                cx.fillRect(v[0] - trv[0], v[1] - trv[1], dho[0] * counts[0], dho[1] * counts[1]);
+                cx.fillStyle = shadowGradient(v, [v[0] + trv_0, v[1]], shipRandomizer.sd(0, 0.9));
+                cx.fillRect(v[0] - trv_0, v[1] - trv_1, dho_0 * counts_0, dho_1 * counts_1);
             }
         },
         // Cylinder array
@@ -415,71 +413,63 @@ export function buildShip(factionRandomizer, p_seed, size) {
             const lcms = calculateLcms(2, v, 0.05, 0, 1, 0, 0.9);
             const componentWidth = Math.ceil(shipRandomizer.sd(0.6, 1.4) * lcms);
             const componentHeight = Math.ceil(shipRandomizer.sd(1, 2) * lcms);
-            const wh2 = [
-                Math.ceil(Math.max((componentWidth * shipRandomizer.sd(0.7, 1)) / 2, 1)),
-                Math.ceil(Math.max((componentWidth * shipRandomizer.sd(0.8, 1)) / 2, 1)),
-            ];
-            const h2 = [
-                Math.floor(clamp(componentWidth * shipRandomizer.sd(0.05, 0.25), 1, componentHeight)),
-                Math.floor(clamp(componentWidth * shipRandomizer.sd(0.1, 0.3), 1, componentHeight)),
-            ];
-            const hpair = h2[0] + h2[1];
+            const wh2_0 = Math.ceil(Math.max((componentWidth * shipRandomizer.sd(0.7, 1)) / 2, 1));
+            const wh2_1 = Math.ceil(Math.max((componentWidth * shipRandomizer.sd(0.8, 1)) / 2, 1));
+            const h2_0 = Math.floor(clamp(componentWidth * shipRandomizer.sd(0.05, 0.25), 1, componentHeight));
+            const h2_1 = Math.floor(clamp(componentWidth * shipRandomizer.sd(0.1, 0.3), 1, componentHeight));
+            const hpair = h2_0 + h2_1;
             const odd = shipRandomizer.sb(factionRandomizer.hd(0, 1, 34 /* Component2OddChance */) ** 0.5);
             const count = Math.max(Math.floor(componentHeight / hpair), 1);
-            const htotal = count * hpair + (odd ? h2[0] : 0);
+            const htotal = count * hpair + (odd ? h2_0 : 0);
             const baseColor = computeBaseColor();
             const scale_0 = shipRandomizer.sd(0.6, 1);
             const scale_1 = shipRandomizer.sd(0.6, 1);
-            const color2 = [
-                scaleColorBy(baseColor, scale_0),
-                scaleColorBy(baseColor, scale_1),
-            ];
+            const color2_0 = scaleColorBy(baseColor, scale_0);
+            const color2_1 = scaleColorBy(baseColor, scale_1);
             const lightness = 1 - shipRandomizer.sd(0.5, 0.95);
-            const colord2 = [
-                scaleColorBy(baseColor, lightness * scale_0),
-                scaleColorBy(baseColor, lightness * scale_1),
-            ];
+            const colord2_0 = scaleColorBy(baseColor, lightness * scale_0);
+            const colord2_1 = scaleColorBy(baseColor, lightness * scale_1);
             const orientation = shipRandomizer.sb(factionRandomizer.hd(0, 1, 35 /* Component2VerticalChance */) ** 0.1);
             if (orientation) {
-                const grad2_0 = cx.createLinearGradient(v[0] - wh2[0], v[1], v[0] + wh2[0], v[1]);
-                const grad2_1 = cx.createLinearGradient(v[0] - wh2[1], v[1], v[0] + wh2[1], v[1]);
+                const grad2_0 = cx.createLinearGradient(v[0] - wh2_0, v[1], v[0] + wh2_0, v[1]);
+                const grad2_1 = cx.createLinearGradient(v[0] - wh2_1, v[1], v[0] + wh2_1, v[1]);
                 const by = Math.floor(v[1] - htotal / 2);
-                grad2_0.addColorStop(0, colord2[0]);
-                grad2_0.addColorStop(0.5, color2[0]);
-                grad2_0.addColorStop(1, colord2[0]);
-                grad2_1.addColorStop(0, colord2[1]);
-                grad2_1.addColorStop(0.5, color2[1]);
-                grad2_1.addColorStop(1, colord2[1]);
+                grad2_0.addColorStop(0, colord2_0);
+                grad2_0.addColorStop(0.5, color2_0);
+                grad2_0.addColorStop(1, colord2_0);
+                grad2_1.addColorStop(0, colord2_1);
+                grad2_1.addColorStop(0.5, color2_1);
+                grad2_1.addColorStop(1, colord2_1);
                 for (let i = 0; i < count; i++) {
                     cx.fillStyle = grad2_0;
-                    cx.fillRect(v[0] - wh2[0], by + i * hpair, wh2[0] * 2, h2[0]);
+                    cx.fillRect(v[0] - wh2_0, by + i * hpair, wh2_0 * 2, h2_0);
                     cx.fillStyle = grad2_1;
-                    cx.fillRect(v[0] - wh2[1], by + i * hpair + h2[0], wh2[1] * 2, h2[1]);
+                    cx.fillRect(v[0] - wh2_1, by + i * hpair + h2_0, wh2_1 * 2, h2_1);
                 }
                 if (odd) {
                     cx.fillStyle = grad2_0;
-                    cx.fillRect(v[0] - wh2[0], by + count * hpair, wh2[0] * 2, h2[0]);
+                    cx.fillRect(v[0] - wh2_0, by + count * hpair, wh2_0 * 2, h2_0);
                 }
             }
             else {
-                const grad2_0 = cx.createLinearGradient(v[0], v[1] - wh2[0], v[0], v[1] + wh2[0]);
-                const grad2_1 = cx.createLinearGradient(v[0], v[1] - wh2[1], v[0], v[1] + wh2[1]);
+                const grad2_0 = cx.createLinearGradient(v[0], v[1] - wh2_0, v[0], v[1] + wh2_0);
+                const grad2_1 = cx.createLinearGradient(v[0], v[1] - wh2_1, v[0], v[1] + wh2_1);
                 const bx = Math.floor(v[0] - htotal / 2);
-                grad2_0.addColorStop(0, colord2[0]);
-                grad2_0.addColorStop(0.5, color2[0]);
-                grad2_0.addColorStop(1, colord2[0]);
-                grad2_1.addColorStop(0, colord2[1]);
-                grad2_1.addColorStop(0.5, color2[1]);
-                grad2_1.addColorStop(1, colord2[1]);
+                grad2_0.addColorStop(0, colord2_0);
+                grad2_0.addColorStop(0.5, color2_0);
+                grad2_0.addColorStop(1, colord2_0);
+                grad2_1.addColorStop(0, colord2_1);
+                grad2_1.addColorStop(0.5, color2_1);
+                grad2_1.addColorStop(1, colord2_1);
                 for (let i = 0; i < count; i++) {
                     cx.fillStyle = grad2_0;
-                    cx.fillRect(bx + i * hpair, v[1] - wh2[0], h2[0], wh2[0] * 2);
+                    cx.fillRect(bx + i * hpair, v[1] - wh2_0, h2_0, wh2_0 * 2);
                     cx.fillStyle = grad2_1;
-                    cx.fillRect(bx + i * hpair + h2[0], v[1] - wh2[1], h2[1], wh2[1] * 2);
+                    cx.fillRect(bx + i * hpair + h2_0, v[1] - wh2_1, h2_1, wh2_1 * 2);
                 }
                 if (odd) {
                     cx.fillStyle = grad2_0;
-                    cx.fillRect(bx + count * hpair, v[1] - wh2[0], h2[0], wh2[0] * 2);
+                    cx.fillRect(bx + count * hpair, v[1] - wh2_0, h2_0, wh2_0 * 2);
                 }
             }
         },
@@ -489,7 +479,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
                 isCellGood(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) ||
                 isCellGood(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8)) {
                 // Any component but this one
-                for (let tries = 0; tries < 100; tries++) {
+                for (;;) {
                     const which = shipRandomizer.schoose(componentChances);
                     if (which != 3) {
                         components[which](v);
@@ -502,8 +492,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
             const baseComponentHeight = Math.ceil(shipRandomizer.sd(0.3, 1) * lcms);
             const nw = componentWidth * shipRandomizer.sd(0.25, 0.6);
             ;
-            const midw = (componentWidth + nw) / 2;
-            const midwh = midw / 2;
+            const midwh = (componentWidth + nw) / 4;
             const componentHeight2 = Math.max(1, Math.ceil(baseComponentHeight * shipRandomizer.sd(0.08, 0.25)));
             const hpair = componentHeight2 + Math.max(1, Math.ceil(baseComponentHeight * shipRandomizer.sd(0.03, 0.15)));
             const count = Math.ceil(baseComponentHeight / hpair);
@@ -512,27 +501,25 @@ export function buildShip(factionRandomizer, p_seed, size) {
             const lightness0_mid = factionRandomizer.hd(0.5, 0.8, 38 /* Component3Lightness0Mid */);
             const lightness0_edge = lightness0_mid - factionRandomizer.hd(0.2, 0.4, 37 /* Component3Lightness0Edge */);
             const lightness1_edge = factionRandomizer.hd(0, 0.2, 39 /* Component3Lightness1Edge */);
-            const grad2 = [
-                cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
-                cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]),
-            ];
+            const grad2_0 = cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]);
+            const grad2_1 = cx.createLinearGradient(v[0] - midwh, v[1], v[0] + midwh, v[1]);
             const by = Math.ceil(v[1] - componentHeight / 2);
             const byh_0 = by + componentHeight2;
             const byh_1 = by + hpair;
-            grad2[0].addColorStop(0, scaleColorBy(basecolor, lightness0_edge));
-            grad2[0].addColorStop(0.5, scaleColorBy(basecolor, lightness0_mid));
-            grad2[0].addColorStop(1, scaleColorBy(basecolor, lightness0_edge));
-            grad2[1].addColorStop(0, scaleColorBy(basecolor, lightness1_edge));
-            grad2[1].addColorStop(0.5, scaleColorBy(basecolor, 1));
-            grad2[1].addColorStop(1, scaleColorBy(basecolor, lightness1_edge));
-            cx.fillStyle = grad2[0];
+            grad2_0.addColorStop(0, scaleColorBy(basecolor, lightness0_edge));
+            grad2_0.addColorStop(0.5, scaleColorBy(basecolor, lightness0_mid));
+            grad2_0.addColorStop(1, scaleColorBy(basecolor, lightness0_edge));
+            grad2_1.addColorStop(0, scaleColorBy(basecolor, lightness1_edge));
+            grad2_1.addColorStop(0.5, scaleColorBy(basecolor, 1));
+            grad2_1.addColorStop(1, scaleColorBy(basecolor, lightness1_edge));
+            cx.fillStyle = grad2_0;
             cx.beginPath();
             cx.moveTo(v[0] - nw / 2, by);
             cx.lineTo(v[0] + nw / 2, by);
             cx.lineTo(v[0] + componentWidth / 2, by + componentHeight);
             cx.lineTo(v[0] - componentWidth / 2, by + componentHeight);
             cx.fill();
-            cx.fillStyle = grad2[1];
+            cx.fillStyle = grad2_1;
             for (let i = 0; i < count; i++) {
                 const lyr_0 = i * hpair + componentHeight2;
                 const lyr_1 = (i + 1) * hpair;
