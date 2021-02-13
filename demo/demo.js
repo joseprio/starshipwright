@@ -96,8 +96,21 @@ __webpack_require__.r(__webpack_exports__);
 class Randomizer {
     constructor(p_seed) {
         this.hrCache = {};
+        let n = 0xefc8249d;
+        function mash(data) {
+            for (let i = 0; i < data.length; i++) {
+                n += data.charCodeAt(i);
+                let h = 0.02519603282416938 * n;
+                n = h >>> 0;
+                h -= n;
+                h *= n;
+                n = h >>> 0;
+                h -= n;
+                n += h * 2 ** 32;
+            }
+            return (n >>> 0) * 2 ** -32;
+        }
         this.seed = p_seed;
-        const mash = Mash();
         this.c = 1;
         this.s0 = mash(' ');
         this.s1 = mash(' ');
@@ -117,7 +130,7 @@ class Randomizer {
     }
     // Stream quick
     sq() {
-        const t = 2091639 * this.s0 + this.c * 2.3283064365386963e-10; // 2^-32
+        const t = 2091639 * this.s0 + this.c * 2 ** -32;
         this.s0 = this.s1;
         this.s1 = this.s2;
         return this.s2 = t - (this.c = t | 0);
@@ -132,11 +145,11 @@ class Randomizer {
     }
     //Returns a raw unsigned 32-bit integer from the stream.
     sr() {
-        return (this.sq() * 0x100000000) | 0;
+        return (this.sq() * 2 ** 32) | 0;
     }
     //Returns a raw unsigned 32-bit integer based on hashing this object's seed with the specified string
     hr(seed) {
-        return (this.hq(seed) * 0x100000000) | 0;
+        return (this.hq(seed) * 2 ** 32) | 0;
     }
     //Returns a double between the specified minimum and maximum, from the stream.
     sd(min, max) {
@@ -216,22 +229,6 @@ class Randomizer {
         }
         return 0;
     }
-}
-function Mash() {
-    let n = 0xefc8249d;
-    return function (data) {
-        for (let i = 0; i < data.length; i++) {
-            n += data.charCodeAt(i);
-            let h = 0.02519603282416938 * n;
-            n = h >>> 0;
-            h -= n;
-            h *= n;
-            n = h >>> 0;
-            h -= n;
-            n += h * 0x100000000; // 2^32
-        }
-        return (n >>> 0) * 2.3283064365386963e-10; // 2^-32
-    };
 }
 
 // CONCATENATED MODULE: ./src/faction.ts
