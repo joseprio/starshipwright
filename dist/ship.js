@@ -111,11 +111,10 @@ export function buildShip(factionRandomizer, p_seed, size) {
                 ]);
             }
             cx.fillStyle = "#fff";
-            for (let i = 0; i < blocks.length; i++) {
-                const lb = blocks[i];
+            blocks.map(lb => {
                 cx.fillRect(lb[0][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
                 cx.fillRect(w - lb[1][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
-            }
+            });
         },
         // 1: Joined circles
         function () {
@@ -124,7 +123,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
             const circles = [];
             const initialcount = Math.floor(h / (initialwidth * 2));
             for (let i = 0; i < initialcount; i++) {
-                let lv = [hw, h - initialwidth * (i * 2 + 1)];
+                const lv = [hw, h - initialwidth * (i * 2 + 1)];
                 circles.push({ v: lv, r: initialwidth });
             }
             const circlecount = initialcount +
@@ -145,15 +144,14 @@ export function buildShip(factionRandomizer, p_seed, size) {
                 circles.push({ v: lv, r: ncr });
             }
             cx.fillStyle = "#fff";
-            for (let i = 0; i < circles.length; i++) {
-                const lc = circles[i];
+            circles.map(lc => {
                 cx.beginPath();
                 cx.arc(lc.v[0], lc.v[1], lc.r, 0, 7);
                 cx.fill();
                 cx.beginPath();
                 cx.arc(w - lc.v[0], lc.v[1], lc.r, 0, 7);
                 cx.fill();
-            }
+            });
         },
         // 2: Mess of lines
         function () {
