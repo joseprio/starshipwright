@@ -1,5 +1,4 @@
 export declare class Randomizer {
-    seed: string;
     c: number;
     s0: number;
     s1: number;

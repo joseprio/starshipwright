@@ -15,7 +15,6 @@ export class Randomizer {
             }
             return (n >>> 0) * 2 ** -32;
         }
-        this.seed = p_seed;
         this.c = 1;
         this.s0 = mash(' ');
         this.s1 = mash(' ');

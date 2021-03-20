@@ -1,5 +1,4 @@
 export class Randomizer {
-  seed: string; // "seed" is reserved and won't be mangled, but it will actually compress 2 bytes better
   c: number;
   s0: number;
   s1: number;
@@ -22,7 +21,6 @@ export class Randomizer {
       return (n >>> 0) * 2 ** -32;
     }
 
-    this.seed = p_seed;
     this.c = 1;
     this.s0 = mash(' ');
     this.s1 = mash(' ');
