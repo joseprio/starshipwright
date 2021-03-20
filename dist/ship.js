@@ -23,7 +23,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
         // Default maximum power is 6
         colorChances.push(2 ** factionRandomizer.hd(0, 6, 6 /* BaseColorChances */ + ls));
     }
-    const shipRandomizer = new Randomizer(factionRandomizer.seed + p_seed);
+    const shipRandomizer = new Randomizer(p_seed);
     function computeBaseColor() {
         let rv = colors[shipRandomizer.schoose(colorChances)];
         return shipRandomizer.sb(factionRandomizer.hd(0, 0.5, 7 /* BaseColorShiftChance */) ** 2) ? [
@@ -284,7 +284,7 @@ export function buildShip(factionRandomizer, p_seed, size) {
         const gx = Math.floor((x - gwextra) / COMPONENT_GRID_SIZE);
         const gy = Math.floor((y - ghextra) / COMPONENT_GRID_SIZE);
         if (gx < 0 || gx >= gw || gy < 0 || gy >= gh) {
-            return false;
+            return;
         }
         return cgrid[gx][gy].phase == 1;
     }

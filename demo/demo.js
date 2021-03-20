@@ -135,11 +135,10 @@ class Randomizer {
         this.s1 = this.s2;
         return this.s2 = t - (this.c = t | 0);
     }
-    // Hash quick
+    // Hash quick - the important thing about this function is to be consistent
     hq(seed) {
         if (!this.hrCache[seed]) {
-            const hashRandomizer = new Randomizer(this.seed + "@" + seed);
-            this.hrCache[seed] = hashRandomizer.sq();
+            this.hrCache[seed] = this.sq();
         }
         return this.hrCache[seed];
     }
@@ -212,6 +211,7 @@ class Randomizer {
                 return j;
             }
         }
+        // We know we already returned at this point, but it's slightly more size efficient
         return 0;
     }
     // Returns an index of the array chances with the relative probability equal to that element of chances, based on a hash value with the specified seed.
@@ -227,6 +227,7 @@ class Randomizer {
                 return j;
             }
         }
+        // We know we already returned at this point, but it's slightly more size efficient
         return 0;
     }
 }
@@ -287,7 +288,7 @@ function buildShip(factionRandomizer, p_seed, size) {
         // Default maximum power is 6
         colorChances.push(2 ** factionRandomizer.hd(0, 6, 6 /* BaseColorChances */ + ls));
     }
-    const shipRandomizer = new Randomizer(factionRandomizer.seed + p_seed);
+    const shipRandomizer = new Randomizer(p_seed);
     function computeBaseColor() {
         let rv = colors[shipRandomizer.schoose(colorChances)];
         return shipRandomizer.sb(factionRandomizer.hd(0, 0.5, 7 /* BaseColorShiftChance */) ** 2) ? [
@@ -548,7 +549,7 @@ function buildShip(factionRandomizer, p_seed, size) {
         const gx = Math.floor((x - gwextra) / COMPONENT_GRID_SIZE);
         const gy = Math.floor((y - ghextra) / COMPONENT_GRID_SIZE);
         if (gx < 0 || gx >= gw || gy < 0 || gy >= gh) {
-            return false;
+            return;
         }
         return cgrid[gx][gy].phase == 1;
     }

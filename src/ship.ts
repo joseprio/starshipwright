@@ -117,7 +117,7 @@ export function buildShip(
     colorChances.push(2 ** factionRandomizer.hd(0, 6, FactionSeed.BaseColorChances + ls));
   }
 
-  const shipRandomizer = new Randomizer(factionRandomizer.seed + p_seed);
+  const shipRandomizer = new Randomizer(p_seed);
 
   function computeBaseColor(): RGBColor {
     let rv = colors[shipRandomizer.schoose(colorChances)];
@@ -457,7 +457,7 @@ export function buildShip(
     const gx = Math.floor((x - gwextra) / COMPONENT_GRID_SIZE);
     const gy = Math.floor((y - ghextra) / COMPONENT_GRID_SIZE);
     if (gx < 0 || gx >= gw || gy < 0 || gy >= gh) {
-      return false;
+      return;
     }
     return cgrid[gx][gy].phase == 1;
   }

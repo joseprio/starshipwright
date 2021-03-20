@@ -43,11 +43,10 @@ export class Randomizer {
     return this.s2 = t - (this.c = t | 0);
   }
 
-  // Hash quick
+  // Hash quick - the important thing about this function is to be consistent
   hq(seed: string | number) {
     if (!this.hrCache[seed]) {
-      const hashRandomizer = new Randomizer(this.seed + "@" + seed);
-      this.hrCache[seed] = hashRandomizer.sq();
+      this.hrCache[seed] = this.sq();
     }
     return this.hrCache[seed];
   }
@@ -134,6 +133,7 @@ export class Randomizer {
         return j;
       }
     }
+    // We know we already returned at this point, but it's slightly more size efficient
     return 0;
   }
 
@@ -150,6 +150,7 @@ export class Randomizer {
         return j;
       }
     }
+    // We know we already returned at this point, but it's slightly more size efficient
     return 0;
   }
 }
