@@ -26,6 +26,7 @@
     "@babel/core": "^7.7.7",
     "@babel/preset-env": "^7.7.7",
     "babel-loader": "^8.0.6",
+    "np": "^7.0.0",
     "prettier": "^2.2.1",
     "ts-loader": "^8.0.2",
     "typescript": "^3.9.7",
@@ -33,6 +34,6 @@
     "webpack-cli": "^3.3.10"
   },
   "dependencies": {
-    "np": "^7.0.0"
+    "canvas-utils": "joseprio/canvas-utils"
   }
 }

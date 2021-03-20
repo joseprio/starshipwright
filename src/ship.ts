@@ -2,6 +2,7 @@ import { Randomizer } from "./randomizer";
 import { computeFactionComponentChances } from "./faction";
 import type { Vec, RGBColor } from "./types";
 import { clamp, scaleColorBy, hsvToRgb } from "./utils";
+import {createCanvas, fillCircle, obtainImageData} from "canvas-utils";
 
 //Size of the component grid
 const COMPONENT_GRID_SIZE = 6;
@@ -174,9 +175,7 @@ export function buildShip(
   const hh = Math.floor(h / 2);
   const gh = Math.floor(h / COMPONENT_GRID_SIZE);
   const ghextra = (h - gh * COMPONENT_GRID_SIZE) / 2;
-  const shipCanvas = document.createElement("canvas"); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
-  shipCanvas.width = w;
-  shipCanvas.height = h;
+  const shipCanvas = createCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
   const cx = shipCanvas.getContext("2d");
   const csarealimit = (w * h) / 20;
 
@@ -299,12 +298,8 @@ export function buildShip(
       }
       cx.fillStyle = "#fff";
       circles.map(lc => {
-        cx.beginPath();
-        cx.arc(lc.v[0], lc.v[1], lc.r, 0, 7);
-        cx.fill();
-        cx.beginPath();
-        cx.arc(w - lc.v[0], lc.v[1], lc.r, 0, 7);
-        cx.fill();
+        fillCircle(cx, lc.v[0], lc.v[1], lc.r);
+        fillCircle(cx, w - lc.v[0], lc.v[1], lc.r);
       });
     },
 
@@ -361,7 +356,7 @@ export function buildShip(
   // ------ End define outlines -----------------------------------
 
   outlines[factionRandomizer.hchoose([1, 1, 1], FactionSeed.OutlineType)]();
-  const outline = cx.getImageData(0, 0, w, h);
+  const outline = obtainImageData(shipCanvas);
 
   //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y)
   function getOutlineAlpha(x: number, y: number): number {
@@ -994,10 +989,7 @@ export function buildShip(
       for (let ax = 0; ax < countx; ax++) {
         const px = bv[0] + (ax * 2 + 1) * smallr;
         for (let ay = 0; ay < county; ay++) {
-          const py = bv[1] + (ay * 2 + 1) * smallr;
-          cx.beginPath();
-          cx.arc(px, py, smallr + 1, 0, 7);
-          cx.fill();
+          fillCircle(cx, px, bv[1] + (ay * 2 + 1) * smallr, smallr + 1);
         }
       }
       for (let ax = 0; ax < countx; ax++) {
@@ -1008,9 +1000,7 @@ export function buildShip(
           grad.addColorStop(0, colormid);
           grad.addColorStop(1, coloredge);
           cx.fillStyle = grad;
-          cx.beginPath();
-          cx.arc(px, py, drawr, 0, 7);
-          cx.fill();
+          fillCircle(cx, px, py, drawr);
         }
       }
     },

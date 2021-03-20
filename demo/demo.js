@@ -259,7 +259,56 @@ function hsvToRgb(h, s, v) {
     return [f(5), f(3), f(1)];
 }
 
+// CONCATENATED MODULE: ./node_modules/canvas-utils/index.js
+function createCanvas(width, height) {
+  const newCanvas = document.createElement("canvas");
+  newCanvas.width = width;
+  newCanvas.height = height;
+  return newCanvas;
+}
+
+function fillCircle(ctx, x, y, r) {
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, 7);
+  ctx.fill();
+}
+
+function obtainImageData(canvas) {
+  return canvas
+    .getContext("2d")
+    .getImageData(0, 0, canvas.width, canvas.height);
+}
+
+function trimCanvas(canvas) {
+  const ctx = canvas.getContext("2d");
+  const imageData = obtainImageData(canvas);
+  const xs = [];
+  const ys = [];
+  for (let x = 0; x < imageData.width; x++) {
+    for (let y = 0; y < imageData.height; y++) {
+      if (imageData.data[(y * imageData.width + x) * 4 + 3]) {
+        xs.push(x);
+        ys.push(y);
+      }
+    }
+  }
+  const minX = Math.min(...xs);
+  const minY = Math.min(...ys);
+  const cut = ctx.getImageData(
+    minX,
+    minY,
+    1 + Math.max(...xs) - minX,
+    1 + Math.max(...ys) - minY
+  );
+
+  canvas.width = cut.width;
+  canvas.height = cut.height;
+  ctx.putImageData(cut, 0, 0);
+  return canvas;
+}
+
 // CONCATENATED MODULE: ./src/ship.ts
+
 
 
 
@@ -317,9 +366,7 @@ function buildShip(factionRandomizer, p_seed, size) {
     const hh = Math.floor(h / 2);
     const gh = Math.floor(h / COMPONENT_GRID_SIZE);
     const ghextra = (h - gh * COMPONENT_GRID_SIZE) / 2;
-    const shipCanvas = document.createElement("canvas"); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
-    shipCanvas.width = w;
-    shipCanvas.height = h;
+    const shipCanvas = createCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
     const cx = shipCanvas.getContext("2d");
     const csarealimit = (w * h) / 20;
     // ------ Define outlines ---------------------------------------
@@ -407,12 +454,8 @@ function buildShip(factionRandomizer, p_seed, size) {
             }
             cx.fillStyle = "#fff";
             circles.map(lc => {
-                cx.beginPath();
-                cx.arc(lc.v[0], lc.v[1], lc.r, 0, 7);
-                cx.fill();
-                cx.beginPath();
-                cx.arc(w - lc.v[0], lc.v[1], lc.r, 0, 7);
-                cx.fill();
+                fillCircle(cx, lc.v[0], lc.v[1], lc.r);
+                fillCircle(cx, w - lc.v[0], lc.v[1], lc.r);
             });
         },
         // 2: Mess of lines
@@ -457,7 +500,7 @@ function buildShip(factionRandomizer, p_seed, size) {
     ];
     // ------ End define outlines -----------------------------------
     outlines[factionRandomizer.hchoose([1, 1, 1], 27 /* OutlineType */)]();
-    const outline = cx.getImageData(0, 0, w, h);
+    const outline = obtainImageData(shipCanvas);
     //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y)
     function getOutlineAlpha(x, y) {
         return outline.data[(y * w + x) * 4 + 3];
@@ -894,10 +937,7 @@ function buildShip(factionRandomizer, p_seed, size) {
             for (let ax = 0; ax < countx; ax++) {
                 const px = bv[0] + (ax * 2 + 1) * smallr;
                 for (let ay = 0; ay < county; ay++) {
-                    const py = bv[1] + (ay * 2 + 1) * smallr;
-                    cx.beginPath();
-                    cx.arc(px, py, smallr + 1, 0, 7);
-                    cx.fill();
+                    fillCircle(cx, px, bv[1] + (ay * 2 + 1) * smallr, smallr + 1);
                 }
             }
             for (let ax = 0; ax < countx; ax++) {
@@ -908,9 +948,7 @@ function buildShip(factionRandomizer, p_seed, size) {
                     grad.addColorStop(0, colormid);
                     grad.addColorStop(1, coloredge);
                     cx.fillStyle = grad;
-                    cx.beginPath();
-                    cx.arc(px, py, drawr, 0, 7);
-                    cx.fill();
+                    fillCircle(cx, px, py, drawr);
                 }
             }
         },
