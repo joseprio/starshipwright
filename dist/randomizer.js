@@ -116,8 +116,7 @@ export class Randomizer {
                 return j;
             }
         }
-        // We know we already returned at this point, but it's slightly more size efficient
-        return 0;
+        // We know we already returned at this point
     }
     // Returns an index of the array chances with the relative probability equal to that element of chances, based on a hash value with the specified seed.
     hchoose(chances, seed) {
@@ -132,7 +131,6 @@ export class Randomizer {
                 return j;
             }
         }
-        // We know we already returned at this point, but it's slightly more size efficient
-        return 0;
+        // We know we already returned at this point
     }
 }
