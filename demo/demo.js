@@ -260,11 +260,15 @@ function hsvToRgb(h, s, v) {
 }
 
 // CONCATENATED MODULE: ./node_modules/canvas-utils/index.js
+function getContext(canvas) {
+  return canvas.getContext("2d");
+}
+
 function createCanvas(width, height) {
   const newCanvas = document.createElement("canvas");
   newCanvas.width = width;
   newCanvas.height = height;
-  return newCanvas;
+  return [newCanvas, getContext(newCanvas)];
 }
 
 function fillCircle(ctx, x, y, r) {
@@ -274,13 +278,12 @@ function fillCircle(ctx, x, y, r) {
 }
 
 function obtainImageData(canvas) {
-  return canvas
-    .getContext("2d")
+  return getContext(canvas)
     .getImageData(0, 0, canvas.width, canvas.height);
 }
 
 function trimCanvas(canvas) {
-  const ctx = canvas.getContext("2d");
+  const ctx = getContext(canvas);
   const imageData = obtainImageData(canvas);
   const xs = [];
   const ys = [];
@@ -366,8 +369,7 @@ function buildShip(factionRandomizer, p_seed, size) {
     const hh = Math.floor(h / 2);
     const gh = Math.floor(h / COMPONENT_GRID_SIZE);
     const ghextra = (h - gh * COMPONENT_GRID_SIZE) / 2;
-    const shipCanvas = createCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
-    const cx = shipCanvas.getContext("2d");
+    const [shipCanvas, cx] = createCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
     const csarealimit = (w * h) / 20;
     // ------ Define outlines ---------------------------------------
     const outlines = [

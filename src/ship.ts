@@ -175,8 +175,7 @@ export function buildShip(
   const hh = Math.floor(h / 2);
   const gh = Math.floor(h / COMPONENT_GRID_SIZE);
   const ghextra = (h - gh * COMPONENT_GRID_SIZE) / 2;
-  const shipCanvas = createCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
-  const cx = shipCanvas.getContext("2d");
+  const [shipCanvas, cx] = createCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
   const csarealimit = (w * h) / 20;
 
   // ------ Define outlines ---------------------------------------
