@@ -259,7 +259,7 @@ function hsvToRgb(h, s, v) {
     return [f(5), f(3), f(1)];
 }
 
-// CONCATENATED MODULE: ./node_modules/canvas-utils/index.js
+// CONCATENATED MODULE: ./node_modules/game-utils/index.js
 function getContext(canvas) {
   return canvas.getContext("2d");
 }

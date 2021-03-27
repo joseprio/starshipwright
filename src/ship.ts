@@ -2,7 +2,7 @@ import { Randomizer } from "./randomizer";
 import { computeFactionComponentChances } from "./faction";
 import type { Vec, RGBColor } from "./types";
 import { clamp, scaleColorBy, hsvToRgb } from "./utils";
-import {createCanvas, fillCircle, obtainImageData} from "canvas-utils";
+import {createCanvas, fillCircle, obtainImageData} from "game-utils";
 
 //Size of the component grid
 const COMPONENT_GRID_SIZE = 6;

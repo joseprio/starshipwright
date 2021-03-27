@@ -1,7 +1,7 @@
 import { Randomizer } from "./randomizer";
 import { computeFactionComponentChances } from "./faction";
 import { clamp, scaleColorBy, hsvToRgb } from "./utils";
-import { createCanvas, fillCircle, obtainImageData } from "canvas-utils";
+import { createCanvas, fillCircle, obtainImageData } from "game-utils";
 //Size of the component grid
 const COMPONENT_GRID_SIZE = 6;
 //Base maximum extent of a component from its origin point. Should be at least equal to cgridsize, but no greater than csedge.
