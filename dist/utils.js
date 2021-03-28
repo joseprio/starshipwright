@@ -3,7 +3,7 @@ export function clamp(n, min, max) {
 }
 // Take a color and multiplies it with a factor. factor = 0 produces black.
 export function scaleColorBy(color, factor) {
-    return `rgba(${color.map((channel) => channel * factor * 100).join("%,")}%,1)`;
+    return `rgb(${color.map((channel) => channel * factor * 100).join("%,")}%)`;
 }
 // Takes a triplet [H,S,V] and returns a triplet [R,G,B], representing the same color. All components are 0 - 1.
 export function hsvToRgb(h, s, v) {
