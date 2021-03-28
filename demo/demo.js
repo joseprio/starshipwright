@@ -997,6 +997,7 @@ function buildShip(factionSeed, shipSeed, size) {
 // CONCATENATED MODULE: ./src/index.ts
 //
 
+
 function generateShip(factionSeed, seed, size) {
     return buildShip(factionSeed, seed, size);
 }
