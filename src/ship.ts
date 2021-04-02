@@ -31,7 +31,7 @@ type ComponentFunc = (v: Vec) => void;
 // This library is heavily optimized towards size, as I used it for a JS13K game. Also, I'm planning to use
 // it again for that purpose in the future. This function is a lot bigger than it needs to be, but doing so
 // allows us to have all variables we need in the closure instead of passing it around in parameters
-export function buildShip(
+export function generateShip(
   factionSeed: number,
   shipSeed: number,
   size?: number
