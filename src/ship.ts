@@ -32,29 +32,29 @@ type ComponentFunc = (v: Vec) => void;
 // it again for that purpose in the future. This function is a lot bigger than it needs to be, but doing so
 // allows us to have all variables we need in the closure instead of passing it around in parameters
 export function generateShip(
-  factionSeed: number,
   shipSeed: number,
+  layoutSeed: number,
   colorSeed: number,
-  size?: number
 ): HTMLCanvasElement {
-  const factionRNG = createNumberGenerator(factionSeed);
+  const layoutRNG = createNumberGenerator(layoutSeed);
   const colorRNG = createNumberGenerator(colorSeed);
+  const shipRNG = createNumberGenerator(shipSeed);
   // Default maximum power
   const componentChancePower = 8;
   const componentChances = [
     0.8 *
-      numberBetween(factionRNG(), 0.001, 1) *
-      2 ** (factionRNG() * componentChancePower),
+      numberBetween(shipRNG(), 0.001, 1) *
+      2 ** (shipRNG() * componentChancePower),
     0.9 *
-      numberBetween(factionRNG(), 0.001, 1) *
-      2 ** (factionRNG() * componentChancePower),
+      numberBetween(shipRNG(), 0.001, 1) *
+      2 ** (shipRNG() * componentChancePower),
     1 *
-      numberBetween(factionRNG(), 0.001, 1) *
-      2 ** (factionRNG() * componentChancePower),
-    3 * factionRNG() * 2 ** (factionRNG() * componentChancePower),
-    0.5 * factionRNG() * 2 ** (factionRNG() * componentChancePower),
-    0.05 * factionRNG() * 2 ** (factionRNG() * componentChancePower),
-    0.5 * factionRNG() * 2 ** (factionRNG() * componentChancePower),
+      numberBetween(shipRNG(), 0.001, 1) *
+      2 ** (shipRNG() * componentChancePower),
+    3 * shipRNG() * 2 ** (shipRNG() * componentChancePower),
+    0.5 * shipRNG() * 2 ** (shipRNG() * componentChancePower),
+    0.05 * shipRNG() * 2 ** (shipRNG() * componentChancePower),
+    0.5 * shipRNG() * 2 ** (shipRNG() * componentChancePower),
   ];
 
   const colors: Array<RGBColor> = [];
@@ -81,75 +81,71 @@ export function generateShip(
   const baseColorShiftChanceGreen = numberBetween(colorRNG(), 0, 0.6);
   const baseColorShiftChanceBlue = numberBetween(colorRNG(), 0, 0.6);
 
-  const factionSizeMin = numberBetween(factionRNG(), 2.5, 3.5);
-  const factionSizeMax = numberBetween(factionRNG(), 5, 7);
-  const factionWidthRationMin = numberBetween(factionRNG(), 0.5, 1);
-  const factionWidthRationMax = numberBetween(factionRNG(), 1, 1.3);
-  const factionHeightRationMin = numberBetween(factionRNG(), 0.7, 1);
-  const factionHeightRationMax = numberBetween(factionRNG(), 1.1, 1.7);
-  const factionOutline0InitialWidth = numberBetween(factionRNG(), 0.1, 1);
-  const factionOutline0BlockCount = numberBetween(factionRNG(), 2, 8);
-  const factionOutline0FrontBias = numberBetween(factionRNG(), 0.5, 1.5);
-  const factionBaseComponentPasses = factionRNG() > 0.5 ? 1 : 2;
-  const factionExtraComponentAmount = factionRNG() / factionBaseComponentPasses;
-  const factionMasterBigness = factionRNG();
-  const factionComponentMiddleness = factionRNG();
-  const factionOutline1InitialWidth = numberBetween(factionRNG(), 0.1, 1);
-  const factionOutline1CircleCount = numberBetween(factionRNG(), 10, 50);
-  const factionOutline1FrontBias = numberBetween(factionRNG(), 0.5, 1.5);
-  const factionOutline2BaseFatness = numberBetween(factionRNG(), 0.03, 0.1);
-  const factionOutline2LineCap = factionRNG() > 0.5 ? "round" : "square";
-  const factionOutline2FrontBias = numberBetween(factionRNG(), 0.1, 1);
-  const factionOutline2ConAdjust = factionRNG();
-  const factionOutlineType = Math.floor(factionRNG() * 3);
-  const factionComponent1HChance = numberBetween(factionRNG(), -0.2, 1.2);
-  const factionComponent2OddChance = factionRNG();
-  const factionComponent2VerticalChance = factionRNG();
-  const factionComponent3Lightness0Mid = numberBetween(factionRNG(), 0.5, 0.8);
+  const layoutOutlineType = Math.floor(layoutRNG() * 3);
+  const size = numberBetween(layoutRNG(), 2.5, 7) ** 3;
+  const wratio = numberBetween(layoutRNG(), 0.5, 1.3);
+  const hratio = numberBetween(layoutRNG(), 0.7, 1.7);
+  const layoutOutline0InitialWidth = numberBetween(layoutRNG(), 0.1, 1);
+  const layoutOutline0BlockCount = numberBetween(layoutRNG(), 2, 8);
+  const layoutOutline0FrontBias = numberBetween(layoutRNG(), 0.5, 1.5);
+  const layoutOutline1InitialWidth = numberBetween(layoutRNG(), 0.1, 1);
+  const layoutOutline1CircleCount = numberBetween(layoutRNG(), 10, 50);
+  const layoutOutline1FrontBias = numberBetween(layoutRNG(), 0.5, 1.5);
+  const layoutOutline2BaseFatness = numberBetween(layoutRNG(), 0.03, 0.1);
+  const layoutOutline2LineCap = layoutRNG() > 0.5 ? "round" : "square";
+  const layoutOutline2FrontBias = numberBetween(layoutRNG(), 0.1, 1);
+  const layoutOutline2ConAdjust = layoutRNG();
+
+  const factionBaseComponentPasses = shipRNG() > 0.5 ? 1 : 2;
+  const factionExtraComponentAmount = shipRNG() / factionBaseComponentPasses;
+  const factionMasterBigness = shipRNG();
+  const factionComponentMiddleness = shipRNG();
+  const factionComponent1HChance = numberBetween(shipRNG(), -0.2, 1.2);
+  const factionComponent2OddChance = shipRNG();
+  const factionComponent2VerticalChance = shipRNG();
+  const factionComponent3Lightness0Mid = numberBetween(shipRNG(), 0.5, 0.8);
   const factionComponent3Lightness0Edge =
-    factionComponent3Lightness0Mid - numberBetween(factionRNG(), 0.2, 0.4);
-  const factionComponent3Lightness1Edge = numberBetween(factionRNG(), 0, 0.2);
-  const factionComponent3BaseColor = chancePicker(factionRNG, colorChances);
-  const factionComponent4MaxWidth = numberBetween(factionRNG(), 0.02, 0.1);
-  const factionComponent4DirectionC0 = factionRNG();
-  const factionComponent4DirectionC1 = factionRNG();
-  const factionComponent4DirectionC2 = factionRNG();
-  const factionComponent4HPower0 = numberBetween(factionRNG(), 2, 6);
-  const factionComponent4HPower1 = numberBetween(factionRNG(), 2, 7);
-  const factionComponent4CoverComC0 = factionRNG();
-  const factionComponent4CoverComC1 = factionRNG();
-  const factionComponent4CoverComC2 = factionRNG();
-  const factionComponent5MultXC = factionRNG();
-  const factionComponent5MultYC = factionRNG();
-  const factionComponent6H1Min = numberBetween(factionRNG(), 0, 0.8);
-  const factionComponent6H1Power = numberBetween(factionRNG(), 0.5, 1.5);
-  const factionComponent6BacknessType = factionRNG();
+    factionComponent3Lightness0Mid - numberBetween(shipRNG(), 0.2, 0.4);
+  const factionComponent3Lightness1Edge = numberBetween(shipRNG(), 0, 0.2);
+  const factionComponent3BaseColor = chancePicker(shipRNG, colorChances);
+  const factionComponent4MaxWidth = numberBetween(shipRNG(), 0.02, 0.1);
+  const factionComponent4DirectionC0 = shipRNG();
+  const factionComponent4DirectionC1 = shipRNG();
+  const factionComponent4DirectionC2 = shipRNG();
+  const factionComponent4HPower0 = numberBetween(shipRNG(), 2, 6);
+  const factionComponent4HPower1 = numberBetween(shipRNG(), 2, 7);
+  const factionComponent4CoverComC0 = shipRNG();
+  const factionComponent4CoverComC1 = shipRNG();
+  const factionComponent4CoverComC2 = shipRNG();
+  const factionComponent5MultXC = shipRNG();
+  const factionComponent5MultYC = shipRNG();
+  const factionComponent6H1Min = numberBetween(shipRNG(), 0, 0.8);
+  const factionComponent6H1Power = numberBetween(shipRNG(), 0.5, 1.5);
+  const factionComponent6BacknessType = shipRNG();
   const factionComponent6BacknessPositive = numberBetween(
-    factionRNG(),
+    shipRNG(),
     0.2,
     0.9
   );
   const factionComponent6BacknessNegative = numberBetween(
-    factionRNG(),
+    shipRNG(),
     -0.2,
     -0.05
   );
-  const factionComponent6Width = numberBetween(factionRNG(), 0.1, 3.5);
-  const factionComponentBigChances = componentChances.map(factionRNG);
-  const factionComponentBigIncChances = componentChances.map(factionRNG);
-
-  const shipRNG = createNumberGenerator(shipSeed);
+  const factionComponent6Width = numberBetween(shipRNG(), 0.1, 3.5);
+  const factionComponentBigChances = componentChances.map(shipRNG);
+  const factionComponentBigIncChances = componentChances.map(shipRNG);
 
   function computeBaseColor(): RGBColor {
-    let rv = colors[chancePicker(shipRNG, colorChances)];
-    return shipRNG() < baseColorShiftChance ** 2
+    let rv = colors[chancePicker(colorRNG, colorChances)];
+    return colorRNG() < baseColorShiftChance ** 2
       ? [
           clamp(
             rv[0] +
               baseColorShiftChanceRed ** 2 *
-                clamp(numberBetween(shipRNG(), -1, 1.2), 0, 1) *
+                clamp(numberBetween(colorRNG(), -1, 1.2), 0, 1) *
                 clamp(
-                  (shipRNG() < 0.7 ? -1 : 1) + (shipRNG() < 0.7 ? -1 : 1),
+                  (colorRNG() < 0.7 ? -1 : 1) + (colorRNG() < 0.7 ? -1 : 1),
                   -1,
                   1
                 ),
@@ -159,9 +155,9 @@ export function generateShip(
           clamp(
             rv[1] +
               baseColorShiftChanceGreen ** 2 *
-                clamp(numberBetween(shipRNG(), -1, 1.2), 0, 1) *
+                clamp(numberBetween(colorRNG(), -1, 1.2), 0, 1) *
                 clamp(
-                  (shipRNG() < 0.7 ? -1 : 1) + (shipRNG() < 0.7 ? -1 : 1),
+                  (colorRNG() < 0.7 ? -1 : 1) + (colorRNG() < 0.7 ? -1 : 1),
                   -1,
                   1
                 ),
@@ -171,9 +167,9 @@ export function generateShip(
           clamp(
             rv[2] +
               baseColorShiftChanceBlue ** 2 *
-                clamp(numberBetween(shipRNG(), -1, 1.2), 0, 1) *
+                clamp(numberBetween(colorRNG(), -1, 1.2), 0, 1) *
                 clamp(
-                  (shipRNG() < 0.7 ? -1 : 1) + (shipRNG() < 0.7 ? -1 : 1),
+                  (colorRNG() < 0.7 ? -1 : 1) + (colorRNG() < 0.7 ? -1 : 1),
                   -1,
                   1
                 ),
@@ -184,18 +180,6 @@ export function generateShip(
       : rv;
   }
 
-  //The initial overall size of this ship, in pixels
-  size = size || numberBetween(shipRNG(), factionSizeMin, factionSizeMax) ** 3;
-  const wratio = numberBetween(
-    shipRNG(),
-    factionWidthRationMin,
-    factionWidthRationMax
-  );
-  const hratio = numberBetween(
-    shipRNG(),
-    factionHeightRationMin,
-    factionHeightRationMax
-  );
   const w = Math.floor(size * wratio); // Maximum width of this ship, in pixels
   const hw = Math.floor(w / 2);
   const gw = Math.floor(w / COMPONENT_GRID_SIZE);
@@ -208,158 +192,151 @@ export function generateShip(
   const csarealimit = (w * h) / 20;
 
   // ------ Define outlines ---------------------------------------
-  const outlines: Array<OutlineFunc> = [
+  if (layoutOutlineType == 0) {
     // 0: Joined rectangles.
-    function () {
-      const initialWidth = Math.ceil((w * factionOutline0InitialWidth) / 5);
-      const blocks = [
-        [
-          [hw - initialWidth, 0],
-          [hw + initialWidth, h],
-        ],
-      ];
-      const blockcount =
-        2 +
-        Math.floor(
-          numberBetween(shipRNG(), 0.5, 1) *
-            factionOutline0BlockCount *
-            size ** 0.5
-        );
-      for (let i = 1; i < blockcount; i++) {
-        const base =
-          blocks[integerNumberBetween(shipRNG(), 0, blocks.length - 1)];
-        const v0 = [
-          base[0][0] + shipRNG() * (base[1][0] - base[0][0]),
-          base[0][1] + shipRNG() * (base[1][1] - base[0][1]),
-        ];
-        if (
-          v0[1] < (base[0][1] + base[1][1]) / 2 &&
-          shipRNG() < factionOutline0FrontBias
-        ) {
-          v0[1] = base[1][1] - (v0[1] - base[0][1]);
-        }
-        const v1 = [shipRNG() * w, shipRNG() * h];
-        const area = Math.abs((v1[0] - v0[0]) * (v1[1] - v0[1]));
-        const ratio = csarealimit / area;
-        if (ratio < 1) {
-          v1[0] = v0[0] + (v1[0] - v0[0]) * ratio;
-          v1[1] = v0[1] + (v1[1] - v0[1]) * ratio;
-        }
-        if (v0[0] > v1[0]) {
-          const t = v0[0];
-          v0[0] = v1[0];
-          v1[0] = t;
-        }
-        if (v0[1] > v1[1]) {
-          const t = v0[1];
-          v0[1] = v1[1];
-          v1[1] = t;
-        }
-        blocks.push([
-          [Math.floor(v0[0]), Math.floor(v0[1])],
-          [Math.ceil(v1[0]), Math.ceil(v1[1])],
-        ]);
-      }
-      cx.fillStyle = "#fff";
-      blocks.map((lb) => {
-        cx.fillRect(
-          lb[0][0],
-          lb[0][1],
-          lb[1][0] - lb[0][0],
-          lb[1][1] - lb[0][1]
-        );
-        cx.fillRect(
-          w - lb[1][0],
-          lb[0][1],
-          lb[1][0] - lb[0][0],
-          lb[1][1] - lb[0][1]
-        );
-      });
-    },
-    // 1: Joined circles
-    function () {
-      const csrlimit = Math.max(2, (csarealimit / Math.PI) ** 0.5);
-      const initialwidth = Math.ceil((w * factionOutline1InitialWidth) / 5);
-      const circles = [];
-      const initialcount = Math.floor(h / (initialwidth * 2));
-      for (let i = 0; i < initialcount; i++) {
-        const lv = [hw, h - initialwidth * (i * 2 + 1)];
-        circles.push({ v: lv, r: initialwidth });
-      }
-      const circlecount =
-        initialcount +
-        Math.floor(
-          numberBetween(shipRNG(), 0.5, 1) *
-            factionOutline1CircleCount *
-            size ** 0.5
-        );
-      for (let i = initialcount; i < circlecount; i++) {
-        const base =
-          circles[
-            Math.max(
-              integerNumberBetween(shipRNG(), 0, circles.length - 1),
-              integerNumberBetween(shipRNG(), 0, circles.length - 1)
-            )
-          ];
-        let ncr = numberBetween(shipRNG(), 1, csrlimit);
-        const pr = numberBetween(shipRNG(), Math.max(0, base.r - ncr), base.r);
-        let pa = numberBetween(shipRNG(), 0, 2 * Math.PI);
-        if (pa > Math.PI && shipRNG() < factionOutline1FrontBias) {
-          pa = numberBetween(shipRNG(), 0, Math.PI);
-        }
-        let lv = [base.v[0] + Math.cos(pa) * pr, base.v[1] + Math.sin(pa) * pr];
-        ncr = Math.min(ncr, lv[0], w - lv[0], lv[1], h - lv[1]);
-        circles.push({ v: lv, r: ncr });
-      }
-      cx.fillStyle = "#fff";
-      circles.map((lc) => {
-        fillCircle(cx, lc.v[0], lc.v[1], lc.r);
-        fillCircle(cx, w - lc.v[0], lc.v[1], lc.r);
-      });
-    },
-
-    // 2: Mess of lines
-    function () {
-      const points = [
-        [hw, numberBetween(shipRNG(), 0, 0.05) * h],
-        [hw, numberBetween(shipRNG(), 0.95, 1) * h],
-      ];
-      const basefatness =
-        COMPONENT_GRID_SIZE / size + factionOutline2BaseFatness;
-      const pointcount = Math.max(
-        3,
-        Math.ceil(
-          (numberBetween(shipRNG(), 0.05, 0.1) / basefatness) * size ** 0.5
-        )
+    const initialWidth = Math.ceil((w * layoutOutline0InitialWidth) / 5);
+    const blocks = [
+      [
+        [hw - initialWidth, 0],
+        [hw + initialWidth, h],
+      ],
+    ];
+    const blockcount =
+      2 +
+      Math.floor(
+        numberBetween(layoutRNG(), 0.5, 1) *
+          layoutOutline0BlockCount *
+          size ** 0.5
       );
-      cx.lineCap = factionOutline2LineCap;
-      cx.strokeStyle = "#fff";
-      for (let npi = 1; npi < pointcount; npi++) {
-        let np = points[npi];
-        if (!np) {
-          np = [shipRNG() * w, shipRNG() ** factionOutline2FrontBias * h];
-          points.push(np);
-        }
-        const cons = 1 + sequenceAdvancer(shipRNG, factionOutline2ConAdjust, 3);
-        for (let nci = 0; nci < cons; nci++) {
-          const pre =
-            points[integerNumberBetween(shipRNG(), 0, points.length - 2)];
-          cx.lineWidth = numberBetween(shipRNG(), 0.7, 1) * basefatness * size;
-          cx.beginPath();
-          cx.moveTo(pre[0], pre[1]);
-          cx.lineTo(np[0], np[1]);
-          cx.stroke();
-          cx.beginPath();
-          cx.moveTo(w - pre[0], pre[1]);
-          cx.lineTo(w - np[0], np[1]);
-          cx.stroke();
-        }
+    for (let i = 1; i < blockcount; i++) {
+      const base =
+        blocks[integerNumberBetween(layoutRNG(), 0, blocks.length - 1)];
+      const v0 = [
+        base[0][0] + layoutRNG() * (base[1][0] - base[0][0]),
+        base[0][1] + layoutRNG() * (base[1][1] - base[0][1]),
+      ];
+      if (
+        v0[1] < (base[0][1] + base[1][1]) / 2 &&
+        layoutRNG() < layoutOutline0FrontBias
+      ) {
+        v0[1] = base[1][1] - (v0[1] - base[0][1]);
       }
-    },
-  ];
+      const v1 = [layoutRNG() * w, layoutRNG() * h];
+      const area = Math.abs((v1[0] - v0[0]) * (v1[1] - v0[1]));
+      const ratio = csarealimit / area;
+      if (ratio < 1) {
+        v1[0] = v0[0] + (v1[0] - v0[0]) * ratio;
+        v1[1] = v0[1] + (v1[1] - v0[1]) * ratio;
+      }
+      if (v0[0] > v1[0]) {
+        const t = v0[0];
+        v0[0] = v1[0];
+        v1[0] = t;
+      }
+      if (v0[1] > v1[1]) {
+        const t = v0[1];
+        v0[1] = v1[1];
+        v1[1] = t;
+      }
+      blocks.push([
+        [Math.floor(v0[0]), Math.floor(v0[1])],
+        [Math.ceil(v1[0]), Math.ceil(v1[1])],
+      ]);
+    }
+    cx.fillStyle = "#fff";
+    blocks.map((lb) => {
+      cx.fillRect(
+        lb[0][0],
+        lb[0][1],
+        lb[1][0] - lb[0][0],
+        lb[1][1] - lb[0][1]
+      );
+      cx.fillRect(
+        w - lb[1][0],
+        lb[0][1],
+        lb[1][0] - lb[0][0],
+        lb[1][1] - lb[0][1]
+      );
+    });
+  } else if (layoutOutlineType == 1) {
+    const csrlimit = Math.max(2, (csarealimit / Math.PI) ** 0.5);
+    const initialwidth = Math.ceil((w * layoutOutline1InitialWidth) / 5);
+    const circles = [];
+    const initialcount = Math.floor(h / (initialwidth * 2));
+    for (let i = 0; i < initialcount; i++) {
+      const lv = [hw, h - initialwidth * (i * 2 + 1)];
+      circles.push({ v: lv, r: initialwidth });
+    }
+    const circlecount =
+      initialcount +
+      Math.floor(
+        numberBetween(layoutRNG(), 0.5, 1) *
+          layoutOutline1CircleCount *
+          size ** 0.5
+      );
+    for (let i = initialcount; i < circlecount; i++) {
+      const base =
+        circles[
+          Math.max(
+            integerNumberBetween(layoutRNG(), 0, circles.length - 1),
+            integerNumberBetween(layoutRNG(), 0, circles.length - 1)
+          )
+        ];
+      let ncr = numberBetween(layoutRNG(), 1, csrlimit);
+      const pr = numberBetween(layoutRNG(), Math.max(0, base.r - ncr), base.r);
+      let pa = numberBetween(layoutRNG(), 0, 2 * Math.PI);
+      if (pa > Math.PI && layoutRNG() < layoutOutline1FrontBias) {
+        pa = numberBetween(layoutRNG(), 0, Math.PI);
+      }
+      let lv = [base.v[0] + Math.cos(pa) * pr, base.v[1] + Math.sin(pa) * pr];
+      ncr = Math.min(ncr, lv[0], w - lv[0], lv[1], h - lv[1]);
+      circles.push({ v: lv, r: ncr });
+    }
+    cx.fillStyle = "#fff";
+    circles.map((lc) => {
+      fillCircle(cx, lc.v[0], lc.v[1], lc.r);
+      fillCircle(cx, w - lc.v[0], lc.v[1], lc.r);
+    });
+  } else {
+  // 2: Mess of lines
+    const points = [
+      [hw, numberBetween(layoutRNG(), 0, 0.05) * h],
+      [hw, numberBetween(layoutRNG(), 0.95, 1) * h],
+    ];
+    const basefatness =
+      COMPONENT_GRID_SIZE / size + layoutOutline2BaseFatness;
+    const pointcount = Math.max(
+      3,
+      Math.ceil(
+        (numberBetween(layoutRNG(), 0.05, 0.1) / basefatness) * size ** 0.5
+      )
+    );
+    cx.lineCap = layoutOutline2LineCap;
+    cx.strokeStyle = "#fff";
+    for (let npi = 1; npi < pointcount; npi++) {
+      let np = points[npi];
+      if (!np) {
+        np = [layoutRNG() * w, layoutRNG() ** layoutOutline2FrontBias * h];
+        points.push(np);
+      }
+      const cons = 1 + sequenceAdvancer(layoutRNG, layoutOutline2ConAdjust, 3);
+      for (let nci = 0; nci < cons; nci++) {
+        const pre =
+          points[integerNumberBetween(layoutRNG(), 0, points.length - 2)];
+        cx.lineWidth = numberBetween(layoutRNG(), 0.7, 1) * basefatness * size;
+        cx.beginPath();
+        cx.moveTo(pre[0], pre[1]);
+        cx.lineTo(np[0], np[1]);
+        cx.stroke();
+        cx.beginPath();
+        cx.moveTo(w - pre[0], pre[1]);
+        cx.lineTo(w - np[0], np[1]);
+        cx.stroke();
+      }
+    }
+  }
   // ------ End define outlines -----------------------------------
 
-  outlines[factionOutlineType]();
   const outline = obtainImageData(shipCanvas);
 
   //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y)

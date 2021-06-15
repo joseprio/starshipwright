@@ -9,33 +9,33 @@ function update() {
   // Empty it
   while (container.firstChild) container.removeChild(container.firstChild);
 
-  const factionSeed = document.getElementById("fseed").value;
+  const shipSeed = document.getElementById("sseed").value;
+  const layoutSeed = document.getElementById("lseed").value;
   const colorSeed = document.getElementById("cseed").value;
-  const size = document.getElementById("size").value;
-  const faction = factionSeed.length > 0 ? Number(factionSeed) : null;
+  const ship = shipSeed.length > 0 ? Number(shipSeed) : null;
+  const layout = layoutSeed.length > 0 ? Number(layoutSeed) : null;
   const color = colorSeed.length > 0 ? Number(colorSeed) : null;
 
   for (let c = 0; c < 20; c++) {
     const shipDiv = document.createElement("div");
     shipDiv.className = "ship";
     const shipCaption = document.createElement("div");
-    const factionCaption = document.createElement("div");
+    const layoutCaption = document.createElement("div");
     const colorCaption = document.createElement("div");
-    const iterationFactionSeed = faction == null ? randomSeed() : faction;
+    const iterationLayoutSeed = layout == null ? randomSeed() : layout;
     const iterationColorSeed = color == null ? randomSeed() : color;
-    const shipSeed = randomSeed();
+    const iterationShipSeed = ship == null ? randomSeed() : ship;
     const shipCanvas = generateShip(
-      iterationFactionSeed,
-      shipSeed,
-      iterationColorSeed,
-      size || undefined
+      iterationShipSeed,
+      iterationLayoutSeed,
+      iterationColorSeed
     );
-    shipCaption.textContent = "Seed: " + shipSeed;
-    factionCaption.textContent = "Faction: " + String(iterationFactionSeed);
+    shipCaption.textContent = "Ship: " + String(iterationShipSeed);
+    layoutCaption.textContent = "Layout: " + String(iterationLayoutSeed);
     colorCaption.textContent = "Color: " + String(iterationColorSeed);
     shipDiv.appendChild(shipCanvas);
     shipDiv.appendChild(shipCaption);
-    shipDiv.appendChild(factionCaption);
+    shipDiv.appendChild(layoutCaption);
     shipDiv.appendChild(colorCaption);
     container.appendChild(shipDiv);
   }
