@@ -1141,7 +1141,7 @@ export function generateShip(
 
   // The generated ship is asymmetric, so we fix it here
   // Removing this makes the vast majority of ships look quite a bit worse
-  cx.clearRect(hw + (w % 2), 0, w, h);
+  cx.clearRect(w - hw, 0, hw, h);
   cx.scale(-1, 1);
   cx.drawImage(shipCanvas, -w, 0);
 
