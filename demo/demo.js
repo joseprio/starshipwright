@@ -1027,8 +1027,7 @@ function update() {
       size || undefined
     );
     shipCaption.textContent = "Seed: " + shipSeed;
-    factionCaption.textContent =
-       true ? factionSeed : undefined;
+    factionCaption.textContent = "Faction: " + String(iterationFactionSeed);
     shipDiv.appendChild(shipCanvas);
     shipDiv.appendChild(shipCaption);
     shipDiv.appendChild(factionCaption);
