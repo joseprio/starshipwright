@@ -209,8 +209,9 @@ const COMPONENT_MAXIMUM_SIZE = 8;
 // This library is heavily optimized towards size, as I used it for a JS13K game. Also, I'm planning to use
 // it again for that purpose in the future. This function is a lot bigger than it needs to be, but doing so
 // allows us to have all variables we need in the closure instead of passing it around in parameters
-function generateShip(factionSeed, shipSeed, size) {
+function generateShip(factionSeed, shipSeed, colorSeed, size) {
     const factionRNG = createNumberGenerator(factionSeed);
+    const colorRNG = createNumberGenerator(colorSeed);
     // Default maximum power
     const componentChancePower = 8;
     const componentChances = [
@@ -230,18 +231,18 @@ function generateShip(factionSeed, shipSeed, size) {
     ];
     const colors = [];
     const colorChances = [];
-    const colorCount = 1 + (factionRNG() < 0.7 ? 1 : 0) + sequenceAdvancer(factionRNG, 0.3, 3);
+    const colorCount = 1 + (colorRNG() < 0.7 ? 1 : 0) + sequenceAdvancer(colorRNG, 0.3, 3);
     // Compute faction colors
     for (let i = 0; i < colorCount; i++) {
         // Just doing random RGB coloring should be alright and simplify the code
-        colors.push(hsvToRgb(factionRNG() ** 2, clamp(numberBetween(factionRNG(), -0.2, 1), 0, factionRNG() ** 4), Math.max(numberBetween(factionRNG(), 0.7, 1.1), 1)));
+        colors.push(hsvToRgb(colorRNG() ** 2, clamp(numberBetween(colorRNG(), -0.2, 1), 0, colorRNG() ** 4), Math.max(numberBetween(colorRNG(), 0.7, 1.1), 1)));
         // Default maximum power is 6
-        colorChances.push(2 ** (factionRNG() * 6));
+        colorChances.push(2 ** (colorRNG() * 6));
     }
-    const factionBaseColorShiftChance = factionRNG() / 2;
-    const factionBaseColorShiftChanceRed = numberBetween(factionRNG(), 0, 0.6);
-    const factionBaseColorShiftChanceGreen = numberBetween(factionRNG(), 0, 0.6);
-    const factionBaseColorShiftChanceBlue = numberBetween(factionRNG(), 0, 0.6);
+    const baseColorShiftChance = colorRNG() / 2;
+    const baseColorShiftChanceRed = numberBetween(colorRNG(), 0, 0.6);
+    const baseColorShiftChanceGreen = numberBetween(colorRNG(), 0, 0.6);
+    const baseColorShiftChanceBlue = numberBetween(colorRNG(), 0, 0.6);
     const factionSizeMin = numberBetween(factionRNG(), 2.5, 3.5);
     const factionSizeMax = numberBetween(factionRNG(), 5, 7);
     const factionWidthRationMin = numberBetween(factionRNG(), 0.5, 1);
@@ -292,18 +293,18 @@ function generateShip(factionSeed, shipSeed, size) {
     const shipRNG = createNumberGenerator(shipSeed);
     function computeBaseColor() {
         let rv = colors[chancePicker(shipRNG, colorChances)];
-        return shipRNG() < factionBaseColorShiftChance ** 2
+        return shipRNG() < baseColorShiftChance ** 2
             ? [
                 clamp(rv[0] +
-                    factionBaseColorShiftChanceRed ** 2 *
+                    baseColorShiftChanceRed ** 2 *
                         clamp(numberBetween(shipRNG(), -1, 1.2), 0, 1) *
                         clamp((shipRNG() < 0.7 ? -1 : 1) + (shipRNG() < 0.7 ? -1 : 1), -1, 1), 0, 1),
                 clamp(rv[1] +
-                    factionBaseColorShiftChanceGreen ** 2 *
+                    baseColorShiftChanceGreen ** 2 *
                         clamp(numberBetween(shipRNG(), -1, 1.2), 0, 1) *
                         clamp((shipRNG() < 0.7 ? -1 : 1) + (shipRNG() < 0.7 ? -1 : 1), -1, 1), 0, 1),
                 clamp(rv[2] +
-                    factionBaseColorShiftChanceBlue ** 2 *
+                    baseColorShiftChanceBlue ** 2 *
                         clamp(numberBetween(shipRNG(), -1, 1.2), 0, 1) *
                         clamp((shipRNG() < 0.7 ? -1 : 1) + (shipRNG() < 0.7 ? -1 : 1), -1, 1), 0, 1),
             ]
@@ -1012,25 +1013,33 @@ function update() {
   while (container.firstChild) container.removeChild(container.firstChild);
 
   const factionSeed = document.getElementById("fseed").value;
+  const colorSeed = document.getElementById("cseed").value;
   const size = document.getElementById("size").value;
-  const faction = factionSeed.length > 1 ? Number(factionSeed) : null;
+  const faction = factionSeed.length > 0 ? Number(factionSeed) : null;
+  const color = colorSeed.length > 0 ? Number(colorSeed) : null;
+
   for (let c = 0; c < 20; c++) {
     const shipDiv = document.createElement("div");
     shipDiv.className = "ship";
     const shipCaption = document.createElement("div");
     const factionCaption = document.createElement("div");
+    const colorCaption = document.createElement("div");
     const iterationFactionSeed = faction == null ? randomSeed() : faction;
+    const iterationColorSeed = color == null ? randomSeed() : color;
     const shipSeed = randomSeed();
     const shipCanvas = generateShip(
       iterationFactionSeed,
       shipSeed,
+      iterationColorSeed,
       size || undefined
     );
     shipCaption.textContent = "Seed: " + shipSeed;
     factionCaption.textContent = "Faction: " + String(iterationFactionSeed);
+    colorCaption.textContent = "Color: " + String(iterationColorSeed);
     shipDiv.appendChild(shipCanvas);
     shipDiv.appendChild(shipCaption);
     shipDiv.appendChild(factionCaption);
+    shipDiv.appendChild(colorCaption);
     container.appendChild(shipDiv);
   }
 }
