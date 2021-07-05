@@ -15,23 +15,32 @@ yarn add starshipwright
 ## Usage
 
 ```js
-import { generateShip, generateFactionRandomizer } from 'starshipwright';
+import { generateShip } from 'starshipwright';
 
 ...
-
-const faction = generateFactionRandomizer("factionRandomSeed");
-const ship = generateShip(faction, "shipRandomSeed"); // HTML Canvas
+const shipSeed = 1;
+const layoutSeed = 2;
+const colorSeed = 3;
+const shipCanvas = generateShip(shipSeed, layoutSeed, colorSeed); // HTML Canvas
 ```
 
 ## API
 
-### generateFactionRandomizer(seed: string) ⇒ `Randomizer`
+### generateShip(shipSeed: number, layoutSeed:number, colorSeed: number) ⇒ `HTMLCanvasElement`
 
-Returns a randomizer initialized with the specified seed.
+Returns a canvas that contains the generated ship based on 3 numberic seeds: ship (which determines that style), layout (size & shape) and color.
 
-### generateShip(faction: Randomizer, seed: string, size?: number) ⇒ `Randomizer`
+### numberBetween(target: number, a: number, b: number) ⇒ `number`
 
-Returns a canvas that contains the generated ship.
+Converts a number between 0 and 1 to a number between [a, b)
+
+### integerNumberBetween(target: number, a: number, b: number) ⇒ `number`
+
+Converts a number between 0 and 1 to an integer number between [a,b] (both included)
+
+### createNumberGenerator(seed: number) ⇒ `() => number`
+
+Returns a PRNG function that will generate numbers between 0 and 1 based on a seed.
 
 ## Demo
 
