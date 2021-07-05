@@ -3,32 +3,86 @@
     <title>Space shipwright demo</title>
     <script src="./demo.js"></script>
     <style>
-      body {
+      html, body {
         color: white;
         background-color: black;
+        font-family: sans-serif;
+      }
+      fieldset {
+        display: inline-block;
+        width: 45%;
+      }
+      fieldset ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 0;
+        display: table;
+      }
+      fieldset li {
+        display: table-row;
+      }
+      fieldset label, fieldset input, fieldset button {
+        display: table-cell;
       }
       .ship {
         display: inline-block;
         text-align: center;
         margin: 20px;
+        font-size: 10px;
       }
     </style>
   </head>
   <body>
-    <div>
-      <label for="sseed">Ship seed: </label>
-      <input id="sseed"></input>
+    <fieldset>
+      <legend>Settings</legend>
+      <ul>
+        <li>
+          <label for="amount">Amount:</label>
+          <input id="amount" value="20" size="3"></input>
+        </li>
+        <li>
+          <label for="sseed">Ship seed:</label>
+          <input id="sseed"></input>
+          <button id="snext">++</button>
+        </li>
+        <li>
+          <label for="lseed">Layout seed:</label>
+          <input id="lseed"></input>
+          <button id="lnext">++</button>
+        </li>
+        <li>
+          <label for="cseed">Color seed:</label>
+          <input id="cseed"></input>
+          <button id="cnext">++</button>
+        </li>
+      </ul>
+    </fieldset>
+   <fieldset>
+      <legend>Filters</legend>
+      <ul>
+        <li>
+          <label for="minwidth">Minimum width:</label>
+          <input id="minwidth" size="3"></input>
+        </li>
+        <li>
+          <label for="maxwidth">Maximum width:</label>
+          <input id="maxwidth" size="3"></input>
+        </li>
+        <li>
+          <label for="minheight">Minimum height:</label>
+          <input id="minheight" size="3"></input>
+        </li>
+        <li>
+          <label for="maxheight">Maximum height:</label>
+          <input id="maxheight" size="3"></input>
+        </li>
+      </ul>
+    </fieldset>
+    <div id="actionButtons">
+      <button id="randomAction">&#x1F500; Generate randomly</button>
     </div>
-    <div>
-      <label for="lseed">Layout seed: </label>
-      <input id="lseed"></input>
-    </div>
-    <div>
-      <label for="cseed">Color seed: </label>
-      <input id="cseed"></input>
-    </div>
-    <div>
-      <button id="updateAction">Update</button>
+    <div id="stopButton" style="display: none;">
+      <button id="stopAction">&#x1f6d1; Stop generating</button>
     </div>
     <div id="container"></div>
   </body>
