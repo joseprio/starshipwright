@@ -209,7 +209,7 @@ const COMPONENT_MAXIMUM_SIZE = 8;
 // This library is heavily optimized towards size, as I used it for a JS13K game. Also, I'm planning to use
 // it again for that purpose in the future. This function is a lot bigger than it needs to be, but doing so
 // allows us to have all variables we need in the closure instead of passing it around in parameters
-function generateShip(shipSeed, layoutSeed, colorSeed) {
+function generateShip(shipSeed, layoutSeed, colorSeed, forceSize) {
     const layoutRNG = createNumberGenerator(layoutSeed);
     const colorRNG = createNumberGenerator(colorSeed);
     const shipRNG = createNumberGenerator(shipSeed);
@@ -245,7 +245,7 @@ function generateShip(shipSeed, layoutSeed, colorSeed) {
     const baseColorShiftChanceGreen = numberBetween(colorRNG(), 0, 0.6);
     const baseColorShiftChanceBlue = numberBetween(colorRNG(), 0, 0.6);
     const layoutOutlineType = Math.floor(layoutRNG() * 3);
-    const size = numberBetween(layoutRNG(), 2.5, 7) ** 3;
+    const size = forceSize || numberBetween(layoutRNG(), 2.5, 7) ** 3;
     const wratio = numberBetween(layoutRNG(), 0.5, 1.3);
     const hratio = numberBetween(layoutRNG(), 0.7, 1.7);
     const layoutOutline0InitialWidth = numberBetween(layoutRNG(), 0.1, 1);
@@ -1048,6 +1048,7 @@ function generateNextShip() {
   const shipSeedInput = document.getElementById("sseed");
   const layoutSeedInput = document.getElementById("lseed");
   const colorSeedInput = document.getElementById("cseed");
+  const forceSizeInput = document.getElementById("fsize");
   if (incrementShip && shipSeedInput.value.length < 1) {
     shipSeedInput.value = 1;
   }
@@ -1060,9 +1061,11 @@ function generateNextShip() {
   const shipSeed = shipSeedInput.value;
   const layoutSeed = layoutSeedInput.value;
   const colorSeed = colorSeedInput.value;
+  const forceSizeValue = forceSizeInput.value;
   const ship = shipSeed.length > 0 ? Number(shipSeed) : null;
   const layout = layoutSeed.length > 0 ? Number(layoutSeed) : null;
   const color = colorSeed.length > 0 ? Number(colorSeed) : null;
+  const forceSize = forceSizeValue.length > 0 ? Number(forceSizeValue) : null;
   if (incrementShip) {
     shipSeedInput.value++;
   }
@@ -1085,7 +1088,8 @@ function generateNextShip() {
   const shipCanvas = generateShip(
     iterationShipSeed,
     iterationLayoutSeed,
-    iterationColorSeed
+    iterationColorSeed,
+    forceSize
   );
   // Check if the filter criteria is met
   const minWidthInput = document.getElementById("minwidth");
@@ -1120,9 +1124,10 @@ function generateNextShip() {
     "" + shipCanvas.width + "x" + shipCanvas.height + " ";
   const copyToClipboard = createItemAction(CLIPBOARD);
   copyToClipboard.onclick = () => {
-    navigator.clipboard.writeText(
-      `generateShip(${iterationShipSeed}, ${iterationLayoutSeed}, ${iterationColorSeed})`
-    );
+    const text = forceSize
+      ? `generateShip(${iterationShipSeed}, ${iterationLayoutSeed}, ${iterationColorSeed}, ${forceSize})`
+      : `generateShip(${iterationShipSeed}, ${iterationLayoutSeed}, ${iterationColorSeed})`;
+    navigator.clipboard.writeText(text);
   };
   infoCaption.appendChild(copyToClipboard);
 
@@ -1149,6 +1154,11 @@ function generateNextShip() {
   shipDiv.appendChild(shipCaption);
   shipDiv.appendChild(layoutCaption);
   shipDiv.appendChild(colorCaption);
+  if (forceSize) {
+    const sizeCaption = document.createElement("div");
+    sizeCaption.textContent = "Size: " + String(forceSize);
+    shipDiv.appendChild(sizeCaption);
+  }
   container.appendChild(shipDiv);
 
   generatedShips++;

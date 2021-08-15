@@ -7,7 +7,7 @@ const COMPONENT_MAXIMUM_SIZE = 8;
 // This library is heavily optimized towards size, as I used it for a JS13K game. Also, I'm planning to use
 // it again for that purpose in the future. This function is a lot bigger than it needs to be, but doing so
 // allows us to have all variables we need in the closure instead of passing it around in parameters
-export function generateShip(shipSeed, layoutSeed, colorSeed) {
+export function generateShip(shipSeed, layoutSeed, colorSeed, forceSize) {
     const layoutRNG = createNumberGenerator(layoutSeed);
     const colorRNG = createNumberGenerator(colorSeed);
     const shipRNG = createNumberGenerator(shipSeed);
@@ -43,7 +43,7 @@ export function generateShip(shipSeed, layoutSeed, colorSeed) {
     const baseColorShiftChanceGreen = numberBetween(colorRNG(), 0, 0.6);
     const baseColorShiftChanceBlue = numberBetween(colorRNG(), 0, 0.6);
     const layoutOutlineType = Math.floor(layoutRNG() * 3);
-    const size = numberBetween(layoutRNG(), 2.5, 7) ** 3;
+    const size = forceSize || numberBetween(layoutRNG(), 2.5, 7) ** 3;
     const wratio = numberBetween(layoutRNG(), 0.5, 1.3);
     const hratio = numberBetween(layoutRNG(), 0.7, 1.7);
     const layoutOutline0InitialWidth = numberBetween(layoutRNG(), 0.1, 1);

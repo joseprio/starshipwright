@@ -46,6 +46,7 @@ function generateNextShip() {
     const shipSeedInput = document.getElementById("sseed");
     const layoutSeedInput = document.getElementById("lseed");
     const colorSeedInput = document.getElementById("cseed");
+    const forceSizeInput = document.getElementById("fsize");
     if (incrementShip && shipSeedInput.value.length < 1) {
         shipSeedInput.value = 1;
     }
@@ -58,9 +59,11 @@ function generateNextShip() {
     const shipSeed = shipSeedInput.value;
     const layoutSeed = layoutSeedInput.value;
     const colorSeed = colorSeedInput.value;
+    const forceSizeValue = forceSizeInput.value;
     const ship = shipSeed.length > 0 ? Number(shipSeed) : null;
     const layout = layoutSeed.length > 0 ? Number(layoutSeed) : null;
     const color = colorSeed.length > 0 ? Number(colorSeed) : null;
+    const forceSize = forceSizeValue.length > 0 ? Number(forceSizeValue) : null;
     if (incrementShip) {
         shipSeedInput.value++;
     }
@@ -79,7 +82,7 @@ function generateNextShip() {
     const iterationLayoutSeed = layout == null ? randomSeed() : layout;
     const iterationColorSeed = color == null ? randomSeed() : color;
     const iterationShipSeed = ship == null ? randomSeed() : ship;
-    const shipCanvas = generateShip(iterationShipSeed, iterationLayoutSeed, iterationColorSeed);
+    const shipCanvas = generateShip(iterationShipSeed, iterationLayoutSeed, iterationColorSeed, forceSize);
     // Check if the filter criteria is met
     const minWidthInput = document.getElementById("minwidth");
     const minHeightInput = document.getElementById("minheight");
@@ -110,7 +113,10 @@ function generateNextShip() {
         "" + shipCanvas.width + "x" + shipCanvas.height + " ";
     const copyToClipboard = createItemAction(CLIPBOARD);
     copyToClipboard.onclick = () => {
-        navigator.clipboard.writeText(`generateShip(${iterationShipSeed}, ${iterationLayoutSeed}, ${iterationColorSeed})`);
+        const text = forceSize
+            ? `generateShip(${iterationShipSeed}, ${iterationLayoutSeed}, ${iterationColorSeed}, ${forceSize})`
+            : `generateShip(${iterationShipSeed}, ${iterationLayoutSeed}, ${iterationColorSeed})`;
+        navigator.clipboard.writeText(text);
     };
     infoCaption.appendChild(copyToClipboard);
     shipCaption.textContent = "Ship: " + String(iterationShipSeed);
@@ -136,6 +142,11 @@ function generateNextShip() {
     shipDiv.appendChild(shipCaption);
     shipDiv.appendChild(layoutCaption);
     shipDiv.appendChild(colorCaption);
+    if (forceSize) {
+        const sizeCaption = document.createElement("div");
+        sizeCaption.textContent = "Size: " + String(forceSize);
+        shipDiv.appendChild(sizeCaption);
+    }
     container.appendChild(shipDiv);
     generatedShips++;
     if (generatedShips < amount) {

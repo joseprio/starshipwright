@@ -35,6 +35,7 @@ export function generateShip(
   shipSeed: number,
   layoutSeed: number,
   colorSeed: number,
+  forceSize?: number,
 ): HTMLCanvasElement {
   const layoutRNG = createNumberGenerator(layoutSeed);
   const colorRNG = createNumberGenerator(colorSeed);
@@ -82,7 +83,7 @@ export function generateShip(
   const baseColorShiftChanceBlue = numberBetween(colorRNG(), 0, 0.6);
 
   const layoutOutlineType = Math.floor(layoutRNG() * 3);
-  const size = numberBetween(layoutRNG(), 2.5, 7) ** 3;
+  const size = forceSize || numberBetween(layoutRNG(), 2.5, 7) ** 3;
   const wratio = numberBetween(layoutRNG(), 0.5, 1.3);
   const hratio = numberBetween(layoutRNG(), 0.7, 1.7);
   const layoutOutline0InitialWidth = numberBetween(layoutRNG(), 0.1, 1);
