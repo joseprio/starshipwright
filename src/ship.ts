@@ -32,9 +32,9 @@ type ComponentFunc = (v: Vec) => void;
 // it again for that purpose in the future. This function is a lot bigger than it needs to be, but doing so
 // allows us to have all variables we need in the closure instead of passing it around in parameters
 export function generateShip(
+  colorSeed: number,
   shipSeed: number,
   layoutSeed: number,
-  colorSeed: number,
   forceSize?: number,
 ): HTMLCanvasElement {
   const layoutRNG = createNumberGenerator(layoutSeed);

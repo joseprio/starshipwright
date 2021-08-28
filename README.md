@@ -18,17 +18,17 @@ yarn add starshipwright
 import { generateShip } from 'starshipwright';
 
 ...
-const shipSeed = 1;
-const layoutSeed = 2;
-const colorSeed = 3;
-const shipCanvas = generateShip(shipSeed, layoutSeed, colorSeed); // HTML Canvas
+const colorSeed = 1;
+const shipSeed = 2;
+const layoutSeed = 3;
+const shipCanvas = generateShip(colorSeed, shipSeed, layoutSeed); // HTML Canvas
 ```
 
 ## API
 
-### `generateShip(shipSeed: number, layoutSeed:number, colorSeed: number, forceSize?: number]): HTMLCanvasElement`
+### `generateShip(colorSeed: number, shipSeed: number, layoutSeed:number, forceSize?: number]): HTMLCanvasElement`
 
-Returns a canvas that contains the generated ship based on 3 numberic seeds: ship (which determines that style), layout (size & shape) and color.
+Returns a canvas that contains the generated ship based on 3 numberic seeds: color, ship (which determines that style), layout (size & shape), and optionally a forced size`.
 
 ### `numberBetween(target: number, a: number, b: number): number`
 

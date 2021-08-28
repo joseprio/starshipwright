@@ -209,7 +209,7 @@ const COMPONENT_MAXIMUM_SIZE = 8;
 // This library is heavily optimized towards size, as I used it for a JS13K game. Also, I'm planning to use
 // it again for that purpose in the future. This function is a lot bigger than it needs to be, but doing so
 // allows us to have all variables we need in the closure instead of passing it around in parameters
-function generateShip(shipSeed, layoutSeed, colorSeed, forceSize) {
+function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
     const layoutRNG = createNumberGenerator(layoutSeed);
     const colorRNG = createNumberGenerator(colorSeed);
     const shipRNG = createNumberGenerator(shipSeed);
@@ -1086,9 +1086,9 @@ function generateNextShip() {
   const iterationColorSeed = color == null ? randomSeed() : color;
   const iterationShipSeed = ship == null ? randomSeed() : ship;
   const shipCanvas = generateShip(
+    iterationColorSeed,
     iterationShipSeed,
     iterationLayoutSeed,
-    iterationColorSeed,
     forceSize
   );
   // Check if the filter criteria is met
@@ -1125,8 +1125,8 @@ function generateNextShip() {
   const copyToClipboard = createItemAction(CLIPBOARD);
   copyToClipboard.onclick = () => {
     const text = forceSize
-      ? `generateShip(${iterationShipSeed}, ${iterationLayoutSeed}, ${iterationColorSeed}, ${forceSize})`
-      : `generateShip(${iterationShipSeed}, ${iterationLayoutSeed}, ${iterationColorSeed})`;
+      ? `generateShip(${iterationColorSeed}, ${iterationShipSeed}, ${iterationLayoutSeed}, ${forceSize})`
+      : `generateShip(${iterationColorSeed}, ${iterationShipSeed}, ${iterationLayoutSeed})`;
     navigator.clipboard.writeText(text);
   };
   infoCaption.appendChild(copyToClipboard);

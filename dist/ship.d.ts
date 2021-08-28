@@ -1,1 +1,1 @@
-export declare function generateShip(shipSeed: number, layoutSeed: number, colorSeed: number, forceSize?: number): HTMLCanvasElement;
+export declare function generateShip(colorSeed: number, shipSeed: number, layoutSeed: number, forceSize?: number): HTMLCanvasElement;

@@ -82,7 +82,7 @@ function generateNextShip() {
     const iterationLayoutSeed = layout == null ? randomSeed() : layout;
     const iterationColorSeed = color == null ? randomSeed() : color;
     const iterationShipSeed = ship == null ? randomSeed() : ship;
-    const shipCanvas = generateShip(iterationShipSeed, iterationLayoutSeed, iterationColorSeed, forceSize);
+    const shipCanvas = generateShip(iterationColorSeed, iterationShipSeed, iterationLayoutSeed, forceSize);
     // Check if the filter criteria is met
     const minWidthInput = document.getElementById("minwidth");
     const minHeightInput = document.getElementById("minheight");
@@ -114,8 +114,8 @@ function generateNextShip() {
     const copyToClipboard = createItemAction(CLIPBOARD);
     copyToClipboard.onclick = () => {
         const text = forceSize
-            ? `generateShip(${iterationShipSeed}, ${iterationLayoutSeed}, ${iterationColorSeed}, ${forceSize})`
-            : `generateShip(${iterationShipSeed}, ${iterationLayoutSeed}, ${iterationColorSeed})`;
+            ? `generateShip(${iterationColorSeed}, ${iterationShipSeed}, ${iterationLayoutSeed}, ${forceSize})`
+            : `generateShip(${iterationColorSeed}, ${iterationShipSeed}, ${iterationLayoutSeed})`;
         navigator.clipboard.writeText(text);
     };
     infoCaption.appendChild(copyToClipboard);
