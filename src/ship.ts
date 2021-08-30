@@ -374,7 +374,7 @@ export function generateShip(
     if (lcell[CELL_GX] < gw - 1) {
       const ncell = cgrid[lcell[CELL_GX] + 1][lcell[CELL_GY]];
       if (!ncell[CELL_PHASE]) {
-        if (getOutlineAlpha(ncell[CELL_X], ncell[CELL_GY])) {
+        if (getOutlineAlpha(ncell[CELL_X], ncell[CELL_Y])) {
           ncell[CELL_PHASE] = 1;
           goodcells.push(ncell);
         } else {
