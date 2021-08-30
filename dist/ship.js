@@ -4,6 +4,11 @@ import { createCanvas, fillCircle, obtainImageData } from "game-utils";
 const COMPONENT_GRID_SIZE = 6;
 //Base maximum extent of a component from its origin point. Should be at least equal to cgridsize, but no greater than csedge.
 const COMPONENT_MAXIMUM_SIZE = 8;
+const CELL_GX = 0;
+const CELL_GY = 1;
+const CELL_X = 2;
+const CELL_Y = 3;
+const CELL_PHASE = 4;
 // This library is heavily optimized towards size, as I used it for a JS13K game. Also, I'm planning to use
 // it again for that purpose in the future. This function is a lot bigger than it needs to be, but doing so
 // allows us to have all variables we need in the closure instead of passing it around in parameters
@@ -239,71 +244,71 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
     for (let gx = 0; gx < gw; gx++) {
         cgrid[gx] = [];
         for (let gy = 0; gy < gh; gy++) {
-            cgrid[gx][gy] = {
-                gx: gx,
-                gy: gy,
-                x: Math.floor(gwextra + (gx + 0.5) * COMPONENT_GRID_SIZE),
-                y: Math.floor(ghextra + (gy + 0.5) * COMPONENT_GRID_SIZE),
-            }; // Phase is 0 for unchecked, 1 for checked and good, and -1 for checked and bad
+            cgrid[gx][gy] = [
+                gx,
+                gy,
+                Math.floor(gwextra + (gx + 0.5) * COMPONENT_GRID_SIZE),
+                Math.floor(ghextra + (gy + 0.5) * COMPONENT_GRID_SIZE),
+            ]; // Phase is 0 for unchecked, 1 for checked and good, and -1 for checked and bad
         }
     }
     const goodcells = [cgrid[Math.floor(gw / 2)][Math.floor(gh / 2)]];
     for (let nextcheck = 0; nextcheck < goodcells.length; nextcheck++) {
         const lcell = goodcells[nextcheck];
-        if (lcell.gx > 0) {
-            const ncell = cgrid[lcell.gx - 1][lcell.gy];
-            if (!ncell.phase) {
-                if (getOutlineAlpha(ncell.x, ncell.y)) {
-                    ncell.phase = 1;
+        if (lcell[CELL_GX] > 0) {
+            const ncell = cgrid[lcell[CELL_GX] - 1][lcell[CELL_GY]];
+            if (!ncell[CELL_PHASE]) {
+                if (getOutlineAlpha(ncell[CELL_X], ncell[CELL_Y])) {
+                    ncell[CELL_PHASE] = 1;
                     goodcells.push(ncell);
                 }
                 else {
-                    ncell.phase = 2;
+                    ncell[CELL_PHASE] = 2;
                 }
             }
         }
-        if (lcell.gx < gw - 1) {
-            const ncell = cgrid[lcell.gx + 1][lcell.gy];
-            if (!ncell.phase) {
-                if (getOutlineAlpha(ncell.x, ncell.y)) {
-                    ncell.phase = 1;
+        if (lcell[CELL_GX] < gw - 1) {
+            const ncell = cgrid[lcell[CELL_GX] + 1][lcell[CELL_GY]];
+            if (!ncell[CELL_PHASE]) {
+                if (getOutlineAlpha(ncell[CELL_X], ncell[CELL_GY])) {
+                    ncell[CELL_PHASE] = 1;
                     goodcells.push(ncell);
                 }
                 else {
-                    ncell.phase = 2;
+                    ncell[CELL_PHASE] = 2;
                 }
             }
         }
-        if (lcell.gy > 0) {
-            const ncell = cgrid[lcell.gx][lcell.gy - 1];
-            if (!ncell.phase) {
-                if (getOutlineAlpha(ncell.x, ncell.y)) {
-                    ncell.phase = 1;
+        if (lcell[CELL_GY] > 0) {
+            const ncell = cgrid[lcell[CELL_GX]][lcell[CELL_GY] - 1];
+            if (!ncell[CELL_PHASE]) {
+                if (getOutlineAlpha(ncell[CELL_X], ncell[CELL_Y])) {
+                    ncell[CELL_PHASE] = 1;
                     goodcells.push(ncell);
                 }
                 else {
-                    ncell.phase = 2;
+                    ncell[CELL_PHASE] = 2;
                 }
             }
         }
-        if (lcell.gy < gh - 1) {
-            const ncell = cgrid[lcell.gx][lcell.gy + 1];
-            if (!ncell.phase) {
-                if (getOutlineAlpha(ncell.x, ncell.y)) {
-                    ncell.phase = 1;
+        if (lcell[CELL_GY] < gh - 1) {
+            const ncell = cgrid[lcell[CELL_GX]][lcell[CELL_GY] + 1];
+            if (!ncell[CELL_PHASE]) {
+                if (getOutlineAlpha(ncell[CELL_X], ncell[CELL_Y])) {
+                    ncell[CELL_PHASE] = 1;
                     goodcells.push(ncell);
                 }
                 else {
-                    ncell.phase = 2;
+                    ncell[CELL_PHASE] = 2;
                 }
             }
         }
     }
     for (let i = 0; i < goodcells.length; i++) {
         const lcell = goodcells[i];
-        const ocell = cgrid[gw - 1 - lcell.gx][lcell.gy];
-        if (ocell.phase != 1) {
-            ocell.phase = 1;
+        const ocell = cgrid[gw - 1 - lcell[CELL_GX]][lcell[CELL_GY]];
+        if (ocell[CELL_PHASE] != 1) {
+            ocell[CELL_PHASE] = 1;
             goodcells.push(ocell);
         }
     }
@@ -319,7 +324,7 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         if (gx < 0 || gx >= gw || gy < 0 || gy >= gh) {
             return;
         }
-        return cgrid[gx][gy].phase == 1;
+        return cgrid[gx][gy][CELL_PHASE] == 1;
     }
     function frontness(v) {
         return 1 - v[1] / h;
@@ -749,12 +754,12 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         else {
             break;
         }
-        let lv = [ncell.x, ncell.y];
+        let lv = [ncell[CELL_X], ncell[CELL_Y]];
         for (let t = 0; t < 10; t++) {
             const nv = [
-                ncell.x +
+                ncell[CELL_X] +
                     integerNumberBetween(shipRNG(), -COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
-                ncell.y +
+                ncell[CELL_Y] +
                     integerNumberBetween(shipRNG(), -COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
             ];
             if (nv[0] < 0 ||
