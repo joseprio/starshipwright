@@ -120,6 +120,22 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
     const ghextra = (h - gh * COMPONENT_GRID_SIZE) / 2;
     const [shipCanvas, cx] = createCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
     const csarealimit = (w * h) / 20;
+    function aliasedCircle(xc, yc, r) {
+        let x = r = Math.round(r), y = 0, cd = 0;
+        xc = Math.round(xc);
+        yc = Math.round(yc);
+        // middle line
+        cx.fillRect(xc - x, yc, r << 1, 1);
+        while (x-- > y++) {
+            cd -= x - y;
+            if (cd < 0)
+                cd += x++;
+            cx.fillRect(xc - y, yc - x, 2 * y, 1); // upper 1/4
+            cx.fillRect(xc - x, yc - y, 2 * x, 1); // upper 2/4
+            cx.fillRect(xc - x, yc + y, 2 * x, 1); // lower 3/4
+            cx.fillRect(xc - y, yc + x, 2 * y, 1); // lower 4/4
+        }
+    }
     // ------ Define outlines ---------------------------------------
     if (layoutOutlineType == 0) {
         // 0: Joined rectangles.
@@ -199,8 +215,8 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         }
         cx.fillStyle = "#fff";
         circles.map((lc) => {
-            fillCircle(cx, lc.v[0], lc.v[1], lc.r);
-            fillCircle(cx, w - lc.v[0], lc.v[1], lc.r);
+            aliasedCircle(lc.v[0], lc.v[1], lc.r);
+            aliasedCircle(w - lc.v[0], lc.v[1], lc.r);
         });
     }
     else {
