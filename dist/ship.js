@@ -194,8 +194,8 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         const circles = [];
         const initialcount = Math.floor(h / (initialwidth * 2));
         for (let i = 0; i < initialcount; i++) {
-            const lv = [hw, h - initialwidth * (i * 2 + 1)];
-            circles.push({ v: lv, r: initialwidth });
+            const lv = [];
+            circles.push([hw, h - initialwidth * (i * 2 + 1), initialwidth]);
         }
         const circlecount = initialcount +
             Math.floor(numberBetween(layoutRNG(), 0.5, 1) *
@@ -204,19 +204,19 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         for (let i = initialcount; i < circlecount; i++) {
             const base = circles[Math.max(integerNumberBetween(layoutRNG(), 0, circles.length - 1), integerNumberBetween(layoutRNG(), 0, circles.length - 1))];
             let ncr = numberBetween(layoutRNG(), 1, csrlimit);
-            const pr = numberBetween(layoutRNG(), Math.max(0, base.r - ncr), base.r);
+            const pr = numberBetween(layoutRNG(), Math.max(0, base[2] - ncr), base[2]);
             let pa = numberBetween(layoutRNG(), 0, 2 * Math.PI);
             if (pa > Math.PI && layoutRNG() < layoutOutline1FrontBias) {
                 pa = numberBetween(layoutRNG(), 0, Math.PI);
             }
-            let lv = [base.v[0] + Math.cos(pa) * pr, base.v[1] + Math.sin(pa) * pr];
-            ncr = Math.min(ncr, lv[0], w - lv[0], lv[1], h - lv[1]);
-            circles.push({ v: lv, r: ncr });
+            let lv0 = base[0] + Math.cos(pa) * pr, lv1 = base[1] + Math.sin(pa) * pr;
+            ncr = Math.min(ncr, lv0, w - lv0, lv1, h - lv1);
+            circles.push([lv0, lv1, ncr]);
         }
         cx.fillStyle = "#fff";
-        circles.map((lc) => {
-            aliasedCircle(lc.v[0], lc.v[1], lc.r);
-            aliasedCircle(w - lc.v[0], lc.v[1], lc.r);
+        circles.map(([a, b, c]) => {
+            aliasedCircle(a, b, c);
+            aliasedCircle(w - a, b, c);
         });
     }
     else {
