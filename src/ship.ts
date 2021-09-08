@@ -209,6 +209,64 @@ export function generateShip(
     }
   }
 
+  function aliasedRectangle(fromX: number, fromY: number, toX: number, toY: number, width: number) {
+    width = Math.round(width);
+    // Fall back to original bresenham algorihm in case we got a too thin line
+    if (width < 1) {
+      return;
+    }
+  
+    let x0 = Math.round(fromX), y0 = Math.round(fromY),
+        x1 = Math.round(toX), y1 = Math.round(toY),
+        deltaX = Math.abs(x1-x0),
+        stepX = x0 < x1 ? 1 : -1,
+        deltaY = Math.abs(y1-y0),
+        stepY = y0 < y1 ? 1 : -1,
+        err = deltaX-deltaY,
+        ed = deltaX+deltaY === 0 ? 1 : Math.sqrt(deltaX*deltaX+deltaY*deltaY),
+        e2, x2, y2;
+  
+  //  width = (width+1)/2;
+  
+    while(true) {
+      cx.fillRect(x0, y0, 1, 1);
+      e2 = err,
+      x2 = x0;
+  
+      // loop over all horizontal parts
+      if (2*e2 >= -deltaX) {
+        e2 += deltaY;
+        y2 = y0;
+        while (e2 < ed*width && (y1 != y2 || deltaX > deltaY)) {
+          cx.fillRect(x0, y2 += stepY, 1 ,1);
+          e2 += deltaX;
+        }
+        if (x0 === x1) {
+          break;
+        }
+        e2 = err;
+        err -= deltaY;
+        x0 += stepX;
+      }
+  
+      // loop over all vertical parts
+      if (2*e2 <= deltaY) {
+        e2 = deltaX-e2;
+        while (e2 < ed*width && (x1 != x2 || deltaX < deltaY)) {
+          cx.fillRect(x2 += stepX, y0, 1, 1);
+          e2 += deltaY;
+        }
+        if (y0 === y1) {
+          break;
+        }
+        err += deltaX;
+        y0 += stepY;
+      }
+    }
+  }
+
+  cx.fillStyle = "#fff";
+
   // ------ Define outlines ---------------------------------------
   if (layoutOutlineType == 0) {
     // 0: Joined rectangles.
@@ -261,7 +319,6 @@ export function generateShip(
         [Math.ceil(v1[0]), Math.ceil(v1[1])],
       ]);
     }
-    cx.fillStyle = "#fff";
     blocks.map((lb) => {
       cx.fillRect(
         lb[0][0],
@@ -309,7 +366,6 @@ export function generateShip(
       ncr = Math.min(ncr, lv0, w - lv0, lv1, h - lv1);
       circles.push([lv0, lv1, ncr]);
     }
-    cx.fillStyle = "#fff";
     circles.map(([a, b, c]) => {
       aliasedCircle(a, b, c);
       aliasedCircle(w - a, b, c);
@@ -329,7 +385,6 @@ export function generateShip(
       )
     );
     cx.lineCap = layoutOutline2LineCap;
-    cx.strokeStyle = "#fff";
     for (let npi = 1; npi < pointcount; npi++) {
       let np = points[npi];
       if (!np) {
@@ -340,15 +395,9 @@ export function generateShip(
       for (let nci = 0; nci < cons; nci++) {
         const pre =
           points[integerNumberBetween(layoutRNG(), 0, points.length - 2)];
-        cx.lineWidth = numberBetween(layoutRNG(), 0.7, 1) * basefatness * size;
-        cx.beginPath();
-        cx.moveTo(pre[0], pre[1]);
-        cx.lineTo(np[0], np[1]);
-        cx.stroke();
-        cx.beginPath();
-        cx.moveTo(w - pre[0], pre[1]);
-        cx.lineTo(w - np[0], np[1]);
-        cx.stroke();
+        const lineWidth = numberBetween(layoutRNG(), 0.7, 1) * basefatness * size;
+        aliasedRectangle(pre[0], pre[1], np[0], np[1], lineWidth);
+        aliasedRectangle(w - pre[0], pre[1], w - np[0], np[1], lineWidth);
       }
     }
   }
