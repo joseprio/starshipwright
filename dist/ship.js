@@ -225,10 +225,7 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
                 [Math.ceil(v1[0]), Math.ceil(v1[1])],
             ]);
         }
-        blocks.map((lb) => {
-            cx.fillRect(lb[0][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
-            cx.fillRect(w - lb[1][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]);
-        });
+        blocks.map((lb) => cx.fillRect(lb[0][0], lb[0][1], lb[1][0] - lb[0][0], lb[1][1] - lb[0][1]));
     }
     else if (layoutOutlineType == 1) {
         const csrlimit = Math.max(2, (csarealimit / Math.PI) ** 0.5);
@@ -254,10 +251,7 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
             ncr = Math.min(ncr, lv0, w - lv0, lv1, h - lv1);
             circles.push([lv0, lv1, ncr]);
         }
-        circles.map(([a, b, c]) => {
-            aliasedCircle(a, b, c);
-            aliasedCircle(w - a, b, c);
-        });
+        circles.map(([a, b, c]) => aliasedCircle(a, b, c));
     }
     else {
         // 2: Mess of lines
@@ -279,10 +273,13 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
                 const pre = points[integerNumberBetween(layoutRNG(), 0, points.length - 2)];
                 const lineWidth = numberBetween(layoutRNG(), 0.7, 1) * basefatness * size;
                 aliasedRectangle(pre[0], pre[1], np[0], np[1], lineWidth);
-                aliasedRectangle(w - pre[0], pre[1], w - np[0], np[1], lineWidth);
             }
         }
     }
+    cx.clearRect(w - hw, 0, hw, h);
+    cx.scale(-1, 1);
+    cx.drawImage(shipCanvas, -w, 0);
+    cx.scale(1, 1);
     // ------ End define outlines -----------------------------------
     const outline = obtainImageData(shipCanvas);
     //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y)
