@@ -194,7 +194,6 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         const circles = [];
         const initialcount = Math.floor(h / (initialwidth * 2));
         for (let i = 0; i < initialcount; i++) {
-            const lv = [];
             circles.push([hw, h - initialwidth * (i * 2 + 1), initialwidth]);
         }
         const circlecount = initialcount +
