@@ -437,14 +437,13 @@ export function generateShip(
   const isCellGood = (x: number, y: number): boolean => {
     const gx = Math.floor((x - gwextra) / COMPONENT_GRID_SIZE);
     const gy = Math.floor((y - ghextra) / COMPONENT_GRID_SIZE);
-    if (gx >= 0 && gx < gw && gy >= 0 && gy < gh) {
-      return cgrid[gx][gy][CELL_PHASE] == 1;
+    if (gx < 0 || gx >= gw || gy < 0 || gy >= gh) {
+      return;
     }
+    return cgrid[gx][gy][CELL_PHASE] == 1;
   };
 
-  const frontness = (v: Vec): number => {
-    return 1 - v[1] / h;
-  };
+  const frontness = (v: Vec): number => 1 - v[1] / h;
 
   const centerness = (v: Vec, doY: boolean): number => {
     let rv = Math.min(1, 1 - Math.abs(v[0] - hw) / hw);

@@ -529,13 +529,12 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
     const isCellGood = (x, y) => {
         const gx = Math.floor((x - gwextra) / COMPONENT_GRID_SIZE);
         const gy = Math.floor((y - ghextra) / COMPONENT_GRID_SIZE);
-        if (gx >= 0 && gx < gw && gy >= 0 && gy < gh) {
-            return cgrid[gx][gy][CELL_PHASE] == 1;
+        if (gx < 0 || gx >= gw || gy < 0 || gy >= gh) {
+            return;
         }
+        return cgrid[gx][gy][CELL_PHASE] == 1;
     };
-    const frontness = (v) => {
-        return 1 - v[1] / h;
-    };
+    const frontness = (v) => 1 - v[1] / h;
     const centerness = (v, doY) => {
         let rv = Math.min(1, 1 - Math.abs(v[0] - hw) / hw);
         if (doY) {
