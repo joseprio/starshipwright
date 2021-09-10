@@ -188,7 +188,6 @@ export function generateShip(
     return grad;
   }
 
-
   const w = Math.floor(size * wratio); // Maximum width of this ship, in pixels
   const hw = Math.floor(w / 2);
   const gw = Math.floor(w / COMPONENT_GRID_SIZE);
@@ -348,9 +347,9 @@ export function generateShip(
   const outline = obtainImageData(shipCanvas);
 
   //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y)
-  function getOutlineAlpha(x: number, y: number): number {
-    return outline.data[(y * w + x) * 4 + 3];
-  }
+  const isOutlineFilled = (x: number, y: number): number => {
+    return outline.data[(y * w + x) * 4];
+  };
 
   const cgrid: Array<Array<Cell>> = [];
   for (let gx = 0; gx < gw; gx++) {
@@ -371,7 +370,7 @@ export function generateShip(
     if (lcell[CELL_GX] > 0) {
       const ncell = cgrid[lcell[CELL_GX] - 1][lcell[CELL_GY]];
       if (!ncell[CELL_PHASE]) {
-        if (getOutlineAlpha(ncell[CELL_X], ncell[CELL_Y])) {
+        if (isOutlineFilled(ncell[CELL_X], ncell[CELL_Y])) {
           ncell[CELL_PHASE] = 1;
           goodcells.push(ncell);
         } else {
@@ -382,7 +381,7 @@ export function generateShip(
     if (lcell[CELL_GX] < gw - 1) {
       const ncell = cgrid[lcell[CELL_GX] + 1][lcell[CELL_GY]];
       if (!ncell[CELL_PHASE]) {
-        if (getOutlineAlpha(ncell[CELL_X], ncell[CELL_Y])) {
+        if (isOutlineFilled(ncell[CELL_X], ncell[CELL_Y])) {
           ncell[CELL_PHASE] = 1;
           goodcells.push(ncell);
         } else {
@@ -393,7 +392,7 @@ export function generateShip(
     if (lcell[CELL_GY] > 0) {
       const ncell = cgrid[lcell[CELL_GX]][lcell[CELL_GY] - 1];
       if (!ncell[CELL_PHASE]) {
-        if (getOutlineAlpha(ncell[CELL_X], ncell[CELL_Y])) {
+        if (isOutlineFilled(ncell[CELL_X], ncell[CELL_Y])) {
           ncell[CELL_PHASE] = 1;
           goodcells.push(ncell);
         } else {
@@ -404,7 +403,7 @@ export function generateShip(
     if (lcell[CELL_GY] < gh - 1) {
       const ncell = cgrid[lcell[CELL_GX]][lcell[CELL_GY] + 1];
       if (!ncell[CELL_PHASE]) {
-        if (getOutlineAlpha(ncell[CELL_X], ncell[CELL_Y])) {
+        if (isOutlineFilled(ncell[CELL_X], ncell[CELL_Y])) {
           ncell[CELL_PHASE] = 1;
           goodcells.push(ncell);
         } else {
@@ -1069,7 +1068,7 @@ export function generateShip(
         nv[0] > w ||
         nv[1] < 0 ||
         nv[1] > h ||
-        !getOutlineAlpha(nv[0], nv[1])
+        !isOutlineFilled(nv[0], nv[1])
       ) {
         continue;
       }

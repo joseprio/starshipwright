@@ -243,9 +243,9 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
     // ------ End define outlines -----------------------------------
     const outline = obtainImageData(shipCanvas);
     //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y)
-    function getOutlineAlpha(x, y) {
-        return outline.data[(y * w + x) * 4 + 3];
-    }
+    const isOutlineFilled = (x, y) => {
+        return outline.data[(y * w + x) * 4];
+    };
     const cgrid = [];
     for (let gx = 0; gx < gw; gx++) {
         cgrid[gx] = [];
@@ -264,7 +264,7 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         if (lcell[CELL_GX] > 0) {
             const ncell = cgrid[lcell[CELL_GX] - 1][lcell[CELL_GY]];
             if (!ncell[CELL_PHASE]) {
-                if (getOutlineAlpha(ncell[CELL_X], ncell[CELL_Y])) {
+                if (isOutlineFilled(ncell[CELL_X], ncell[CELL_Y])) {
                     ncell[CELL_PHASE] = 1;
                     goodcells.push(ncell);
                 }
@@ -276,7 +276,7 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         if (lcell[CELL_GX] < gw - 1) {
             const ncell = cgrid[lcell[CELL_GX] + 1][lcell[CELL_GY]];
             if (!ncell[CELL_PHASE]) {
-                if (getOutlineAlpha(ncell[CELL_X], ncell[CELL_Y])) {
+                if (isOutlineFilled(ncell[CELL_X], ncell[CELL_Y])) {
                     ncell[CELL_PHASE] = 1;
                     goodcells.push(ncell);
                 }
@@ -288,7 +288,7 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         if (lcell[CELL_GY] > 0) {
             const ncell = cgrid[lcell[CELL_GX]][lcell[CELL_GY] - 1];
             if (!ncell[CELL_PHASE]) {
-                if (getOutlineAlpha(ncell[CELL_X], ncell[CELL_Y])) {
+                if (isOutlineFilled(ncell[CELL_X], ncell[CELL_Y])) {
                     ncell[CELL_PHASE] = 1;
                     goodcells.push(ncell);
                 }
@@ -300,7 +300,7 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         if (lcell[CELL_GY] < gh - 1) {
             const ncell = cgrid[lcell[CELL_GX]][lcell[CELL_GY] + 1];
             if (!ncell[CELL_PHASE]) {
-                if (getOutlineAlpha(ncell[CELL_X], ncell[CELL_Y])) {
+                if (isOutlineFilled(ncell[CELL_X], ncell[CELL_Y])) {
                     ncell[CELL_PHASE] = 1;
                     goodcells.push(ncell);
                 }
@@ -733,7 +733,7 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
                 nv[0] > w ||
                 nv[1] < 0 ||
                 nv[1] > h ||
-                !getOutlineAlpha(nv[0], nv[1])) {
+                !isOutlineFilled(nv[0], nv[1])) {
                 continue;
             }
             lv = nv;
