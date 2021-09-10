@@ -318,29 +318,31 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
             goodcells.push(ocell);
         }
     }
-    // Touching the dimensions of the canvas will reset its data
-    shipCanvas.width |= 0;
     const extra = Math.max(1, Math.floor(goodcells.length * factionExtraComponentAmount));
     const totalcomponents = factionBaseComponentPasses * goodcells.length + extra;
+    // Touching the dimensions of the canvas will reset its data
+    shipCanvas.width |= 0;
     // ------ Define components ---------------------------------------
     //Returns true if the cell at (X,Y) is good, or false if there is no such cell
-    const isCellGood = (x, y) => {
+    function isCellGood(x, y) {
         const gx = Math.floor((x - gwextra) / COMPONENT_GRID_SIZE);
         const gy = Math.floor((y - ghextra) / COMPONENT_GRID_SIZE);
         if (gx < 0 || gx >= gw || gy < 0 || gy >= gh) {
             return;
         }
         return cgrid[gx][gy][CELL_PHASE] == 1;
-    };
-    const frontness = (v) => 1 - v[1] / h;
-    const centerness = (v, doY) => {
+    }
+    function frontness(v) {
+        return 1 - v[1] / h;
+    }
+    function centerness(v, doY) {
         let rv = Math.min(1, 1 - Math.abs(v[0] - hw) / hw);
         if (doY) {
             rv = Math.min(rv, 1 - Math.abs(v[1] - hh) / hh);
         }
         return rv;
-    };
-    const calculateLcms = (componentIndex, v, magnitude, bigChanceLow, bigChanceHigh, bigIncChanceLow, bigIncChanceHigh) => {
+    }
+    function calculateLcms(componentIndex, v, magnitude, bigChanceLow, bigChanceHigh, bigIncChanceLow, bigIncChanceHigh) {
         const effectCenter = centerness(v, true);
         const effectShipsize = 1 - 1 / ((w + h) / 1000 + 1);
         const effectFaction = factionMasterBigness ** 0.5;
@@ -364,7 +366,7 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
             }
         }
         return lcms;
-    };
+    }
     //lp is the ship. amount is the amount of shadow at the edges, 0 - 1 (the middle is always 0). middlep and edgep should be vectors at the middle and edge of the gradient.
     const shadowGradient = (middlePoint, edgePoint, amount) => gradientInOut(edgePoint[0], edgePoint[1], middlePoint[0] * 2 - edgePoint[0], middlePoint[1] * 2 - edgePoint[1], `rgba(0,0,0,${amount})`, `rgba(0,0,0,0)`);
     // Each component function takes an argument 'lp' (for the ship) and 'v' (an integral 2-vector denoting the center of the component)

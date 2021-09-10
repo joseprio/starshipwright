@@ -420,40 +420,40 @@ export function generateShip(
       goodcells.push(ocell);
     }
   }
-
-  // Touching the dimensions of the canvas will reset its data
-  shipCanvas.width |= 0;
-
   const extra = Math.max(
     1,
     Math.floor(goodcells.length * factionExtraComponentAmount)
   );
   const totalcomponents = factionBaseComponentPasses * goodcells.length + extra;
 
+  // Touching the dimensions of the canvas will reset its data
+  shipCanvas.width |= 0;
 
   // ------ Define components ---------------------------------------
 
   //Returns true if the cell at (X,Y) is good, or false if there is no such cell
-  const isCellGood = (x: number, y: number): boolean => {
+  function isCellGood(x: number, y: number): boolean {
     const gx = Math.floor((x - gwextra) / COMPONENT_GRID_SIZE);
     const gy = Math.floor((y - ghextra) / COMPONENT_GRID_SIZE);
     if (gx < 0 || gx >= gw || gy < 0 || gy >= gh) {
       return;
     }
     return cgrid[gx][gy][CELL_PHASE] == 1;
-  };
+  }
 
-  const frontness = (v: Vec): number => 1 - v[1] / h;
+  function frontness(v: Vec): number {
+    return 1 - v[1] / h;
+  }
 
-  const centerness = (v: Vec, doY: boolean): number => {
+  function centerness(v: Vec, doY: boolean): number {
     let rv = Math.min(1, 1 - Math.abs(v[0] - hw) / hw);
     if (doY) {
       rv = Math.min(rv, 1 - Math.abs(v[1] - hh) / hh);
     }
     return rv;
-  };
+  }
 
-  const calculateLcms = (
+  function calculateLcms(
     componentIndex: number,
     v: Vec,
     magnitude: number,
@@ -461,7 +461,7 @@ export function generateShip(
     bigChanceHigh: number,
     bigIncChanceLow: number,
     bigIncChanceHigh: number
-  ): number => {
+  ): number {
     const effectCenter = centerness(v, true);
     const effectShipsize = 1 - 1 / ((w + h) / 1000 + 1);
     const effectFaction = factionMasterBigness ** 0.5;
@@ -500,7 +500,7 @@ export function generateShip(
       }
     }
     return lcms;
-  };
+  }
 
   //lp is the ship. amount is the amount of shadow at the edges, 0 - 1 (the middle is always 0). middlep and edgep should be vectors at the middle and edge of the gradient.
   const shadowGradient = (
