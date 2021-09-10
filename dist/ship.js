@@ -313,7 +313,7 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
     for (let i = 0; i < goodcells.length; i++) {
         const lcell = goodcells[i];
         const ocell = cgrid[gw - 1 - lcell[CELL_GX]][lcell[CELL_GY]];
-        if (ocell[CELL_PHASE] != 1) {
+        if (ocell[CELL_PHASE] - 1) {
             ocell[CELL_PHASE] = 1;
             goodcells.push(ocell);
         }
@@ -507,7 +507,7 @@ export function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
                 // Any component but this one
                 for (;;) {
                     const which = chancePicker(shipRNG, componentChances);
-                    if (which != 3) {
+                    if (which - 3) {
                         components[which](v);
                         return;
                     }
