@@ -92,7 +92,6 @@ export function generateShip(
   const layoutOutline1CircleCount = numberBetween(layoutRNG(), 10, 50);
   const layoutOutline1FrontBias = numberBetween(layoutRNG(), 0.5, 1.5);
   const layoutOutline2BaseFatness = numberBetween(layoutRNG(), 0.03, 0.1);
-  const layoutOutline2LineCap = layoutRNG() > 0.5 ? "round" : "square";
   const layoutOutline2FrontBias = numberBetween(layoutRNG(), 0.1, 1);
   const layoutOutline2ConAdjust = layoutRNG();
 
@@ -136,7 +135,55 @@ export function generateShip(
   const factionComponentBigChances = componentChances.map(shipRNG);
   const factionComponentBigIncChances = componentChances.map(shipRNG);
 
-  function computeBaseColor(): RGBColor {
+  const aliasedCircle = (xc: number, yc: number, r: number) => {
+    let x = r = Math.round(r), y = 0, cd = 0;
+    xc = Math.round(xc);
+    yc = Math.round(yc);
+  
+    // middle line
+    cx.fillRect(xc - x, yc, 2 * r, 1);
+  
+    for (;x-- > y++;) {
+      cd -= x - y;
+      if (cd < 0) cd += x++;
+      cx.fillRect(xc - y, yc - x, 2 * y, 1);    // upper 1/4
+      cx.fillRect(xc - x, yc - y, 2 * x, 1);    // upper 2/4
+      cx.fillRect(xc - x, yc + y, 2 * x, 1);    // lower 3/4
+      cx.fillRect(xc - y, yc + x, 2 * y, 1);    // lower 4/4
+    }
+  };
+
+  const aliasedLine = (x1: number, y1: number, x2: number, y2: number, thickness: number) => {
+    // Define differences and error check
+    thickness = Math.round(thickness/2);
+    x1 = Math.round(x1);
+    y1 = Math.round(y1);
+    x2 = Math.round(x2);
+    y2 = Math.round(y2);
+   let dx = Math.abs(x2 - x1),
+     dy = Math.abs(y2 - y1),
+     sx = (x1 < x2) ? 1 : -1,
+     sy = (y1 < y2) ? 1 : -1,
+     err = dx - dy;
+    // Set first coordinates
+    aliasedCircle(x1, y1, thickness);
+    // Main loop
+    for (;(!((x1 == x2) && (y1 == y2))!);) {
+        var e2 = 2 * err;
+        if (e2 > -dy) {
+            err -= dy;
+            x1 += sx;
+        }
+        if (e2 < dx) {
+            err += dx;
+            y1 += sy;
+        }
+        // Set coordinates
+        aliasedCircle(x1, y1, thickness);
+      }
+  };
+
+  const computeBaseColor: () => RGBColor = () => {
     let rv = colors[chancePicker(colorRNG, colorChances)];
     return colorRNG() < baseColorShiftChance ** 2
       ? [
@@ -178,7 +225,7 @@ export function generateShip(
           ),
         ]
       : rv;
-  }
+  };
   
   const gradientInOut = (x0: number, y0: number, x1: number, y1: number, inColor: string, outColor: string) => {
     const grad = cx.createLinearGradient(x0, y0, x1, y1);
@@ -199,6 +246,7 @@ export function generateShip(
   const [shipCanvas, cx] = createCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
   const csarealimit = (w * h) / 20;
 
+  cx.fillStyle = "#fff";
   // ------ Define outlines ---------------------------------------
   if (layoutOutlineType == 0) {
     // 0: Joined rectangles.
@@ -251,7 +299,6 @@ export function generateShip(
         [Math.ceil(v1[0]), Math.ceil(v1[1])],
       ]);
     }
-    cx.fillStyle = "#fff";
     blocks.map((lb) => {
       cx.fillRect(
         lb[0][0],
@@ -299,10 +346,9 @@ export function generateShip(
       ncr = Math.min(ncr, lv0, w - lv0, lv1, h - lv1);
       circles.push([lv0, lv1, ncr ]);
     }
-    cx.fillStyle = "#fff";
     circles.map(([x, y, r]) => {
-      fillCircle(cx, x, y, r);
-      fillCircle(cx, w - x, y, r);
+      aliasedCircle(x, y, r);
+      aliasedCircle(w - x, y, r);
     });
   } else {
   // 2: Mess of lines
@@ -318,8 +364,6 @@ export function generateShip(
         (numberBetween(layoutRNG(), 0.05, 0.1) / basefatness) * size ** 0.5
       )
     );
-    cx.lineCap = layoutOutline2LineCap;
-    cx.strokeStyle = "#fff";
     for (let npi = 1; npi < pointcount; npi++) {
       let np = points[npi];
       if (!np) {
@@ -330,15 +374,9 @@ export function generateShip(
       for (let nci = 0; nci < cons; nci++) {
         const pre =
           points[integerNumberBetween(layoutRNG(), 0, points.length - 2)];
-        cx.lineWidth = numberBetween(layoutRNG(), 0.7, 1) * basefatness * size;
-        cx.beginPath();
-        cx.moveTo(pre[0], pre[1]);
-        cx.lineTo(np[0], np[1]);
-        cx.stroke();
-        cx.beginPath();
-        cx.moveTo(w - pre[0], pre[1]);
-        cx.lineTo(w - np[0], np[1]);
-        cx.stroke();
+        const lineWidth = numberBetween(layoutRNG(), 0.7, 1) * basefatness * size;
+        aliasedLine(pre[0], pre[1], np[0], np[1], lineWidth);
+        aliasedLine(w-pre[0], pre[1], w-np[0], np[1], lineWidth);
       }
     }
   }
