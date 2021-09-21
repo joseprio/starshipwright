@@ -81,7 +81,7 @@ export function generateShip(
   const baseColorShiftChanceGreen = numberBetween(colorRNG(), 0, 0.6);
   const baseColorShiftChanceBlue = numberBetween(colorRNG(), 0, 0.6);
 
-  const layoutOutlineType = Math.floor(layoutRNG() * 3);
+  const layoutOutlineType = integerNumberBetween(layoutRNG(), 0, 2);
   const size = forceSize || numberBetween(layoutRNG(), 2.5, 7) ** 3;
   const wratio = numberBetween(layoutRNG(), 0.5, 1.3);
   const hratio = numberBetween(layoutRNG(), 0.7, 1.7);
@@ -385,9 +385,7 @@ export function generateShip(
   const outline = obtainImageData(shipCanvas);
 
   //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y)
-  const isOutlineFilled = (x: number, y: number): number => {
-    return outline.data[(y * w + x) * 4];
-  };
+  const isOutlineFilled = (x: number, y: number): number => outline.data[(y * w + x) * 4];
 
   const cgrid: Array<Array<Cell>> = [];
   for (let gx = 0; gx < gw; gx++) {
@@ -556,9 +554,8 @@ export function generateShip(
   // Each component function takes an argument 'lp' (for the ship) and 'v' (an integral 2-vector denoting the center of the component)
   const components: Array<ComponentFunc> = [
     // Bordered block
-    function (v) {
+    (v) => {
       const lcms = calculateLcms(0, v, 0.3, 0, 0.9, 0, 0.5);
-      const lcms2 = lcms * 2;
       const dhi_0 = Math.ceil(
         numberBetween(shipRNG(), 1, Math.max(2, lcms / 2))
       );
@@ -569,8 +566,8 @@ export function generateShip(
         Math.min(dhi_0, dhi_1) * numberBetween(shipRNG(), 0.1, 1.2);
       const dho_0 = dhi_0 + borderwidth * 2;
       const dho_1 = dhi_1 + borderwidth * 2;
-      const counts_0 = Math.ceil(lcms2 / dho_0);
-      const counts_1 = Math.ceil(lcms2 / dho_1);
+      const counts_0 = Math.ceil(2 * lcms / dho_0);
+      const counts_1 = Math.ceil(2 * lcms / dho_1);
       const trv_0 = Math.round((counts_0 * dho_0) / 2);
       const trv_1 = Math.round((counts_1 * dho_1) / 2);
       const baseColor = computeBaseColor();
@@ -619,7 +616,7 @@ export function generateShip(
       }
     },
     // Cylinder array
-    function (v) {
+    (v) => {
       const lcms = calculateLcms(1, v, 0.2, 0.3, 1, 0, 0.6);
       const baseComponentWidth = Math.ceil(
         numberBetween(shipRNG(), 0.8, 2) * lcms
@@ -686,7 +683,7 @@ export function generateShip(
       }
     },
     // Banded cylinder
-    function (v) {
+    (v) => {
       const lcms = calculateLcms(2, v, 0.05, 0, 1, 0, 0.9);
       const componentWidth = Math.ceil(
         numberBetween(shipRNG(), 0.6, 1.4) * lcms
@@ -783,7 +780,7 @@ export function generateShip(
       }
     },
     //Rocket engine (or tries to call another random component if too far forward)
-    function (v) {
+    (v) => {
       if (
         shipRNG() < frontness(v) - 0.3 ||
         isCellGood(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) ||
@@ -860,7 +857,7 @@ export function generateShip(
       }
     },
     //Elongated cylinder (calls component 0 - 2 on top of its starting point)
-    function (v) {
+    (v) => {
       const cn = centerness(v, false);
       const lightmid = numberBetween(shipRNG(), 0.7, 1);
       const lightedge = numberBetween(shipRNG(), 0, 0.2);
@@ -954,7 +951,7 @@ export function generateShip(
       }
     },
     //Ball
-    function (v) {
+    (v) => {
       const lcms = calculateLcms(5, v, 0.1, 0, 0.9, 0, 0.8);
       const lightmid = numberBetween(shipRNG(), 0.75, 1);
       const lightedge = numberBetween(shipRNG(), 0, 0.25);
@@ -1006,7 +1003,7 @@ export function generateShip(
       }
     },
     //Forward-facing trapezoidal fin
-    function (v) {
+    (v) => {
       if (nextpass <= 0 || shipRNG() < frontness(v)) {
         components[chancePicker(shipRNG, componentChances.slice(0, 6))](v);
         return;
