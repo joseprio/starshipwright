@@ -9,7 +9,7 @@ import {
   integerNumberBetween,
   chancePicker,
 } from "./utils";
-import { createCanvas, fillCircle, obtainImageData } from "game-utils";
+import { createCanvas, fillCircle, obtainPixelArray } from "game-utils";
 
 //Size of the component grid
 const COMPONENT_GRID_SIZE = 6;
@@ -95,7 +95,7 @@ export function generateShip(
   const layoutOutline2FrontBias = numberBetween(layoutRNG(), 0.1, 1);
   const layoutOutline2ConAdjust = layoutRNG();
 
-  const factionBaseComponentPasses = shipRNG() > 0.5 ? 1 : 2;
+  const factionBaseComponentPasses = integerNumberBetween(layoutRNG(), 1, 2);
   const factionExtraComponentAmount = shipRNG() / factionBaseComponentPasses;
   const factionMasterBigness = shipRNG();
   const factionComponentMiddleness = shipRNG();
@@ -382,10 +382,10 @@ export function generateShip(
   }
   // ------ End define outlines -----------------------------------
 
-  const outline = obtainImageData(shipCanvas);
+  const outline = obtainPixelArray(shipCanvas);
 
   //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y)
-  const isOutlineFilled = (x: number, y: number): number => outline.data[(y * w + x) * 4];
+  const isOutlineFilled = (x: number, y: number): number => outline[(y * w + x) * 4];
 
   const cgrid: Array<Array<Cell>> = [];
   for (let gx = 0; gx < gw; gx++) {

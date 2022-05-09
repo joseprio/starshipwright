@@ -167,8 +167,11 @@ function fillCircle(ctx, x, y, r) {
 }
 
 function obtainImageData(canvas) {
-  return getContext(canvas)
-    .getImageData(0, 0, canvas.width, canvas.height);
+  return getContext(canvas).getImageData(0, 0, canvas.width, canvas.height);
+}
+
+function obtainPixelArray(canvas) {
+  return obtainImageData(canvas).data;
 }
 
 function trimCanvas(canvas) {
@@ -262,7 +265,7 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
     const layoutOutline2BaseFatness = numberBetween(layoutRNG(), 0.03, 0.1);
     const layoutOutline2FrontBias = numberBetween(layoutRNG(), 0.1, 1);
     const layoutOutline2ConAdjust = layoutRNG();
-    const factionBaseComponentPasses = shipRNG() > 0.5 ? 1 : 2;
+    const factionBaseComponentPasses = integerNumberBetween(layoutRNG(), 1, 2);
     const factionExtraComponentAmount = shipRNG() / factionBaseComponentPasses;
     const factionMasterBigness = shipRNG();
     const factionComponentMiddleness = shipRNG();
@@ -474,9 +477,9 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         }
     }
     // ------ End define outlines -----------------------------------
-    const outline = obtainImageData(shipCanvas);
+    const outline = obtainPixelArray(shipCanvas);
     //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y)
-    const isOutlineFilled = (x, y) => outline.data[(y * w + x) * 4];
+    const isOutlineFilled = (x, y) => outline[(y * w + x) * 4];
     const cgrid = [];
     for (let gx = 0; gx < gw; gx++) {
         cgrid[gx] = [];
