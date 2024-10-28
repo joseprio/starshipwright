@@ -1,4 +1,5 @@
 import type { RGBColor } from "./types";
+import type { RandomNumberGenerator } from "game-utils";
 
 export function clamp(n: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, n));
@@ -14,22 +15,6 @@ export function hsvToRgb(h: number, s: number, v: number): RGBColor {
   const f: (n: number, k?: number) => number = (n, k = (n + h * 6) % 6) =>
     v - v * s * Math.max(Math.min(k, 4 - k, 1), 0);
   return [f(5), f(3), f(1)];
-}
-
-type RandomNumberGenerator = () => number;
-
-// Converts a number between 0 and 1 to a number between [a, b)
-export function numberBetween(target: number, a: number, b: number): number {
-  return target * (b - a) + a;
-}
-
-// Converts a number between 0 and 1 to an integer number between [a,b] (both included)
-export function integerNumberBetween(
-  target: number,
-  a: number,
-  b: number
-): number {
-  return Math.floor(numberBetween(target, a, b + 1));
 }
 
 export function sequenceAdvancer(
@@ -62,17 +47,3 @@ export function chancePicker(
   // We know we already returned at this point
 }
 
-export function createNumberGenerator(seed: number): RandomNumberGenerator {
-  const ints = new Uint32Array([
-    Math.imul(seed, 0x85ebca6b),
-    Math.imul(seed, 0xc2b2ae35),
-  ]);
-
-  return () => {
-    const s0 = ints[0];
-    const s1 = ints[1] ^ s0;
-    ints[0] = ((s0 << 26) | (s0 >> 8)) ^ s1 ^ (s1 << 9);
-    ints[1] = (s1 << 13) | (s1 >> 19);
-    return (Math.imul(s0, 0x9e3779bb) >>> 0) / 0xffffffff;
-  };
-}

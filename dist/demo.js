@@ -1,4 +1,7 @@
-import { generateShip } from "./index";
+import { generateOutline as generateOutlineVoronoi } from "./outline/voronoi";
+import { generateOutline as generateOutlineClassic } from "./outline/classic";
+import { generateOutline as generateOutlineMicro } from "./outline/micro";
+import { generateShip } from "./ship";
 function randomSeed() {
     return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
 }
@@ -73,6 +76,13 @@ function generateNextShip() {
     if (incrementColor) {
         colorSeedInput.value++;
     }
+    let generateOutline = generateOutlineVoronoi;
+    if (document.getElementById("classic").checked) {
+        generateOutline = generateOutlineClassic;
+    }
+    else if (document.getElementById("micro").checked) {
+        generateOutline = generateOutlineMicro;
+    }
     const shipDiv = document.createElement("div");
     shipDiv.className = "ship";
     const infoCaption = document.createElement("div");
@@ -82,7 +92,8 @@ function generateNextShip() {
     const iterationLayoutSeed = layout == null ? randomSeed() : layout;
     const iterationColorSeed = color == null ? randomSeed() : color;
     const iterationShipSeed = ship == null ? randomSeed() : ship;
-    const shipCanvas = generateShip(iterationColorSeed, iterationShipSeed, iterationLayoutSeed, forceSize);
+    const outlineCanvas = generateOutline(iterationLayoutSeed, forceSize);
+    const shipCanvas = generateShip(outlineCanvas, iterationColorSeed, iterationShipSeed);
     // Check if the filter criteria is met
     const minWidthInput = document.getElementById("minwidth");
     const minHeightInput = document.getElementById("minheight");
@@ -137,6 +148,9 @@ function generateNextShip() {
         colorSeedInput.value = String(iterationColorSeed);
     };
     colorCaption.appendChild(colorPin);
+    outlineCanvas.className = "outline";
+    shipDiv.appendChild(outlineCanvas);
+    shipCanvas.className = "full";
     shipDiv.appendChild(shipCanvas);
     shipDiv.appendChild(infoCaption);
     shipDiv.appendChild(shipCaption);
@@ -156,6 +170,14 @@ function generateNextShip() {
         stop();
     }
 }
+function updateShow() {
+    if (document.getElementById("full").checked) {
+        document.body.dataset.show = "full";
+    }
+    else {
+        document.body.dataset.show = "outlines";
+    }
+}
 window.onload = function () {
     document
         .getElementById("randomAction")
@@ -173,4 +195,8 @@ window.onload = function () {
         incrementColor = true;
         update();
     }, false);
+    document.getElementById("full").addEventListener("change", updateShow, false);
+    document
+        .getElementById("outlines")
+        .addEventListener("change", updateShow, false);
 };

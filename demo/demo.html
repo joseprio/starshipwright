@@ -30,6 +30,18 @@
         margin: 20px;
         font-size: 10px;
       }
+      .ship canvas.full {
+        display: inline-block;
+      }
+      .ship canvas.outline {
+        display: none;
+      }
+      body[data-show="outlines"] .ship canvas.full {
+        display: none;
+      }
+      body[data-show="outlines"] .ship canvas.outline {
+        display: inline-block;
+      }
     </style>
   </head>
   <body>
@@ -79,6 +91,36 @@
         <li>
           <label for="maxheight">Maximum height:</label>
           <input id="maxheight" size="3"></input>
+        </li>
+      </ul>
+    </fieldset>
+    <fieldset>
+      <legend>Show</legend>
+      <ul>
+        <li>
+          <input type="radio" id="full" name="show" checked></input>
+          <label for="full">Full</label>
+        </li>
+        <li>
+          <input type="radio" id="outlines" name="show"></input>
+          <label for="outlines">Outlines</label>
+        </li>
+      </ul>
+    </fieldset>
+    <fieldset>
+      <legend>Algorithm</legend>
+      <ul>
+        <li>
+          <input type="radio" id="voronoi" name="algorithm" checked></input>
+          <label for="voronoi">Voronoi</label>
+        </li>
+        <li>
+          <input type="radio" id="classic" name="algorithm"></input>
+          <label for="classic">Classic</label>
+        </li>
+        <li>
+          <input type="radio" id="micro" name="algorithm"></input>
+          <label for="micro">Micro</label>
         </li>
       </ul>
     </fieldset>

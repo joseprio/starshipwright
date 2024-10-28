@@ -1,98 +1,238 @@
-/******/ (function(modules) { // webpackBootstrap
+/******/ (() => { // webpackBootstrap
+/******/ 	"use strict";
+/******/ 	var __webpack_modules__ = ({
+
+/***/ 103:
+/***/ ((__unused_webpack_module, exports) => {
+
+var __webpack_unused_export__;
+
+__webpack_unused_export__ = ({ value: true });
+exports.Wq = exports.od = exports.rB = __webpack_unused_export__ = exports.f$ = exports.h4 = exports.W2 = exports.Nw = __webpack_unused_export__ = void 0;
+function getContext(canvas) {
+    // @ts-expect-error -- Could potentially return null, but we won't account for that case
+    return canvas.getContext("2d");
+}
+__webpack_unused_export__ = getContext;
+function createCanvas(width, height) {
+    const newCanvas = document.createElement("canvas");
+    newCanvas.width = width;
+    newCanvas.height = height;
+    return [newCanvas, getContext(newCanvas)];
+}
+exports.Nw = createCanvas;
+function fillCircle(ctx, x, y, r) {
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, 7);
+    ctx.fill();
+}
+exports.W2 = fillCircle;
+function obtainImageData(canvas) {
+    return getContext(canvas).getImageData(0, 0, canvas.width, canvas.height);
+}
+exports.h4 = obtainImageData;
+function obtainPixelArray(canvas) {
+    return obtainImageData(canvas).data;
+}
+exports.f$ = obtainPixelArray;
+function trimCanvas(canvas) {
+    const ctx = getContext(canvas);
+    const imageData = obtainImageData(canvas);
+    const xs = [];
+    const ys = [];
+    for (let x = 0; x < imageData.width; x++) {
+        for (let y = 0; y < imageData.height; y++) {
+            if (imageData.data[(y * imageData.width + x) * 4 + 3]) {
+                xs.push(x);
+                ys.push(y);
+            }
+        }
+    }
+    const minX = Math.min(...xs);
+    const minY = Math.min(...ys);
+    const cut = ctx.getImageData(minX, minY, 1 + Math.max(...xs) - minX, 1 + Math.max(...ys) - minY);
+    canvas.width = cut.width;
+    canvas.height = cut.height;
+    ctx.putImageData(cut, 0, 0);
+    return canvas;
+}
+__webpack_unused_export__ = trimCanvas;
+function createPRNGGenerator(seed) {
+    const ints = new Uint32Array([
+        Math.imul(seed, 0x85ebca6b),
+        Math.imul(seed, 0xc2b2ae35),
+    ]);
+    return () => {
+        const s0 = ints[0];
+        const s1 = ints[1] ^ s0;
+        ints[0] = ((s0 << 26) | (s0 >> 8)) ^ s1 ^ (s1 << 9);
+        ints[1] = (s1 << 13) | (s1 >> 19);
+        return (Math.imul(s0, 0x9e3779bb) >>> 0) / 0xffffffff;
+    };
+}
+exports.rB = createPRNGGenerator;
+// Converts a number between 0 and 1 to a number between [a, b)
+function numberBetween(target, a, b) {
+    return target * (b - a) + a;
+}
+exports.od = numberBetween;
+// Converts a number between 0 and 1 to an integer number between [a,b] (both included)
+function integerNumberBetween(target, a, b) {
+    return Math.floor(numberBetween(target, a, b + 1));
+}
+exports.Wq = integerNumberBetween;
+
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
 /******/ 	// The module cache
-/******/ 	var installedModules = {};
-/******/
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
 /******/ 	// The require function
 /******/ 	function __webpack_require__(moduleId) {
-/******/
 /******/ 		// Check if module is in cache
-/******/ 		if(installedModules[moduleId]) {
-/******/ 			return installedModules[moduleId].exports;
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
 /******/ 		}
 /******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = installedModules[moduleId] = {
-/******/ 			i: moduleId,
-/******/ 			l: false,
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			// no module.id needed
+/******/ 			// no module.loaded needed
 /******/ 			exports: {}
 /******/ 		};
-/******/
+/******/ 	
 /******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
-/******/
-/******/ 		// Flag the module as loaded
-/******/ 		module.l = true;
-/******/
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
 /******/ 	}
-/******/
-/******/
-/******/ 	// expose the modules object (__webpack_modules__)
-/******/ 	__webpack_require__.m = modules;
-/******/
-/******/ 	// expose the module cache
-/******/ 	__webpack_require__.c = installedModules;
-/******/
-/******/ 	// define getter function for harmony exports
-/******/ 	__webpack_require__.d = function(exports, name, getter) {
-/******/ 		if(!__webpack_require__.o(exports, name)) {
-/******/ 			Object.defineProperty(exports, name, { enumerable: true, get: getter });
-/******/ 		}
-/******/ 	};
-/******/
-/******/ 	// define __esModule on exports
-/******/ 	__webpack_require__.r = function(exports) {
-/******/ 		if(typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 			Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-/******/ 		}
-/******/ 		Object.defineProperty(exports, '__esModule', { value: true });
-/******/ 	};
-/******/
-/******/ 	// create a fake namespace object
-/******/ 	// mode & 1: value is a module id, require it
-/******/ 	// mode & 2: merge all properties of value into the ns
-/******/ 	// mode & 4: return value when already ns object
-/******/ 	// mode & 8|1: behave like require
-/******/ 	__webpack_require__.t = function(value, mode) {
-/******/ 		if(mode & 1) value = __webpack_require__(value);
-/******/ 		if(mode & 8) return value;
-/******/ 		if((mode & 4) && typeof value === 'object' && value && value.__esModule) return value;
-/******/ 		var ns = Object.create(null);
-/******/ 		__webpack_require__.r(ns);
-/******/ 		Object.defineProperty(ns, 'default', { enumerable: true, value: value });
-/******/ 		if(mode & 2 && typeof value != 'string') for(var key in value) __webpack_require__.d(ns, key, function(key) { return value[key]; }.bind(null, key));
-/******/ 		return ns;
-/******/ 	};
-/******/
-/******/ 	// getDefaultExport function for compatibility with non-harmony modules
-/******/ 	__webpack_require__.n = function(module) {
-/******/ 		var getter = module && module.__esModule ?
-/******/ 			function getDefault() { return module['default']; } :
-/******/ 			function getModuleExports() { return module; };
-/******/ 		__webpack_require__.d(getter, 'a', getter);
-/******/ 		return getter;
-/******/ 	};
-/******/
-/******/ 	// Object.prototype.hasOwnProperty.call
-/******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
-/******/
-/******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "";
-/******/
-/******/
-/******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
-/******/ })
+/******/ 	
 /************************************************************************/
-/******/ ([
-/* 0 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
+var __webpack_exports__ = {};
 
-"use strict";
-// ESM COMPAT FLAG
-__webpack_require__.r(__webpack_exports__);
+// EXTERNAL MODULE: ./node_modules/game-utils/lib/index.js
+var lib = __webpack_require__(103);
+;// ./src/outline/voronoi.ts
 
-// CONCATENATED MODULE: ./src/utils.ts
+const SPRITE_CENTER_X = 0;
+const SPRITE_CENTER_Y = 1;
+const SPRITE_OFFSET_X = 2;
+const SPRITE_OFFSET_Y = 3;
+const SPRITE_CANVAS = 4;
+function createSprites(targetCanvas, rng, desiredSize) {
+    const COLLECTOR_MIN_X = 0;
+    const COLLECTOR_MIN_Y = 1;
+    const COLLECTOR_MAX_X = 2;
+    const COLLECTOR_MAX_Y = 3;
+    const COLLECTOR_CENTER_X = 4;
+    const COLLECTOR_CENTER_Y = 5;
+    const COLLECTOR_NEAREST = 6;
+    const width = targetCanvas.width;
+    const height = targetCanvas.height;
+    const targetSize = desiredSize || Math.max(12, Math.floor(Math.min(width, height) / 12));
+    const pixelArray = (0,lib/* obtainPixelArray */.f$)(targetCanvas);
+    const xPoints = Math.floor(width / targetSize);
+    const yPoints = Math.floor(height / targetSize);
+    const collectors = [];
+    const yOffset = Math.floor(height / yPoints / 2);
+    const sprites = [];
+    // Gather collectors
+    for (let currentY = 0; currentY < yPoints; currentY++) {
+        // We calculate the initial offset so the center points are in a displaced pattern
+        const xOffset = Math.floor(width / ((2 - (currentY % 2)) * xPoints));
+        for (let currentX = 0; currentX < xPoints - (currentY % 2); currentX++) {
+            // We add some noise so all pieces look different
+            collectors.push([
+                1e9,
+                1e9,
+                0,
+                0,
+                xOffset + ((currentX + (rng() - 0.5)) * width) / xPoints,
+                yOffset + ((currentY + (rng() - 0.5)) * height) / yPoints,
+                [],
+            ]);
+        }
+    }
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const pos = (y * width + x) * 4;
+            if (pixelArray[pos + 3]) {
+                // Non transparent pixel
+                // With the size of the images we are working, 1,000,000,000 behaves the same as infinity
+                let minDistance = 1e9;
+                let minCollector;
+                collectors.map((c) => {
+                    const distance = Math.hypot(c[COLLECTOR_CENTER_X] - x, c[COLLECTOR_CENTER_Y] - y);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        minCollector = c;
+                    }
+                });
+                minCollector[COLLECTOR_MIN_X] = Math.min(x, minCollector[COLLECTOR_MIN_X]);
+                minCollector[COLLECTOR_MAX_X] = Math.max(x, minCollector[COLLECTOR_MAX_X]);
+                minCollector[COLLECTOR_MIN_Y] = Math.min(y, minCollector[COLLECTOR_MIN_Y]);
+                minCollector[COLLECTOR_MAX_Y] = Math.max(y, minCollector[COLLECTOR_MAX_Y]);
+                minCollector[COLLECTOR_NEAREST].push([
+                    x,
+                    y,
+                    pixelArray.slice(pos, pos + 4),
+                ]);
+            }
+        }
+    }
+    // We want to have the collectors with the most points first
+    // sort modifies in place, so collectors changes as a side effect (which we don't really care because we don't use it anymore)
+    collectors
+        .sort((a, b) => b[COLLECTOR_NEAREST].length - a[COLLECTOR_NEAREST].length)
+        .map((collector) => {
+        if (collector[COLLECTOR_MIN_X] < 1e9) {
+            const shardWidth = collector[COLLECTOR_MAX_X] - collector[COLLECTOR_MIN_X] + 1;
+            const shardHeight = collector[COLLECTOR_MAX_Y] - collector[COLLECTOR_MIN_Y] + 1;
+            const [shardCanvas, shardCtx] = (0,lib/* createCanvas */.Nw)(shardWidth, shardHeight);
+            const imgData = (0,lib/* obtainImageData */.h4)(shardCanvas);
+            collector[COLLECTOR_NEAREST].map((point) => imgData.data.set(point[2], 4 *
+                ((point[1] - collector[COLLECTOR_MIN_Y]) * shardWidth +
+                    (point[0] - collector[COLLECTOR_MIN_X]))));
+            shardCtx.putImageData(imgData, 0, 0);
+            sprites.push([
+                collector[COLLECTOR_CENTER_X],
+                collector[COLLECTOR_CENTER_Y],
+                collector[COLLECTOR_MIN_X] - collector[COLLECTOR_CENTER_X],
+                collector[COLLECTOR_MIN_Y] - collector[COLLECTOR_CENTER_Y],
+                shardCanvas,
+            ]);
+        }
+    });
+    return sprites;
+}
+function voronoi_generateOutline(layoutSeed, forceSize) {
+    const layoutRNG = (0,lib/* createPRNGGenerator */.rB)(layoutSeed);
+    const size = forceSize || (0,lib/* numberBetween */.od)(layoutRNG(), 2.5, 7) ** 3;
+    const halfSize = Math.floor(size / 2);
+    const [shipOutline, shipOutlineContext] = (0,lib/* createCanvas */.Nw)(size, size);
+    const [piecesCanvas, piecesCanvasContext] = (0,lib/* createCanvas */.Nw)(size, size);
+    piecesCanvasContext.fillStyle = "red";
+    piecesCanvasContext.fillRect(0, 0, size, size);
+    const sprites = createSprites(piecesCanvas, layoutRNG, size / (0,lib/* numberBetween */.od)(layoutRNG(), 3, 6));
+    for (let i = sprites.length; i--;) {
+        const spriteCanvas = sprites[i][SPRITE_CANVAS];
+        const topX = halfSize + sprites[i][SPRITE_OFFSET_X];
+        const topY = halfSize + sprites[i][SPRITE_OFFSET_Y];
+        if (topX > 0 &&
+            topY > 0 &&
+            topX + spriteCanvas.width < size &&
+            topY + spriteCanvas.height < size) {
+            shipOutlineContext.drawImage(spriteCanvas, topX, topY);
+        }
+    }
+    return shipOutline;
+}
+
+;// ./src/utils.ts
 function clamp(n, min, max) {
     return Math.max(min, Math.min(max, n));
 }
@@ -104,14 +244,6 @@ function scaleColorBy(color, factor) {
 function hsvToRgb(h, s, v) {
     const f = (n, k = (n + h * 6) % 6) => v - v * s * Math.max(Math.min(k, 4 - k, 1), 0);
     return [f(5), f(3), f(1)];
-}
-// Converts a number between 0 and 1 to a number between [a, b)
-function numberBetween(target, a, b) {
-    return target * (b - a) + a;
-}
-// Converts a number between 0 and 1 to an integer number between [a,b] (both included)
-function integerNumberBetween(target, a, b) {
-    return Math.floor(numberBetween(target, a, b + 1));
 }
 function sequenceAdvancer(generator, chance, max) {
     let rv = 0;
@@ -134,167 +266,27 @@ function chancePicker(generator, chances) {
     }
     // We know we already returned at this point
 }
-function createNumberGenerator(seed) {
-    const ints = new Uint32Array([
-        Math.imul(seed, 0x85ebca6b),
-        Math.imul(seed, 0xc2b2ae35),
-    ]);
-    return () => {
-        const s0 = ints[0];
-        const s1 = ints[1] ^ s0;
-        ints[0] = ((s0 << 26) | (s0 >> 8)) ^ s1 ^ (s1 << 9);
-        ints[1] = (s1 << 13) | (s1 >> 19);
-        return (Math.imul(s0, 0x9e3779bb) >>> 0) / 0xffffffff;
-    };
-}
 
-// CONCATENATED MODULE: ./node_modules/game-utils/index.js
-function getContext(canvas) {
-  return canvas.getContext("2d");
-}
-
-function createCanvas(width, height) {
-  const newCanvas = document.createElement("canvas");
-  newCanvas.width = width;
-  newCanvas.height = height;
-  return [newCanvas, getContext(newCanvas)];
-}
-
-function fillCircle(ctx, x, y, r) {
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, 7);
-  ctx.fill();
-}
-
-function obtainImageData(canvas) {
-  return getContext(canvas).getImageData(0, 0, canvas.width, canvas.height);
-}
-
-function obtainPixelArray(canvas) {
-  return obtainImageData(canvas).data;
-}
-
-function trimCanvas(canvas) {
-  const ctx = getContext(canvas);
-  const imageData = obtainImageData(canvas);
-  const xs = [];
-  const ys = [];
-  for (let x = 0; x < imageData.width; x++) {
-    for (let y = 0; y < imageData.height; y++) {
-      if (imageData.data[(y * imageData.width + x) * 4 + 3]) {
-        xs.push(x);
-        ys.push(y);
-      }
-    }
-  }
-  const minX = Math.min(...xs);
-  const minY = Math.min(...ys);
-  const cut = ctx.getImageData(
-    minX,
-    minY,
-    1 + Math.max(...xs) - minX,
-    1 + Math.max(...ys) - minY
-  );
-
-  canvas.width = cut.width;
-  canvas.height = cut.height;
-  ctx.putImageData(cut, 0, 0);
-  return canvas;
-}
-
-// CONCATENATED MODULE: ./src/ship.ts
+;// ./src/outline/classic.ts
 
 
 //Size of the component grid
 const COMPONENT_GRID_SIZE = 6;
-//Base maximum extent of a component from its origin point. Should be at least equal to cgridsize, but no greater than csedge.
-const COMPONENT_MAXIMUM_SIZE = 8;
-const CELL_GX = 0;
-const CELL_GY = 1;
-const CELL_X = 2;
-const CELL_Y = 3;
-const CELL_PHASE = 4;
-// This library is heavily optimized towards size, as I used it for a JS13K game. Also, I'm planning to use
-// it again for that purpose in the future. This function is a lot bigger than it needs to be, but doing so
-// allows us to have all variables we need in the closure instead of passing it around in parameters
-function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
-    const layoutRNG = createNumberGenerator(layoutSeed);
-    const colorRNG = createNumberGenerator(colorSeed);
-    const shipRNG = createNumberGenerator(shipSeed);
-    // Default maximum power
-    const componentChancePower = 8;
-    const componentChances = [
-        0.8 *
-            numberBetween(shipRNG(), 0.001, 1) *
-            2 ** (shipRNG() * componentChancePower),
-        0.9 *
-            numberBetween(shipRNG(), 0.001, 1) *
-            2 ** (shipRNG() * componentChancePower),
-        1 *
-            numberBetween(shipRNG(), 0.001, 1) *
-            2 ** (shipRNG() * componentChancePower),
-        3 * shipRNG() * 2 ** (shipRNG() * componentChancePower),
-        0.5 * shipRNG() * 2 ** (shipRNG() * componentChancePower),
-        0.05 * shipRNG() * 2 ** (shipRNG() * componentChancePower),
-        0.5 * shipRNG() * 2 ** (shipRNG() * componentChancePower),
-    ];
-    const colors = [];
-    const colorChances = [];
-    const colorCount = 1 + (colorRNG() < 0.7 ? 1 : 0) + sequenceAdvancer(colorRNG, 0.3, 3);
-    // Compute faction colors
-    for (let i = 0; i < colorCount; i++) {
-        // Just doing random RGB coloring should be alright and simplify the code
-        colors.push(hsvToRgb(colorRNG() ** 2, clamp(numberBetween(colorRNG(), -0.2, 1), 0, colorRNG() ** 4), Math.max(numberBetween(colorRNG(), 0.7, 1.1), 1)));
-        // Default maximum power is 6
-        colorChances.push(2 ** (colorRNG() * 6));
-    }
-    const baseColorShiftChance = colorRNG() / 2;
-    const baseColorShiftChanceRed = numberBetween(colorRNG(), 0, 0.6);
-    const baseColorShiftChanceGreen = numberBetween(colorRNG(), 0, 0.6);
-    const baseColorShiftChanceBlue = numberBetween(colorRNG(), 0, 0.6);
-    const layoutOutlineType = integerNumberBetween(layoutRNG(), 0, 2);
-    const size = forceSize || numberBetween(layoutRNG(), 2.5, 7) ** 3;
-    const wratio = numberBetween(layoutRNG(), 0.5, 1.3);
-    const hratio = numberBetween(layoutRNG(), 0.7, 1.7);
-    const layoutOutline0InitialWidth = numberBetween(layoutRNG(), 0.1, 1);
-    const layoutOutline0BlockCount = numberBetween(layoutRNG(), 2, 8);
-    const layoutOutline0FrontBias = numberBetween(layoutRNG(), 0.5, 1.5);
-    const layoutOutline1InitialWidth = numberBetween(layoutRNG(), 0.1, 1);
-    const layoutOutline1CircleCount = numberBetween(layoutRNG(), 10, 50);
-    const layoutOutline1FrontBias = numberBetween(layoutRNG(), 0.5, 1.5);
-    const layoutOutline2BaseFatness = numberBetween(layoutRNG(), 0.03, 0.1);
-    const layoutOutline2FrontBias = numberBetween(layoutRNG(), 0.1, 1);
+function classic_generateOutline(layoutSeed, forceSize) {
+    const layoutRNG = (0,lib/* createPRNGGenerator */.rB)(layoutSeed);
+    const layoutOutlineType = (0,lib/* integerNumberBetween */.Wq)(layoutRNG(), 0, 2);
+    const size = forceSize || (0,lib/* numberBetween */.od)(layoutRNG(), 2.5, 7) ** 3;
+    const wratio = (0,lib/* numberBetween */.od)(layoutRNG(), 0.5, 1.3);
+    const hratio = (0,lib/* numberBetween */.od)(layoutRNG(), 0.7, 1.7);
+    const layoutOutline0InitialWidth = (0,lib/* numberBetween */.od)(layoutRNG(), 0.1, 1);
+    const layoutOutline0BlockCount = (0,lib/* numberBetween */.od)(layoutRNG(), 2, 8);
+    const layoutOutline0FrontBias = (0,lib/* numberBetween */.od)(layoutRNG(), 0.5, 1.5);
+    const layoutOutline1InitialWidth = (0,lib/* numberBetween */.od)(layoutRNG(), 0.1, 1);
+    const layoutOutline1CircleCount = (0,lib/* numberBetween */.od)(layoutRNG(), 10, 50);
+    const layoutOutline1FrontBias = (0,lib/* numberBetween */.od)(layoutRNG(), 0.5, 1.5);
+    const layoutOutline2BaseFatness = (0,lib/* numberBetween */.od)(layoutRNG(), 0.03, 0.1);
+    const layoutOutline2FrontBias = (0,lib/* numberBetween */.od)(layoutRNG(), 0.1, 1);
     const layoutOutline2ConAdjust = layoutRNG();
-    const factionBaseComponentPasses = integerNumberBetween(layoutRNG(), 1, 2);
-    const factionExtraComponentAmount = shipRNG() / factionBaseComponentPasses;
-    const factionMasterBigness = shipRNG();
-    const factionComponentMiddleness = shipRNG();
-    const factionComponent1HChance = numberBetween(shipRNG(), -0.2, 1.2);
-    const factionComponent2OddChance = shipRNG();
-    const factionComponent2VerticalChance = shipRNG();
-    const factionComponent3Lightness0Mid = numberBetween(shipRNG(), 0.5, 0.8);
-    const factionComponent3Lightness0Edge = factionComponent3Lightness0Mid - numberBetween(shipRNG(), 0.2, 0.4);
-    const factionComponent3Lightness1Edge = numberBetween(shipRNG(), 0, 0.2);
-    const factionComponent3BaseColor = chancePicker(shipRNG, colorChances);
-    const factionComponent4MaxWidth = numberBetween(shipRNG(), 0.02, 0.1);
-    const factionComponent4DirectionC0 = shipRNG();
-    const factionComponent4DirectionC1 = shipRNG();
-    const factionComponent4DirectionC2 = shipRNG();
-    const factionComponent4HPower0 = numberBetween(shipRNG(), 2, 6);
-    const factionComponent4HPower1 = numberBetween(shipRNG(), 2, 7);
-    const factionComponent4CoverComC0 = shipRNG();
-    const factionComponent4CoverComC1 = shipRNG();
-    const factionComponent4CoverComC2 = shipRNG();
-    const factionComponent5MultXC = shipRNG();
-    const factionComponent5MultYC = shipRNG();
-    const factionComponent6H1Min = numberBetween(shipRNG(), 0, 0.8);
-    const factionComponent6H1Power = numberBetween(shipRNG(), 0.5, 1.5);
-    const factionComponent6BacknessType = shipRNG();
-    const factionComponent6BacknessPositive = numberBetween(shipRNG(), 0.2, 0.9);
-    const factionComponent6BacknessNegative = numberBetween(shipRNG(), -0.2, -0.05);
-    const factionComponent6Width = numberBetween(shipRNG(), 0.1, 3.5);
-    const factionComponentBigChances = componentChances.map(shipRNG);
-    const factionComponentBigIncChances = componentChances.map(shipRNG);
     const aliasedCircle = (xc, yc, r) => {
         let x = r = Math.round(r), y = 0, cd = 0;
         xc = Math.round(xc);
@@ -336,43 +328,12 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
             aliasedCircle(x1, y1, thickness);
         }
     };
-    const computeBaseColor = () => {
-        let rv = colors[chancePicker(colorRNG, colorChances)];
-        return colorRNG() < baseColorShiftChance ** 2
-            ? [
-                clamp(rv[0] +
-                    baseColorShiftChanceRed ** 2 *
-                        clamp(numberBetween(colorRNG(), -1, 1.2), 0, 1) *
-                        clamp((colorRNG() < 0.7 ? -1 : 1) + (colorRNG() < 0.7 ? -1 : 1), -1, 1), 0, 1),
-                clamp(rv[1] +
-                    baseColorShiftChanceGreen ** 2 *
-                        clamp(numberBetween(colorRNG(), -1, 1.2), 0, 1) *
-                        clamp((colorRNG() < 0.7 ? -1 : 1) + (colorRNG() < 0.7 ? -1 : 1), -1, 1), 0, 1),
-                clamp(rv[2] +
-                    baseColorShiftChanceBlue ** 2 *
-                        clamp(numberBetween(colorRNG(), -1, 1.2), 0, 1) *
-                        clamp((colorRNG() < 0.7 ? -1 : 1) + (colorRNG() < 0.7 ? -1 : 1), -1, 1), 0, 1),
-            ]
-            : rv;
-    };
-    const gradientInOut = (x0, y0, x1, y1, inColor, outColor) => {
-        const grad = cx.createLinearGradient(x0, y0, x1, y1);
-        grad.addColorStop(0, inColor);
-        grad.addColorStop(0.5, outColor);
-        grad.addColorStop(1, inColor);
-        return grad;
-    };
     const w = Math.floor(size * wratio); // Maximum width of this ship, in pixels
-    const hw = Math.floor(w / 2);
-    const gw = Math.floor(w / COMPONENT_GRID_SIZE);
-    const gwextra = (w - gw * COMPONENT_GRID_SIZE) / 2;
     const h = Math.floor(size * hratio); // Maximum height of this ship, in pixels
-    const hh = Math.floor(h / 2);
-    const gh = Math.floor(h / COMPONENT_GRID_SIZE);
-    const ghextra = (h - gh * COMPONENT_GRID_SIZE) / 2;
-    const [shipCanvas, cx] = createCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
+    const hw = Math.floor(w / 2);
+    const [shipOutline, cx] = (0,lib/* createCanvas */.Nw)(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
     const csarealimit = (w * h) / 20;
-    cx.fillStyle = "#fff";
+    cx.fillStyle = "red";
     // ------ Define outlines ---------------------------------------
     if (layoutOutlineType == 0) {
         // 0: Joined rectangles.
@@ -384,11 +345,11 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
             ],
         ];
         const blockcount = 2 +
-            Math.floor(numberBetween(layoutRNG(), 0.5, 1) *
+            Math.floor((0,lib/* numberBetween */.od)(layoutRNG(), 0.5, 1) *
                 layoutOutline0BlockCount *
                 size ** 0.5);
         for (let i = 1; i < blockcount; i++) {
-            const base = blocks[integerNumberBetween(layoutRNG(), 0, blocks.length - 1)];
+            const base = blocks[(0,lib/* integerNumberBetween */.Wq)(layoutRNG(), 0, blocks.length - 1)];
             const v0 = [
                 base[0][0] + layoutRNG() * (base[1][0] - base[0][0]),
                 base[0][1] + layoutRNG() * (base[1][1] - base[0][1]),
@@ -433,16 +394,16 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
             circles.push([hw, h - initialwidth * (i * 2 + 1), initialwidth]);
         }
         const circlecount = initialcount +
-            Math.floor(numberBetween(layoutRNG(), 0.5, 1) *
+            Math.floor((0,lib/* numberBetween */.od)(layoutRNG(), 0.5, 1) *
                 layoutOutline1CircleCount *
                 size ** 0.5);
         for (let i = initialcount; i < circlecount; i++) {
-            const base = circles[Math.max(integerNumberBetween(layoutRNG(), 0, circles.length - 1), integerNumberBetween(layoutRNG(), 0, circles.length - 1))];
-            let ncr = numberBetween(layoutRNG(), 1, csrlimit);
-            const pr = numberBetween(layoutRNG(), Math.max(0, base[2] - ncr), base[2]);
-            let pa = numberBetween(layoutRNG(), 0, 2 * Math.PI);
+            const base = circles[Math.max((0,lib/* integerNumberBetween */.Wq)(layoutRNG(), 0, circles.length - 1), (0,lib/* integerNumberBetween */.Wq)(layoutRNG(), 0, circles.length - 1))];
+            let ncr = (0,lib/* numberBetween */.od)(layoutRNG(), 1, csrlimit);
+            const pr = (0,lib/* numberBetween */.od)(layoutRNG(), Math.max(0, base[2] - ncr), base[2]);
+            let pa = (0,lib/* numberBetween */.od)(layoutRNG(), 0, 2 * Math.PI);
             if (pa > Math.PI && layoutRNG() < layoutOutline1FrontBias) {
-                pa = numberBetween(layoutRNG(), 0, Math.PI);
+                pa = (0,lib/* numberBetween */.od)(layoutRNG(), 0, Math.PI);
             }
             let lv0 = base[0] + Math.cos(pa) * pr, lv1 = base[1] + Math.sin(pa) * pr;
             ncr = Math.min(ncr, lv0, w - lv0, lv1, h - lv1);
@@ -456,11 +417,11 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
     else {
         // 2: Mess of lines
         const points = [
-            [hw, numberBetween(layoutRNG(), 0, 0.05) * h],
-            [hw, numberBetween(layoutRNG(), 0.95, 1) * h],
+            [hw, (0,lib/* numberBetween */.od)(layoutRNG(), 0, 0.05) * h],
+            [hw, (0,lib/* numberBetween */.od)(layoutRNG(), 0.95, 1) * h],
         ];
         const basefatness = COMPONENT_GRID_SIZE / size + layoutOutline2BaseFatness;
-        const pointcount = Math.max(3, Math.ceil((numberBetween(layoutRNG(), 0.05, 0.1) / basefatness) * size ** 0.5));
+        const pointcount = Math.max(3, Math.ceil(((0,lib/* numberBetween */.od)(layoutRNG(), 0.05, 0.1) / basefatness) * size ** 0.5));
         for (let npi = 1; npi < pointcount; npi++) {
             let np = points[npi];
             if (!np) {
@@ -469,15 +430,151 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
             }
             const cons = 1 + sequenceAdvancer(layoutRNG, layoutOutline2ConAdjust, 3);
             for (let nci = 0; nci < cons; nci++) {
-                const pre = points[integerNumberBetween(layoutRNG(), 0, points.length - 2)];
-                const lineWidth = numberBetween(layoutRNG(), 0.7, 1) * basefatness * size;
+                const pre = points[(0,lib/* integerNumberBetween */.Wq)(layoutRNG(), 0, points.length - 2)];
+                const lineWidth = (0,lib/* numberBetween */.od)(layoutRNG(), 0.7, 1) * basefatness * size;
                 aliasedLine(pre[0], pre[1], np[0], np[1], lineWidth);
                 aliasedLine(w - pre[0], pre[1], w - np[0], np[1], lineWidth);
             }
         }
     }
-    // ------ End define outlines -----------------------------------
-    const outline = obtainPixelArray(shipCanvas);
+    return shipOutline;
+}
+
+;// ./src/outline/micro.ts
+//r=r=>Math.random()*r
+//for(i=9;i--;x.rect(44-w+t%1*5e3,50+(t|0)*132-h+r(60),2*w,2*h))w=r(32),h=r(32)
+//x.fill`evenodd`
+
+function micro_generateOutline(layoutSeed, forceSize) {
+    const layoutRNG = (0,lib/* createPRNGGenerator */.rB)(layoutSeed);
+    const size = forceSize || (0,lib/* numberBetween */.od)(layoutRNG(), 2.5, 7) ** 3;
+    const halfSize = Math.floor(size / 2);
+    const [shipOutline, cx] = (0,lib/* createCanvas */.Nw)(size, 3 * size); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
+    cx.fillStyle = "red";
+    for (let i = (0,lib/* integerNumberBetween */.Wq)(layoutRNG(), 1, size / 10); i--;) {
+        const rectWidth = (0,lib/* integerNumberBetween */.Wq)(layoutRNG(), 1, halfSize);
+        const rectHeight = (0,lib/* integerNumberBetween */.Wq)(layoutRNG(), 1, halfSize);
+        cx.rect(halfSize - rectWidth, halfSize - rectHeight + (0,lib/* integerNumberBetween */.Wq)(layoutRNG(), 1, size * 2), 2 * rectWidth, 2 * rectHeight);
+    }
+    cx.fill(layoutRNG() < 0.5 ? 'evenodd' : undefined);
+    return shipOutline;
+}
+
+;// ./src/ship.ts
+
+
+//Size of the component grid
+const ship_COMPONENT_GRID_SIZE = 6;
+//Base maximum extent of a component from its origin point. Should be at least equal to cgridsize, but no greater than csedge.
+const COMPONENT_MAXIMUM_SIZE = 8;
+const CELL_GX = 0;
+const CELL_GY = 1;
+const CELL_X = 2;
+const CELL_Y = 3;
+const CELL_PHASE = 4;
+// This library is heavily optimized towards size, as I used it for a JS13K game. Also, I'm planning to use
+// it again for that purpose in the future. This function is a lot bigger than it needs to be, but doing so
+// allows us to have all variables we need in the closure instead of passing it around in parameters
+function generateShip(shipOutline, colorSeed, shipSeed) {
+    const w = shipOutline.width;
+    const h = shipOutline.height;
+    const [shipCanvas, cx] = (0,lib/* createCanvas */.Nw)(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
+    const outline = (0,lib/* obtainPixelArray */.f$)(shipOutline);
+    const hw = Math.floor(w / 2);
+    const gw = Math.floor(w / ship_COMPONENT_GRID_SIZE);
+    const gwextra = (w - gw * ship_COMPONENT_GRID_SIZE) / 2;
+    const hh = Math.floor(h / 2);
+    const gh = Math.floor(h / ship_COMPONENT_GRID_SIZE);
+    const ghextra = (h - gh * ship_COMPONENT_GRID_SIZE) / 2;
+    const colorRNG = (0,lib/* createPRNGGenerator */.rB)(colorSeed);
+    const shipRNG = (0,lib/* createPRNGGenerator */.rB)(shipSeed);
+    // Default maximum power
+    const componentChancePower = 8;
+    const componentChances = [
+        0.8 *
+            (0,lib/* numberBetween */.od)(shipRNG(), 0.001, 1) *
+            2 ** (shipRNG() * componentChancePower),
+        0.9 *
+            (0,lib/* numberBetween */.od)(shipRNG(), 0.001, 1) *
+            2 ** (shipRNG() * componentChancePower),
+        1 *
+            (0,lib/* numberBetween */.od)(shipRNG(), 0.001, 1) *
+            2 ** (shipRNG() * componentChancePower),
+        3 * shipRNG() * 2 ** (shipRNG() * componentChancePower),
+        0.5 * shipRNG() * 2 ** (shipRNG() * componentChancePower),
+        0.05 * shipRNG() * 2 ** (shipRNG() * componentChancePower),
+        0.5 * shipRNG() * 2 ** (shipRNG() * componentChancePower),
+    ];
+    const colors = [];
+    const colorChances = [];
+    const colorCount = 1 + (colorRNG() < 0.7 ? 1 : 0) + sequenceAdvancer(colorRNG, 0.3, 3);
+    // Compute faction colors
+    for (let i = 0; i < colorCount; i++) {
+        // Just doing random RGB coloring should be alright and simplify the code
+        colors.push(hsvToRgb(colorRNG() ** 2, clamp((0,lib/* numberBetween */.od)(colorRNG(), -0.2, 1), 0, colorRNG() ** 4), Math.max((0,lib/* numberBetween */.od)(colorRNG(), 0.7, 1.1), 1)));
+        // Default maximum power is 6
+        colorChances.push(2 ** (colorRNG() * 6));
+    }
+    const baseColorShiftChance = colorRNG() / 2;
+    const baseColorShiftChanceRed = (0,lib/* numberBetween */.od)(colorRNG(), 0, 0.6);
+    const baseColorShiftChanceGreen = (0,lib/* numberBetween */.od)(colorRNG(), 0, 0.6);
+    const baseColorShiftChanceBlue = (0,lib/* numberBetween */.od)(colorRNG(), 0, 0.6);
+    const factionBaseComponentPasses = (0,lib/* integerNumberBetween */.Wq)(shipRNG(), 1, 2);
+    const factionExtraComponentAmount = shipRNG() / factionBaseComponentPasses;
+    const factionMasterBigness = shipRNG();
+    const factionComponentMiddleness = shipRNG();
+    const factionComponent1HChance = (0,lib/* numberBetween */.od)(shipRNG(), -0.2, 1.2);
+    const factionComponent2OddChance = shipRNG();
+    const factionComponent2VerticalChance = shipRNG();
+    const factionComponent3Lightness0Mid = (0,lib/* numberBetween */.od)(shipRNG(), 0.5, 0.8);
+    const factionComponent3Lightness0Edge = factionComponent3Lightness0Mid - (0,lib/* numberBetween */.od)(shipRNG(), 0.2, 0.4);
+    const factionComponent3Lightness1Edge = (0,lib/* numberBetween */.od)(shipRNG(), 0, 0.2);
+    const factionComponent3BaseColor = chancePicker(shipRNG, colorChances);
+    const factionComponent4MaxWidth = (0,lib/* numberBetween */.od)(shipRNG(), 0.02, 0.1);
+    const factionComponent4DirectionC0 = shipRNG();
+    const factionComponent4DirectionC1 = shipRNG();
+    const factionComponent4DirectionC2 = shipRNG();
+    const factionComponent4HPower0 = (0,lib/* numberBetween */.od)(shipRNG(), 2, 6);
+    const factionComponent4HPower1 = (0,lib/* numberBetween */.od)(shipRNG(), 2, 7);
+    const factionComponent4CoverComC0 = shipRNG();
+    const factionComponent4CoverComC1 = shipRNG();
+    const factionComponent4CoverComC2 = shipRNG();
+    const factionComponent5MultXC = shipRNG();
+    const factionComponent5MultYC = shipRNG();
+    const factionComponent6H1Min = (0,lib/* numberBetween */.od)(shipRNG(), 0, 0.8);
+    const factionComponent6H1Power = (0,lib/* numberBetween */.od)(shipRNG(), 0.5, 1.5);
+    const factionComponent6BacknessType = shipRNG();
+    const factionComponent6BacknessPositive = (0,lib/* numberBetween */.od)(shipRNG(), 0.2, 0.9);
+    const factionComponent6BacknessNegative = (0,lib/* numberBetween */.od)(shipRNG(), -0.2, -0.05);
+    const factionComponent6Width = (0,lib/* numberBetween */.od)(shipRNG(), 0.1, 3.5);
+    const factionComponentBigChances = componentChances.map(shipRNG);
+    const factionComponentBigIncChances = componentChances.map(shipRNG);
+    const computeBaseColor = () => {
+        let rv = colors[chancePicker(colorRNG, colorChances)];
+        return colorRNG() < baseColorShiftChance ** 2
+            ? [
+                clamp(rv[0] +
+                    baseColorShiftChanceRed ** 2 *
+                        clamp((0,lib/* numberBetween */.od)(colorRNG(), -1, 1.2), 0, 1) *
+                        clamp((colorRNG() < 0.7 ? -1 : 1) + (colorRNG() < 0.7 ? -1 : 1), -1, 1), 0, 1),
+                clamp(rv[1] +
+                    baseColorShiftChanceGreen ** 2 *
+                        clamp((0,lib/* numberBetween */.od)(colorRNG(), -1, 1.2), 0, 1) *
+                        clamp((colorRNG() < 0.7 ? -1 : 1) + (colorRNG() < 0.7 ? -1 : 1), -1, 1), 0, 1),
+                clamp(rv[2] +
+                    baseColorShiftChanceBlue ** 2 *
+                        clamp((0,lib/* numberBetween */.od)(colorRNG(), -1, 1.2), 0, 1) *
+                        clamp((colorRNG() < 0.7 ? -1 : 1) + (colorRNG() < 0.7 ? -1 : 1), -1, 1), 0, 1),
+            ]
+            : rv;
+    };
+    const gradientInOut = (x0, y0, x1, y1, inColor, outColor) => {
+        const grad = cx.createLinearGradient(x0, y0, x1, y1);
+        grad.addColorStop(0, inColor);
+        grad.addColorStop(0.5, outColor);
+        grad.addColorStop(1, inColor);
+        return grad;
+    };
     //Returns the alpha value (0 - 255) for the pixel of csd corresponding to the point (X,Y)
     const isOutlineFilled = (x, y) => outline[(y * w + x) * 4];
     const cgrid = [];
@@ -487,8 +584,8 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
             cgrid[gx][gy] = [
                 gx,
                 gy,
-                Math.floor(gwextra + (gx + 0.5) * COMPONENT_GRID_SIZE),
-                Math.floor(ghextra + (gy + 0.5) * COMPONENT_GRID_SIZE),
+                Math.floor(gwextra + (gx + 0.5) * ship_COMPONENT_GRID_SIZE),
+                Math.floor(ghextra + (gy + 0.5) * ship_COMPONENT_GRID_SIZE),
             ]; // Phase is 0 for unchecked, 1 for checked and good, and -1 for checked and bad
         }
     }
@@ -559,8 +656,8 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
     // ------ Define components ---------------------------------------
     //Returns true if the cell at (X,Y) is good, or false if there is no such cell
     function isCellGood(x, y) {
-        const gx = Math.floor((x - gwextra) / COMPONENT_GRID_SIZE);
-        const gy = Math.floor((y - ghextra) / COMPONENT_GRID_SIZE);
+        const gx = Math.floor((x - gwextra) / ship_COMPONENT_GRID_SIZE);
+        const gy = Math.floor((y - ghextra) / ship_COMPONENT_GRID_SIZE);
         if (gx < 0 || gx >= gw || gy < 0 || gy >= gh) {
             return;
         }
@@ -585,9 +682,9 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
             magnitude;
         let lcms = COMPONENT_MAXIMUM_SIZE;
         if (shipRNG() <
-            numberBetween(factionComponentBigChances[componentIndex], bigChanceLow, bigChanceHigh) *
+            (0,lib/* numberBetween */.od)(factionComponentBigChances[componentIndex], bigChanceLow, bigChanceHigh) *
                 bn) {
-            const chance = numberBetween(factionComponentBigIncChances[componentIndex], bigIncChanceLow, bigIncChanceHigh);
+            const chance = (0,lib/* numberBetween */.od)(factionComponentBigIncChances[componentIndex], bigIncChanceLow, bigIncChanceHigh);
             // Using for as it's smaller, even though it didn't make the zip smaller
             for (; shipRNG() < chance * bn;) {
                 const minLeeway = Math.min(v[0] - lcms, w - v[0] - lcms, v[1] - lcms, h - v[1] - lcms);
@@ -608,9 +705,9 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         // Bordered block
         (v) => {
             const lcms = calculateLcms(0, v, 0.3, 0, 0.9, 0, 0.5);
-            const dhi_0 = Math.ceil(numberBetween(shipRNG(), 1, Math.max(2, lcms / 2)));
-            const dhi_1 = Math.ceil(numberBetween(shipRNG(), 1, Math.max(2, lcms / 2)));
-            const borderwidth = Math.min(dhi_0, dhi_1) * numberBetween(shipRNG(), 0.1, 1.2);
+            const dhi_0 = Math.ceil((0,lib/* numberBetween */.od)(shipRNG(), 1, Math.max(2, lcms / 2)));
+            const dhi_1 = Math.ceil((0,lib/* numberBetween */.od)(shipRNG(), 1, Math.max(2, lcms / 2)));
+            const borderwidth = Math.min(dhi_0, dhi_1) * (0,lib/* numberBetween */.od)(shipRNG(), 0.1, 1.2);
             const dho_0 = dhi_0 + borderwidth * 2;
             const dho_1 = dhi_1 + borderwidth * 2;
             const counts_0 = Math.ceil(2 * lcms / dho_0);
@@ -618,11 +715,11 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
             const trv_0 = Math.round((counts_0 * dho_0) / 2);
             const trv_1 = Math.round((counts_1 * dho_1) / 2);
             const baseColor = computeBaseColor();
-            cx.fillStyle = `rgba(0,0,0,${numberBetween(shipRNG(), 0, 0.25)})`;
+            cx.fillStyle = `rgba(0,0,0,${(0,lib/* numberBetween */.od)(shipRNG(), 0, 0.25)})`;
             cx.fillRect(v[0] - trv_0 - 1, v[1] - trv_1 - 1, dho_0 * counts_0 + 2, dho_1 * counts_1 + 2);
-            cx.fillStyle = scaleColorBy(baseColor, numberBetween(shipRNG(), 0.4, 1));
+            cx.fillStyle = scaleColorBy(baseColor, (0,lib/* numberBetween */.od)(shipRNG(), 0.4, 1));
             cx.fillRect(v[0] - trv_0, v[1] - trv_1, dho_0 * counts_0, dho_1 * counts_1);
-            cx.fillStyle = scaleColorBy(baseColor, numberBetween(shipRNG(), 0.4, 1));
+            cx.fillStyle = scaleColorBy(baseColor, (0,lib/* numberBetween */.od)(shipRNG(), 0.4, 1));
             for (let x = 0; x < counts_0; x++) {
                 const bx = v[0] + borderwidth + x * dho_0 - trv_0;
                 for (let y = 0; y < counts_1; y++) {
@@ -633,21 +730,21 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
             if (shipRNG() <
                 clamp(((totaldone * 0.6) / totalcomponents + 0.3) *
                     (lcms / COMPONENT_MAXIMUM_SIZE), 0, 0.98)) {
-                cx.fillStyle = shadowGradient(v, [v[0] + trv_0, v[1]], numberBetween(shipRNG(), 0, 0.9));
+                cx.fillStyle = shadowGradient(v, [v[0] + trv_0, v[1]], (0,lib/* numberBetween */.od)(shipRNG(), 0, 0.9));
                 cx.fillRect(v[0] - trv_0, v[1] - trv_1, dho_0 * counts_0, dho_1 * counts_1);
             }
         },
         // Cylinder array
         (v) => {
             const lcms = calculateLcms(1, v, 0.2, 0.3, 1, 0, 0.6);
-            const baseComponentWidth = Math.ceil(numberBetween(shipRNG(), 0.8, 2) * lcms);
-            const componentHeight = Math.ceil(numberBetween(shipRNG(), 0.8, 2) * lcms);
-            const cw = integerNumberBetween(shipRNG(), 3, Math.max(4, baseComponentWidth));
+            const baseComponentWidth = Math.ceil((0,lib/* numberBetween */.od)(shipRNG(), 0.8, 2) * lcms);
+            const componentHeight = Math.ceil((0,lib/* numberBetween */.od)(shipRNG(), 0.8, 2) * lcms);
+            const cw = (0,lib/* integerNumberBetween */.Wq)(shipRNG(), 3, Math.max(4, baseComponentWidth));
             const count = Math.max(1, Math.round(baseComponentWidth / cw));
             const componentWidth = count * cw;
             const baseColor = computeBaseColor();
-            const ccolor = scaleColorBy(baseColor, numberBetween(shipRNG(), 0.5, 1));
-            const darkness = numberBetween(shipRNG(), 0.3, 0.9);
+            const ccolor = scaleColorBy(baseColor, (0,lib/* numberBetween */.od)(shipRNG(), 0.5, 1));
+            const darkness = (0,lib/* numberBetween */.od)(shipRNG(), 0.3, 0.9);
             // true = horizontal array, false = vertical array
             const orientation = shipRNG() < clamp(factionComponent1HChance, 0, 1);
             if (orientation) {
@@ -655,7 +752,7 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
                     v[0] - Math.floor(componentWidth / 2),
                     v[1] - Math.floor(componentHeight / 2),
                 ];
-                cx.fillStyle = `rgba(0,0,0,${numberBetween(shipRNG(), 0, 0.25)})`;
+                cx.fillStyle = `rgba(0,0,0,${(0,lib/* numberBetween */.od)(shipRNG(), 0, 0.25)})`;
                 cx.fillRect(bv[0] - 1, bv[1] - 1, componentWidth + 2, componentHeight + 2);
                 cx.fillStyle = ccolor;
                 cx.fillRect(bv[0], bv[1], componentWidth, componentHeight);
@@ -669,7 +766,7 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
                     v[0] - Math.floor(componentHeight / 2),
                     v[1] - Math.floor(componentWidth / 2),
                 ];
-                cx.fillStyle = `rgba(0,0,0,${numberBetween(shipRNG(), 0, 0.25)})`;
+                cx.fillStyle = `rgba(0,0,0,${(0,lib/* numberBetween */.od)(shipRNG(), 0, 0.25)})`;
                 cx.fillRect(bv[0] - 1, bv[1] - 1, componentHeight + 2, componentWidth + 2);
                 cx.fillStyle = ccolor;
                 cx.fillRect(bv[0], bv[1], componentHeight, componentWidth);
@@ -682,22 +779,22 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         // Banded cylinder
         (v) => {
             const lcms = calculateLcms(2, v, 0.05, 0, 1, 0, 0.9);
-            const componentWidth = Math.ceil(numberBetween(shipRNG(), 0.6, 1.4) * lcms);
-            const componentHeight = Math.ceil(numberBetween(shipRNG(), 1, 2) * lcms);
-            const wh2_0 = Math.ceil(Math.max((componentWidth * numberBetween(shipRNG(), 0.7, 1)) / 2, 1));
-            const wh2_1 = Math.ceil(Math.max((componentWidth * numberBetween(shipRNG(), 0.8, 1)) / 2, 1));
-            const h2_0 = Math.floor(clamp(componentWidth * numberBetween(shipRNG(), 0.05, 0.25), 1, componentHeight));
-            const h2_1 = Math.floor(clamp(componentWidth * numberBetween(shipRNG(), 0.1, 0.3), 1, componentHeight));
+            const componentWidth = Math.ceil((0,lib/* numberBetween */.od)(shipRNG(), 0.6, 1.4) * lcms);
+            const componentHeight = Math.ceil((0,lib/* numberBetween */.od)(shipRNG(), 1, 2) * lcms);
+            const wh2_0 = Math.ceil(Math.max((componentWidth * (0,lib/* numberBetween */.od)(shipRNG(), 0.7, 1)) / 2, 1));
+            const wh2_1 = Math.ceil(Math.max((componentWidth * (0,lib/* numberBetween */.od)(shipRNG(), 0.8, 1)) / 2, 1));
+            const h2_0 = Math.floor(clamp(componentWidth * (0,lib/* numberBetween */.od)(shipRNG(), 0.05, 0.25), 1, componentHeight));
+            const h2_1 = Math.floor(clamp(componentWidth * (0,lib/* numberBetween */.od)(shipRNG(), 0.1, 0.3), 1, componentHeight));
             const hpair = h2_0 + h2_1;
             const odd = shipRNG() < factionComponent2OddChance ** 0.5;
             const count = Math.max(Math.floor(componentHeight / hpair), 1);
             const htotal = count * hpair + (odd ? h2_0 : 0);
             const baseColor = computeBaseColor();
-            const scale_0 = numberBetween(shipRNG(), 0.6, 1);
-            const scale_1 = numberBetween(shipRNG(), 0.6, 1);
+            const scale_0 = (0,lib/* numberBetween */.od)(shipRNG(), 0.6, 1);
+            const scale_1 = (0,lib/* numberBetween */.od)(shipRNG(), 0.6, 1);
             const color2_0 = scaleColorBy(baseColor, scale_0);
             const color2_1 = scaleColorBy(baseColor, scale_1);
-            const lightness = 1 - numberBetween(shipRNG(), 0.5, 0.95);
+            const lightness = 1 - (0,lib/* numberBetween */.od)(shipRNG(), 0.5, 0.95);
             const colord2_0 = scaleColorBy(baseColor, lightness * scale_0);
             const colord2_1 = scaleColorBy(baseColor, lightness * scale_1);
             const orientation = shipRNG() < factionComponent2VerticalChance ** 0.1;
@@ -735,8 +832,8 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         //Rocket engine (or tries to call another random component if too far forward)
         (v) => {
             if (shipRNG() < frontness(v) - 0.3 ||
-                isCellGood(v[0], v[1] + COMPONENT_GRID_SIZE * 1.2) ||
-                isCellGood(v[0], v[1] + COMPONENT_GRID_SIZE * 1.8)) {
+                isCellGood(v[0], v[1] + ship_COMPONENT_GRID_SIZE * 1.2) ||
+                isCellGood(v[0], v[1] + ship_COMPONENT_GRID_SIZE * 1.8)) {
                 // Any component but this one
                 for (;;) {
                     const which = chancePicker(shipRNG, componentChances);
@@ -747,13 +844,13 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
                 }
             }
             const lcms = calculateLcms(3, v, 0.1, 0.6, 1, 0.3, 0.8);
-            const componentWidth = numberBetween(shipRNG(), 1, 2) * lcms;
-            const baseComponentHeight = Math.ceil(numberBetween(shipRNG(), 0.3, 1) * lcms);
-            const nw = componentWidth * numberBetween(shipRNG(), 0.25, 0.6);
+            const componentWidth = (0,lib/* numberBetween */.od)(shipRNG(), 1, 2) * lcms;
+            const baseComponentHeight = Math.ceil((0,lib/* numberBetween */.od)(shipRNG(), 0.3, 1) * lcms);
+            const nw = componentWidth * (0,lib/* numberBetween */.od)(shipRNG(), 0.25, 0.6);
             const midwh = (componentWidth + nw) / 4;
-            const componentHeight2 = Math.max(1, Math.ceil(baseComponentHeight * numberBetween(shipRNG(), 0.08, 0.25)));
+            const componentHeight2 = Math.max(1, Math.ceil(baseComponentHeight * (0,lib/* numberBetween */.od)(shipRNG(), 0.08, 0.25)));
             const hpair = componentHeight2 +
-                Math.max(1, Math.ceil(baseComponentHeight * numberBetween(shipRNG(), 0.03, 0.15)));
+                Math.max(1, Math.ceil(baseComponentHeight * (0,lib/* numberBetween */.od)(shipRNG(), 0.03, 0.15)));
             const count = Math.ceil(baseComponentHeight / hpair);
             const componentHeight = count * hpair + componentHeight2;
             const basecolor = colors[factionComponent3BaseColor];
@@ -787,13 +884,13 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         //Elongated cylinder (calls component 0 - 2 on top of its starting point)
         (v) => {
             const cn = centerness(v, false);
-            const lightmid = numberBetween(shipRNG(), 0.7, 1);
-            const lightedge = numberBetween(shipRNG(), 0, 0.2);
+            const lightmid = (0,lib/* numberBetween */.od)(shipRNG(), 0.7, 1);
+            const lightedge = (0,lib/* numberBetween */.od)(shipRNG(), 0, 0.2);
             const baseColor = computeBaseColor();
             const colormid = scaleColorBy(baseColor, lightmid);
             const coloredge = scaleColorBy(baseColor, lightedge);
-            const componentWidth = Math.max(3, Math.ceil(size *
-                numberBetween(shipRNG(), 0.4, 1) ** 2 *
+            const componentWidth = Math.max(3, Math.ceil(h *
+                (0,lib/* numberBetween */.od)(shipRNG(), 0.4, 1) ** 2 *
                 factionComponent4MaxWidth));
             const hwi = Math.floor(componentWidth / 2);
             const hwe = componentWidth % 2;
@@ -811,7 +908,7 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
                 //forwards
                 const hlimit = v[1];
                 const componentHeight = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit -
-                    integerNumberBetween(shipRNG(), 0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.7 * size * shipRNG() ** factionComponent4HPower0));
+                    (0,lib/* integerNumberBetween */.Wq)(shipRNG(), 0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.7 * h * shipRNG() ** factionComponent4HPower0));
                 const bb_0_0 = v[0] - hwi, bb_0_1 = v[1] - componentHeight, bb_1_0 = v[0] + hwi + hwe;
                 cx.fillStyle = gradientInOut(bb_0_0, bb_0_1, bb_1_0, bb_0_1, coloredge, colormid);
                 cx.fillRect(bb_0_0, bb_0_1, componentWidth, componentHeight);
@@ -821,7 +918,7 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
                 //backwards
                 const hlimit = h - v[1];
                 const componentHeight = Math.min(Math.max(COMPONENT_MAXIMUM_SIZE, hlimit -
-                    integerNumberBetween(shipRNG(), 0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.6 * size * shipRNG() ** factionComponent4HPower1));
+                    (0,lib/* integerNumberBetween */.Wq)(shipRNG(), 0, COMPONENT_MAXIMUM_SIZE * 2)), Math.floor(0.6 * h * shipRNG() ** factionComponent4HPower1));
                 const bb_0_0 = v[0] - hwi, bb_0_1 = v[1], bb_1_0 = v[0] + hwi + hwe;
                 cx.fillStyle = gradientInOut(bb_0_0, bb_0_1, bb_1_0, bb_0_1, coloredge, colormid);
                 cx.fillRect(bb_0_0, bb_0_1, componentWidth, componentHeight);
@@ -842,9 +939,9 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
             if (isCellGood(ev[0], ev[1])) {
                 const nev = [
                     ev[0] +
-                        Math.round(numberBetween(shipRNG(), -1, 1) * COMPONENT_GRID_SIZE),
+                        Math.round((0,lib/* numberBetween */.od)(shipRNG(), -1, 1) * ship_COMPONENT_GRID_SIZE),
                     ev[1] +
-                        Math.round(numberBetween(shipRNG(), 1, 1) * COMPONENT_GRID_SIZE),
+                        Math.round((0,lib/* numberBetween */.od)(shipRNG(), 1, 1) * ship_COMPONENT_GRID_SIZE),
                 ];
                 components[chancePicker(shipRNG, coverComC)](isCellGood(nev[0], nev[1]) ? nev : ev);
             }
@@ -852,8 +949,8 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         //Ball
         (v) => {
             const lcms = calculateLcms(5, v, 0.1, 0, 0.9, 0, 0.8);
-            const lightmid = numberBetween(shipRNG(), 0.75, 1);
-            const lightedge = numberBetween(shipRNG(), 0, 0.25);
+            const lightmid = (0,lib/* numberBetween */.od)(shipRNG(), 0.75, 1);
+            const lightedge = (0,lib/* numberBetween */.od)(shipRNG(), 0, 0.25);
             const baseColor = computeBaseColor();
             const colormid = scaleColorBy(baseColor, lightmid);
             const coloredge = scaleColorBy(baseColor, lightedge);
@@ -861,14 +958,14 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
                 sequenceAdvancer(shipRNG, factionComponent5MultXC, Math.floor(1.2 * (lcms / COMPONENT_MAXIMUM_SIZE) ** 0.6));
             const county = 1 +
                 sequenceAdvancer(shipRNG, factionComponent5MultYC, Math.floor(1.2 * (lcms / COMPONENT_MAXIMUM_SIZE) ** 0.6));
-            const smallr = (numberBetween(shipRNG(), 0.5, 1) * lcms) / Math.max(countx, county);
+            const smallr = ((0,lib/* numberBetween */.od)(shipRNG(), 0.5, 1) * lcms) / Math.max(countx, county);
             const drawr = smallr + 0.5;
             const bv = [v[0] - smallr * countx, v[1] - smallr * county];
-            cx.fillStyle = `rgba(0,0,0,${numberBetween(shipRNG(), 0, 0.2)})`;
+            cx.fillStyle = `rgba(0,0,0,${(0,lib/* numberBetween */.od)(shipRNG(), 0, 0.2)})`;
             for (let ax = 0; ax < countx; ax++) {
                 const px = bv[0] + (ax * 2 + 1) * smallr;
                 for (let ay = 0; ay < county; ay++) {
-                    fillCircle(cx, px, bv[1] + (ay * 2 + 1) * smallr, smallr + 1);
+                    (0,lib/* fillCircle */.W2)(cx, px, bv[1] + (ay * 2 + 1) * smallr, smallr + 1);
                 }
             }
             for (let ax = 0; ax < countx; ax++) {
@@ -879,7 +976,7 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
                     grad.addColorStop(0, colormid);
                     grad.addColorStop(1, coloredge);
                     cx.fillStyle = grad;
-                    fillCircle(cx, px, py, drawr);
+                    (0,lib/* fillCircle */.W2)(cx, px, py, drawr);
                 }
             }
         },
@@ -890,21 +987,21 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
                 return;
             }
             const lcms = calculateLcms(6, v, 0.05, 0, 0.9, 0, 0.8);
-            const h0 = Math.ceil(lcms * 2 * numberBetween(shipRNG(), 0.6, 1)); //Inner height, longer.
+            const h0 = Math.ceil(lcms * 2 * (0,lib/* numberBetween */.od)(shipRNG(), 0.6, 1)); //Inner height, longer.
             const hh0i = Math.floor(h0 / 2);
             const hh0e = h0 % 2;
             //Outer height, shorter
             const h1 = h0 *
-                numberBetween(shipRNG(), factionComponent6H1Min ** 0.5, 0.9) **
+                (0,lib/* numberBetween */.od)(shipRNG(), factionComponent6H1Min ** 0.5, 0.9) **
                     factionComponent6H1Power;
             const hh1i = Math.floor(h1 / 2);
             const backamount = Math.max((h1 - h0) / 2, h0 *
-                (numberBetween(shipRNG(), 0, 0.45) +
-                    numberBetween(shipRNG(), 0, 0.45)) *
+                ((0,lib/* numberBetween */.od)(shipRNG(), 0, 0.45) +
+                    (0,lib/* numberBetween */.od)(shipRNG(), 0, 0.45)) *
                 (factionComponent6BacknessType < 0.8
                     ? factionComponent6BacknessPositive
                     : factionComponent6BacknessNegative));
-            const componentWidth = Math.ceil(lcms * numberBetween(shipRNG(), 0.7, 1) * factionComponent6Width ** 0.5);
+            const componentWidth = Math.ceil(lcms * (0,lib/* numberBetween */.od)(shipRNG(), 0.7, 1) * factionComponent6Width ** 0.5);
             const hwi = Math.floor(componentWidth / 2);
             const hwe = componentWidth % 2;
             const quad = [
@@ -914,14 +1011,14 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
                 [v[0] - hwi, v[1] + backamount + hh1i + (h0 % 2)],
             ];
             const baseColor = computeBaseColor();
-            cx.fillStyle = `rgba(0,0,0,${numberBetween(shipRNG(), 0, 0.2)})`;
+            cx.fillStyle = `rgba(0,0,0,${(0,lib/* numberBetween */.od)(shipRNG(), 0, 0.2)})`;
             cx.beginPath();
             cx.moveTo(quad[0][0] - 1, quad[0][1]);
             cx.lineTo(quad[1][0] - 1, quad[1][1]);
             cx.lineTo(quad[2][0] - 1, quad[2][1]);
             cx.lineTo(quad[3][0] - 1, quad[3][1]);
             cx.fill();
-            cx.fillStyle = scaleColorBy(baseColor, numberBetween(shipRNG(), 0.7, 1));
+            cx.fillStyle = scaleColorBy(baseColor, (0,lib/* numberBetween */.od)(shipRNG(), 0.7, 1));
             cx.beginPath();
             cx.moveTo(quad[0][0], quad[0][1]);
             cx.lineTo(quad[1][0], quad[1][1]);
@@ -948,7 +1045,7 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         }
         else if (extradone < extra) {
             ncell =
-                goodcells[integerNumberBetween(shipRNG(), 0, goodcells.length - 1)];
+                goodcells[(0,lib/* integerNumberBetween */.Wq)(shipRNG(), 0, goodcells.length - 1)];
             extradone++;
         }
         else {
@@ -958,9 +1055,9 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
         for (let t = 0; t < 10; t++) {
             const nv = [
                 ncell[CELL_X] +
-                    integerNumberBetween(shipRNG(), -COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
+                    (0,lib/* integerNumberBetween */.Wq)(shipRNG(), -ship_COMPONENT_GRID_SIZE, ship_COMPONENT_GRID_SIZE),
                 ncell[CELL_Y] +
-                    integerNumberBetween(shipRNG(), -COMPONENT_GRID_SIZE, COMPONENT_GRID_SIZE),
+                    (0,lib/* integerNumberBetween */.Wq)(shipRNG(), -ship_COMPONENT_GRID_SIZE, ship_COMPONENT_GRID_SIZE),
             ];
             if (nv[0] < 0 ||
                 nv[0] > w ||
@@ -972,7 +1069,7 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
             lv = nv;
             break;
         }
-        if (Math.abs(lv[0] - hw) < COMPONENT_GRID_SIZE &&
+        if (Math.abs(lv[0] - hw) < ship_COMPONENT_GRID_SIZE &&
             shipRNG() < factionComponentMiddleness) {
             lv[0] = hw;
         }
@@ -987,12 +1084,10 @@ function generateShip(colorSeed, shipSeed, layoutSeed, forceSize) {
     return shipCanvas;
 }
 
-// CONCATENATED MODULE: ./src/index.ts
-//
+;// ./src/demo.js
 
 
 
-// CONCATENATED MODULE: ./src/demo.js
 
 
 function randomSeed() {
@@ -1079,6 +1174,14 @@ function generateNextShip() {
     colorSeedInput.value++;
   }
 
+  let generateOutline = voronoi_generateOutline;
+
+  if (document.getElementById("classic").checked) {
+    generateOutline = classic_generateOutline;
+  } else if (document.getElementById("micro").checked) {
+    generateOutline = micro_generateOutline;
+  }
+
   const shipDiv = document.createElement("div");
   shipDiv.className = "ship";
   const infoCaption = document.createElement("div");
@@ -1088,11 +1191,11 @@ function generateNextShip() {
   const iterationLayoutSeed = layout == null ? randomSeed() : layout;
   const iterationColorSeed = color == null ? randomSeed() : color;
   const iterationShipSeed = ship == null ? randomSeed() : ship;
+  const outlineCanvas = generateOutline(iterationLayoutSeed, forceSize);
   const shipCanvas = generateShip(
+    outlineCanvas,
     iterationColorSeed,
-    iterationShipSeed,
-    iterationLayoutSeed,
-    forceSize
+    iterationShipSeed
   );
   // Check if the filter criteria is met
   const minWidthInput = document.getElementById("minwidth");
@@ -1152,6 +1255,9 @@ function generateNextShip() {
     colorSeedInput.value = String(iterationColorSeed);
   };
   colorCaption.appendChild(colorPin);
+  outlineCanvas.className = "outline";
+  shipDiv.appendChild(outlineCanvas);
+  shipCanvas.className = "full";
   shipDiv.appendChild(shipCanvas);
   shipDiv.appendChild(infoCaption);
   shipDiv.appendChild(shipCaption);
@@ -1169,6 +1275,14 @@ function generateNextShip() {
     scheduleNextShip();
   } else {
     stop();
+  }
+}
+
+function updateShow() {
+  if (document.getElementById("full").checked) {
+    document.body.dataset.show = "full";
+  } else {
+    document.body.dataset.show = "outlines";
   }
 }
 
@@ -1201,8 +1315,12 @@ window.onload = function () {
     },
     false
   );
+
+  document.getElementById("full").addEventListener("change", updateShow, false);
+  document
+    .getElementById("outlines")
+    .addEventListener("change", updateShow, false);
 };
 
-
-/***/ })
-/******/ ]);
+/******/ })()
+;
