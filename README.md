@@ -15,32 +15,34 @@ yarn add starshipwright
 ## Usage
 
 ```js
-import { generateShip } from 'starshipwright';
-
+import { generateShip, generateOutlineClassic } from 'starshipwright';
 ...
 const colorSeed = 1;
 const shipSeed = 2;
 const layoutSeed = 3;
-const shipCanvas = generateShip(colorSeed, shipSeed, layoutSeed); // HTML Canvas
+const outline = generateOutlineClassic(layoutSeed);
+const shipCanvas = generateShip(outline, colorSeed, shipSeed); // HTML Canvas
 ```
 
 ## API
 
-### `generateShip(colorSeed: number, shipSeed: number, layoutSeed:number, forceSize?: number]): HTMLCanvasElement`
+### `generateShip(outline: HTMLCanvasElement, colorSeed: number, shipSeed: number): HTMLCanvasElement`
 
-Returns a canvas that contains the generated ship based on 3 numberic seeds: color, ship (which determines that style), layout (size & shape), and optionally a forced size`.
+Returns a canvas that contains the generated ship based on an outline and 2 numeric seeds: color, ship (which determines that style), layout (size & shape), and optionally a forced size`.
 
-### `numberBetween(target: number, a: number, b: number): number`
+### `generateOutlineVoronoi(layoutSeed: number, forceSize?: number): HTMLCanvasElement`
 
-Converts a number between 0 and 1 to a number between [a, b)
+Returns a canvas representing the outline of the ship; internally, it uses a voronoi algorithm to create the shape. The layout seed determines the size and shape, and it's possible to force a size with the `forceSize` parameter.
 
-### `integerNumberBetween(target: number, a: number, b: number): number`
 
-Converts a number between 0 and 1 to an integer number between [a,b] (both included)
+### `generateOutlineClassic(layoutSeed: number, forceSize?: number): HTMLCanvasElement`
 
-### `createNumberGenerator(seed: number): () => number`
+Returns a canvas representing the outline of the ship; internally, it uses the original algorithm to create the shape. The layout seed determines the size and shape, and it's possible to force a size with the `forceSize` parameter.
 
-Returns a PRNG function that will generate numbers between 0 and 1 based on a seed.
+
+### `generateOutlineMicro(layoutSeed: number, forceSize?: number): HTMLCanvasElement`
+
+Returns a canvas representing the outline of the ship; internally, it uses a algorithm focused on byte size to create the shape. The layout seed determines the size and shape, and it's possible to force a size with the `forceSize` parameter.
 
 ## Demo
 
