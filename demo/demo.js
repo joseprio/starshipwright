@@ -159,7 +159,9 @@ function voronoi_generateOutline(layoutSeed, forceSize) {
     const [piecesCanvas, piecesCanvasContext] = createCanvas(size, size);
     piecesCanvasContext.fillStyle = "red";
     piecesCanvasContext.fillRect(0, 0, size, size);
-    const sprites = createCanvasFragments(piecesCanvas, layoutRNG, size / numberBetween(layoutRNG(), 3, 6));
+    const minPieceSize = Math.min(Math.floor(size / 3), 5);
+    const pieceSize = numberBetween(layoutRNG(), minPieceSize, Math.max(minPieceSize, size / 4));
+    const sprites = createCanvasFragments(piecesCanvas, layoutRNG, pieceSize);
     for (let i = sprites.length; i--;) {
         const [spriteCanvas, left, top] = sprites[i];
         if (left > 0 &&

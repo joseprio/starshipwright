@@ -4,9 +4,7 @@ import {
   createCanvasFragments,
   createPRNGGenerator,
   integerNumberBetween,
-  numberBetween,
-  obtainImageData,
-  obtainPixelArray
+  numberBetween
 } from "game-utils";
 
 export function generateOutline(
@@ -21,7 +19,9 @@ export function generateOutline(
   piecesCanvasContext.fillStyle = "red";
   piecesCanvasContext.fillRect(0, 0, size, size);
 
-  const sprites = createCanvasFragments(piecesCanvas, layoutRNG, size/numberBetween(layoutRNG(), 3, 6));
+  const minPieceSize = Math.min(Math.floor(size / 3), 5);
+  const pieceSize = numberBetween(layoutRNG(), minPieceSize, Math.max(minPieceSize, size/4));
+  const sprites = createCanvasFragments(piecesCanvas, layoutRNG, pieceSize);
 
   for (let i = sprites.length; i--; ) {
     const [spriteCanvas, left, top] = sprites[i];
