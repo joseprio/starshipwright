@@ -2,7 +2,11 @@
 /******/ 	"use strict";
 
 ;// ./node_modules/game-utils/lib/index.js
-function getContext(canvas) {
+function getContext(canvas, readFrequently) {
+    if (readFrequently) {
+        // @ts-expect-error -- Could potentially return null, but we won't account for that case
+        return canvas.getContext("2d", { willReadFrequently: true });
+    }
     // @ts-expect-error -- Could potentially return null, but we won't account for that case
     return canvas.getContext("2d");
 }
@@ -11,6 +15,12 @@ function createCanvas(width, height) {
     newCanvas.width = width;
     newCanvas.height = height;
     return [newCanvas, getContext(newCanvas)];
+}
+function createOffscreenCanvas(width, height) {
+    const newCanvas = document.createElement("canvas");
+    newCanvas.width = width;
+    newCanvas.height = height;
+    return [newCanvas, getContext(newCanvas, true)];
 }
 function fillCircle(ctx, x, y, r) {
     ctx.beginPath();
@@ -24,7 +34,7 @@ function obtainPixelArray(canvas) {
     return obtainImageData(canvas).data;
 }
 function trimCanvas(canvas) {
-    const ctx = getContext(canvas);
+    const ctx = getContext(canvas, true);
     const imageData = obtainImageData(canvas);
     const xs = [];
     const ys = [];
@@ -93,38 +103,60 @@ function createCanvasFragments(targetCanvas, rng, desiredSize) {
                 1e9,
                 0,
                 0,
-                xOffset + ((currentX + (rng() - 0.5)) * width) / xPoints,
-                yOffset + ((currentY + (rng() - 0.5)) * height) / yPoints,
+                Math.floor(xOffset + ((currentX + (rng() - 0.5)) * width) / xPoints),
+                Math.floor(yOffset + ((currentY + (rng() - 0.5)) * height) / yPoints),
                 [],
             ]);
         }
     }
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            const pos = (y * width + x) * 4;
-            if (pixelArray[pos + 3]) {
-                // Non transparent pixel
-                // With the size of the images we are working, 1,000,000,000 behaves the same as infinity
-                let minDistance = 1e9;
-                let minCollector;
-                collectors.map((c) => {
-                    const distance = Math.hypot(c[COLLECTOR_CENTER_X] - x, c[COLLECTOR_CENTER_Y] - y);
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        minCollector = c;
-                    }
-                });
-                minCollector[COLLECTOR_MIN_X] = Math.min(x, minCollector[COLLECTOR_MIN_X]);
-                minCollector[COLLECTOR_MAX_X] = Math.max(x, minCollector[COLLECTOR_MAX_X]);
-                minCollector[COLLECTOR_MIN_Y] = Math.min(y, minCollector[COLLECTOR_MIN_Y]);
-                minCollector[COLLECTOR_MAX_Y] = Math.max(y, minCollector[COLLECTOR_MAX_Y]);
-                minCollector[COLLECTOR_NEAREST].push([
-                    x,
-                    y,
-                    pixelArray.slice(pos, pos + 4),
-                ]);
+    const processedPixels = Array(width * height);
+    let addedAtLeastOne = false;
+    function addPixelToCollector(x, y, collector) {
+        if (x < 0 || y < 0 || x >= width || y >= height)
+            return;
+        const arrayIndex = y * width + x;
+        if (processedPixels[arrayIndex])
+            return;
+        processedPixels[arrayIndex] = true;
+        if (!pixelArray[arrayIndex * 4 + 3])
+            return;
+        addedAtLeastOne = true;
+        collector[COLLECTOR_MIN_X] = Math.min(x, collector[COLLECTOR_MIN_X]);
+        collector[COLLECTOR_MAX_X] = Math.max(x, collector[COLLECTOR_MAX_X]);
+        collector[COLLECTOR_MIN_Y] = Math.min(y, collector[COLLECTOR_MIN_Y]);
+        collector[COLLECTOR_MAX_Y] = Math.max(y, collector[COLLECTOR_MAX_Y]);
+        collector[COLLECTOR_NEAREST].push([
+            x,
+            y,
+            pixelArray.slice(arrayIndex * 4, arrayIndex * 4 + 4),
+        ]);
+    }
+    let activeCollectors = collectors;
+    let radius = 0;
+    while (activeCollectors.length > 0) {
+        activeCollectors = activeCollectors.filter((collector) => {
+            addedAtLeastOne = false;
+            if (radius) {
+                for (let r = 0; r < 1 + 2 * (radius - 1); r++) {
+                    addPixelToCollector(collector[COLLECTOR_CENTER_X] - radius + 1 + r, collector[COLLECTOR_CENTER_Y] - radius, collector);
+                    addPixelToCollector(collector[COLLECTOR_CENTER_X] - radius + 1 + r, collector[COLLECTOR_CENTER_Y] + radius, collector);
+                    addPixelToCollector(collector[COLLECTOR_CENTER_X] - radius, collector[COLLECTOR_CENTER_Y] - radius + 1 + r, collector);
+                    addPixelToCollector(collector[COLLECTOR_CENTER_X] + radius, collector[COLLECTOR_CENTER_Y] - radius + 1 + r, collector);
+                }
+                if (radius > 1) {
+                    addPixelToCollector(collector[COLLECTOR_CENTER_X] - radius + 1, collector[COLLECTOR_CENTER_Y] - radius + 1, collector);
+                    addPixelToCollector(collector[COLLECTOR_CENTER_X] - radius + 1, collector[COLLECTOR_CENTER_Y] + radius - 1, collector);
+                    addPixelToCollector(collector[COLLECTOR_CENTER_X] + radius - 1, collector[COLLECTOR_CENTER_Y] - radius + 1, collector);
+                    addPixelToCollector(collector[COLLECTOR_CENTER_X] + radius - 1, collector[COLLECTOR_CENTER_Y] + radius - 1, collector);
+                }
             }
-        }
+            else {
+                addPixelToCollector(collector[COLLECTOR_CENTER_X], collector[COLLECTOR_CENTER_Y], collector);
+            }
+            // Keep it in the array if added at least one new pixel to the collector
+            return addedAtLeastOne;
+        });
+        radius++;
     }
     // We want to have the collectors with the most points first
     // sort modifies in place, so collectors changes as a side effect (which we don't really care because we don't use it anymore)
@@ -134,7 +166,7 @@ function createCanvasFragments(targetCanvas, rng, desiredSize) {
         if (collector[COLLECTOR_MIN_X] < 1e9) {
             const shardWidth = collector[COLLECTOR_MAX_X] - collector[COLLECTOR_MIN_X] + 1;
             const shardHeight = collector[COLLECTOR_MAX_Y] - collector[COLLECTOR_MIN_Y] + 1;
-            const [shardCanvas, shardCtx] = createCanvas(shardWidth, shardHeight);
+            const [shardCanvas, shardCtx] = createOffscreenCanvas(shardWidth, shardHeight);
             const imgData = obtainImageData(shardCanvas);
             collector[COLLECTOR_NEAREST].map((point) => imgData.data.set(point[2], 4 *
                 ((point[1] - collector[COLLECTOR_MIN_Y]) * shardWidth +
@@ -155,8 +187,8 @@ function createCanvasFragments(targetCanvas, rng, desiredSize) {
 function voronoi_generateOutline(layoutSeed, forceSize) {
     const layoutRNG = createPRNGGenerator(layoutSeed);
     const size = forceSize || integerNumberBetween(layoutRNG(), 2.5, 7) ** 3;
-    const [shipOutline, shipOutlineContext] = createCanvas(size, size);
-    const [piecesCanvas, piecesCanvasContext] = createCanvas(size, size);
+    const [shipOutline, shipOutlineContext] = createOffscreenCanvas(size, size);
+    const [piecesCanvas, piecesCanvasContext] = createOffscreenCanvas(size, size);
     piecesCanvasContext.fillStyle = "red";
     piecesCanvasContext.fillRect(0, 0, size, size);
     const minPieceSize = Math.min(Math.floor(size / 3), 5);
@@ -273,7 +305,7 @@ function classic_generateOutline(layoutSeed, forceSize) {
     const w = Math.floor(size * wratio); // Maximum width of this ship, in pixels
     const h = Math.floor(size * hratio); // Maximum height of this ship, in pixels
     const hw = Math.floor(w / 2);
-    const [shipOutline, cx] = createCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
+    const [shipOutline, cx] = createOffscreenCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
     const csarealimit = (w * h) / 20;
     cx.fillStyle = "red";
     // ------ Define outlines ---------------------------------------
@@ -391,7 +423,7 @@ function micro_generateOutline(layoutSeed, forceSize) {
     const layoutRNG = createPRNGGenerator(layoutSeed);
     const size = forceSize || numberBetween(layoutRNG(), 2.5, 7) ** 3;
     const halfSize = Math.floor(size / 2);
-    const [shipOutline, cx] = createCanvas(size, 3 * size); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
+    const [shipOutline, cx] = createOffscreenCanvas(size, 3 * size); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
     cx.fillStyle = "red";
     for (let i = integerNumberBetween(layoutRNG(), 1, size / 10); i--;) {
         const rectWidth = integerNumberBetween(layoutRNG(), 1, halfSize);
@@ -420,7 +452,7 @@ const CELL_PHASE = 4;
 function generateShip(shipOutline, colorSeed, shipSeed) {
     const w = shipOutline.width;
     const h = shipOutline.height;
-    const [shipCanvas, cx] = createCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
+    const [shipCanvas, cx] = createOffscreenCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
     const outline = obtainPixelArray(shipOutline);
     const hw = Math.floor(w / 2);
     const gw = Math.floor(w / ship_COMPONENT_GRID_SIZE);

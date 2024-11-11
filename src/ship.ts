@@ -9,7 +9,7 @@ import {
 
 import type { RandomNumberGenerator } from "game-utils";
 import {
-  createCanvas,
+  createOffscreenCanvas,
   createPRNGGenerator,
   fillCircle,
   integerNumberBetween,
@@ -43,7 +43,7 @@ export function generateShip(
 ): HTMLCanvasElement {
   const w = shipOutline.width;
   const h = shipOutline.height;
-  const [shipCanvas, cx] = createCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
+  const [shipCanvas, cx] = createOffscreenCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
   const outline = obtainPixelArray(shipOutline);
   const hw = Math.floor(w / 2);
   const gw = Math.floor(w / COMPONENT_GRID_SIZE);

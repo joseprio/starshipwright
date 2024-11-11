@@ -1,5 +1,5 @@
 import { clamp, scaleColorBy, hsvToRgb, sequenceAdvancer, chancePicker, } from "./utils";
-import { createCanvas, createPRNGGenerator, fillCircle, integerNumberBetween, numberBetween, obtainPixelArray } from "game-utils";
+import { createOffscreenCanvas, createPRNGGenerator, fillCircle, integerNumberBetween, numberBetween, obtainPixelArray } from "game-utils";
 //Size of the component grid
 const COMPONENT_GRID_SIZE = 6;
 //Base maximum extent of a component from its origin point. Should be at least equal to cgridsize, but no greater than csedge.
@@ -15,7 +15,7 @@ const CELL_PHASE = 4;
 export function generateShip(shipOutline, colorSeed, shipSeed) {
     const w = shipOutline.width;
     const h = shipOutline.height;
-    const [shipCanvas, cx] = createCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
+    const [shipCanvas, cx] = createOffscreenCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
     const outline = obtainPixelArray(shipOutline);
     const hw = Math.floor(w / 2);
     const gw = Math.floor(w / COMPONENT_GRID_SIZE);

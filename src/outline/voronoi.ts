@@ -1,6 +1,6 @@
 import type {CanvasFragment, RandomNumberGenerator} from "game-utils";
 import {
-  createCanvas,
+  createOffscreenCanvas,
   createCanvasFragments,
   createPRNGGenerator,
   integerNumberBetween,
@@ -14,8 +14,8 @@ export function generateOutline(
   const layoutRNG = createPRNGGenerator(layoutSeed);
   const size = forceSize || integerNumberBetween(layoutRNG(), 2.5, 7) ** 3;
 
-  const [shipOutline, shipOutlineContext] = createCanvas(size, size);
-  const [piecesCanvas, piecesCanvasContext] = createCanvas(size, size);
+  const [shipOutline, shipOutlineContext] = createOffscreenCanvas(size, size);
+  const [piecesCanvas, piecesCanvasContext] = createOffscreenCanvas(size, size);
   piecesCanvasContext.fillStyle = "red";
   piecesCanvasContext.fillRect(0, 0, size, size);
 

@@ -1,9 +1,9 @@
-import { createCanvas, createCanvasFragments, createPRNGGenerator, integerNumberBetween, numberBetween } from "game-utils";
+import { createOffscreenCanvas, createCanvasFragments, createPRNGGenerator, integerNumberBetween, numberBetween } from "game-utils";
 export function generateOutline(layoutSeed, forceSize) {
     const layoutRNG = createPRNGGenerator(layoutSeed);
     const size = forceSize || integerNumberBetween(layoutRNG(), 2.5, 7) ** 3;
-    const [shipOutline, shipOutlineContext] = createCanvas(size, size);
-    const [piecesCanvas, piecesCanvasContext] = createCanvas(size, size);
+    const [shipOutline, shipOutlineContext] = createOffscreenCanvas(size, size);
+    const [piecesCanvas, piecesCanvasContext] = createOffscreenCanvas(size, size);
     piecesCanvasContext.fillStyle = "red";
     piecesCanvasContext.fillRect(0, 0, size, size);
     const minPieceSize = Math.min(Math.floor(size / 3), 5);

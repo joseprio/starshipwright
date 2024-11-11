@@ -1,5 +1,5 @@
 import { sequenceAdvancer } from "../utils";
-import { createCanvas, createPRNGGenerator, integerNumberBetween, numberBetween } from "game-utils";
+import { createOffscreenCanvas, createPRNGGenerator, integerNumberBetween, numberBetween } from "game-utils";
 //Size of the component grid
 const COMPONENT_GRID_SIZE = 6;
 export function generateOutline(layoutSeed, forceSize) {
@@ -61,7 +61,7 @@ export function generateOutline(layoutSeed, forceSize) {
     const w = Math.floor(size * wratio); // Maximum width of this ship, in pixels
     const h = Math.floor(size * hratio); // Maximum height of this ship, in pixels
     const hw = Math.floor(w / 2);
-    const [shipOutline, cx] = createCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
+    const [shipOutline, cx] = createOffscreenCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
     const csarealimit = (w * h) / 20;
     cx.fillStyle = "red";
     // ------ Define outlines ---------------------------------------

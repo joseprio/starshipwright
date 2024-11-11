@@ -1,6 +1,6 @@
 import { sequenceAdvancer } from "../utils";
 import {
-  createCanvas,
+  createOffscreenCanvas,
   createPRNGGenerator,
   integerNumberBetween,
   numberBetween
@@ -79,7 +79,7 @@ export function generateOutline(
       const h = Math.floor(size * hratio); // Maximum height of this ship, in pixels
       const hw = Math.floor(w / 2);
 
-      const [shipOutline, cx] = createCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
+      const [shipOutline, cx] = createOffscreenCanvas(w, h); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
       const csarealimit = (w * h) / 20;
     
       cx.fillStyle = "red";

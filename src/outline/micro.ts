@@ -3,7 +3,7 @@
 //x.fill`evenodd`
 
 import {
-  createCanvas,
+  createOffscreenCanvas,
   createPRNGGenerator,
   integerNumberBetween,
   numberBetween
@@ -17,7 +17,7 @@ import {
       const size = forceSize || numberBetween(layoutRNG(), 2.5, 7) ** 3;
       const halfSize = Math.floor(size/2);
 
-      const [shipOutline, cx] = createCanvas(size, 3*size); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
+      const [shipOutline, cx] = createOffscreenCanvas(size, 3*size); // Canvas on which the basic outline of the ship is drawn. Ships face upwards, with front towards Y=0
       cx.fillStyle = "red";
 
       for (let i = integerNumberBetween(layoutRNG(), 1, size/10); i--; ) {
