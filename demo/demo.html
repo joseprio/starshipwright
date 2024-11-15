@@ -73,24 +73,32 @@
         </li>
       </ul>
     </fieldset>
-   <fieldset>
-      <legend>Filters</legend>
+    <fieldset>
+      <legend>Algorithm</legend>
       <ul>
         <li>
-          <label for="minwidth">Minimum width:</label>
-          <input id="minwidth" size="3"></input>
+          <input type="radio" id="voronoi" name="algorithm" checked></input>
+          <label for="voronoi">Voronoi</label>
         </li>
         <li>
-          <label for="maxwidth">Maximum width:</label>
-          <input id="maxwidth" size="3"></input>
+          <input type="radio" id="classic" name="algorithm"></input>
+          <label for="classic">Classic</label>
         </li>
         <li>
-          <label for="minheight">Minimum height:</label>
-          <input id="minheight" size="3"></input>
+          <input type="radio" id="micro" name="algorithm"></input>
+          <label for="micro">Micro</label>
         </li>
         <li>
-          <label for="maxheight">Maximum height:</label>
-          <input id="maxheight" size="3"></input>
+          <input type="radio" id="rectangles" name="algorithm"></input>
+          <label for="rectangles">Rectangles</label>
+        </li>
+        <li>
+          <input type="radio" id="circles" name="algorithm"></input>
+          <label for="circles">Circles</label>
+        </li>
+        <li>
+          <input type="radio" id="lines" name="algorithm"></input>
+          <label for="lines">Lines</label>
         </li>
       </ul>
     </fieldset>
@@ -108,19 +116,23 @@
       </ul>
     </fieldset>
     <fieldset>
-      <legend>Algorithm</legend>
+      <legend>Filters</legend>
       <ul>
         <li>
-          <input type="radio" id="voronoi" name="algorithm" checked></input>
-          <label for="voronoi">Voronoi</label>
+          <label for="minwidth">Minimum width:</label>
+          <input id="minwidth" size="3"></input>
         </li>
         <li>
-          <input type="radio" id="classic" name="algorithm"></input>
-          <label for="classic">Classic</label>
+          <label for="maxwidth">Maximum width:</label>
+          <input id="maxwidth" size="3"></input>
         </li>
         <li>
-          <input type="radio" id="micro" name="algorithm"></input>
-          <label for="micro">Micro</label>
+          <label for="minheight">Minimum height:</label>
+          <input id="minheight" size="3"></input>
+        </li>
+        <li>
+          <label for="maxheight">Maximum height:</label>
+          <input id="maxheight" size="3"></input>
         </li>
       </ul>
     </fieldset>

@@ -1,6 +1,9 @@
 import { generateOutline as generateOutlineVoronoi } from "./outline/voronoi";
 import { generateOutline as generateOutlineClassic } from "./outline/classic";
 import { generateOutline as generateOutlineMicro } from "./outline/micro";
+import { generateOutline as generateOutlineRectangles } from "./outline/rectangles";
+import { generateOutline as generateOutlineCircles } from "./outline/circles";
+import { generateOutline as generateOutlineLines } from "./outline/lines";
 import { generateShip } from "./ship";
 function randomSeed() {
     return Math.floor(Math.random() * Number.MAX_SAFE_INTEGER);
@@ -82,6 +85,15 @@ function generateNextShip() {
     }
     else if (document.getElementById("micro").checked) {
         generateOutline = generateOutlineMicro;
+    }
+    else if (document.getElementById("rectangles").checked) {
+        generateOutline = generateOutlineRectangles;
+    }
+    else if (document.getElementById("circles").checked) {
+        generateOutline = generateOutlineCircles;
+    }
+    else if (document.getElementById("lines").checked) {
+        generateOutline = generateOutlineLines;
     }
     const shipDiv = document.createElement("div");
     shipDiv.className = "ship";
